@@ -29,6 +29,7 @@ class ImageArea : public QWidget
     unsigned threshold = 128;
     unsigned bound_counter[4] = {0,0,0,0};
     Modes mode = ISO;
+    QVector<QRect> randrect;
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
@@ -43,6 +44,7 @@ public:
     void switchMode();
     void saveImage();
     void setMode(Modes m) {mode = m;}
+    void randomgen();
 public slots:
     void align();
     void open();

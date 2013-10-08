@@ -60,6 +60,20 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" down: ")+QString::number(bound_counter[3])+
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
+    if(!image.isNull()){
+        randomgen();
+        for(QRect x : randrect){
+            if(x.height() == 40){
+                //painter.setPen(Qt::yellow);
+                //painter.drawRect(x);
+            }else{
+                painter.setPen(Qt::red);
+                painter.drawRect(x.left()-10,x.top()-10,40,40);
+
+            }
+            painter.setPen(Qt::white);
+        }
+    }
     e->accept();
     releaseMouse();
 }
@@ -139,7 +153,7 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
 }
 
 void ImageArea::wheelEvent(QWheelEvent *e){
-    qint32 a = threshold + e->delta()/40;
+    qint32 a = threshold + e->delta()/80;
     if( a > 255 ) a = 255;
     if( a < 0 ) a = 0;
     threshold = quint8(a);
@@ -220,10 +234,10 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
             if(qGray(image.pixel(i, j)) >= tre()) {
                 counter++;
             }
-            if(qGray(image.pixel(i,j)) < tre() && (qGray(image.pixel(i + 1, j)) >= tre() ||
-                                                   qGray(image.pixel(i, j + 1)) >= tre() ||
-                                                   qGray(image.pixel(i - 1, j)) >= tre() ||
-                                                   qGray(image.pixel(i, j - 1)) >= tre() )) {
+            if(qGray(image.pixel(i,j)) <= tre() && (qGray(image.pixel(i + 1, j)) > tre() ||
+                                                    qGray(image.pixel(i, j + 1)) > tre() ||
+                                                    qGray(image.pixel(i - 1, j)) > tre() ||
+                                                    qGray(image.pixel(i, j - 1)) > tre() )) {
                 image.setPixel(i, j, qRgb(0,255,0));
             }
         }
@@ -250,6 +264,38 @@ void ImageArea::align()
     image = image.transformed(matrix);
     counter = 0;
     repaint();
+}
+
+void ImageArea::randomgen(){
+    randrect.clear();
+    srand(time(NULL));
+    for(int i = 0; i < 10000; ++i){
+        int x = rand() % (image.width() - 40) + 20;
+        int y = rand() % (image.height() - 40) + 20;
+        int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+        for(int i = 0; i < 500; ++i){
+            int x1 = rand() % 41 - 20;
+            int y1 = rand() % 41 - 20;
+            if(x1 > 0 && y1 < 0){
+                sum1+= qGray(image.pixel(x+x1, y+y1));
+            }
+            if(x1 > 0 && y1 > 0){
+                sum2+= qGray(image.pixel(x+x1, y+y1));
+            }
+            if(x1 < 0 && y1 > 0){
+                sum3+= qGray(image.pixel(x+x1, y+y1));
+            }
+            if(x1 < 0 && y1 < 0){
+                sum4+= qGray(image.pixel(x+x1, y+y1));
+            }
+            if(sum1 - sum3 > 300 && sum2 - sum3 > 300 && sum4 - sum2 > 300 && sum3 < 200 && sum2 > 600){
+                randrect.push_back(QRect(x - 10, y - 10, 20, 20));
+                qDebug() << "Yabadabadu!";
+            }
+            //qDebug() << sum1 << sum2 << sum3 << sum4;
+        }
+       // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
+    }
 }
 
 ImageArea::~ImageArea()
