@@ -15,4 +15,10 @@ double x2,y2,z2;
 int c;
 };
 
+struct Config{
+    QPoint crop[2];
+    QPoint square[3];
+    QPoint square0[3];
+};
+
 #endif // HELPERS_HPP

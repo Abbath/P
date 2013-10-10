@@ -43,6 +43,9 @@
    <addaction name="actionRun"/>
    <addaction name="action3D"/>
    <addaction name="actionSave"/>
+   <addaction name="actionLoad"/>
+   <addaction name="actionAutorun"/>
+   <addaction name="actionCalibrate"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -109,6 +112,36 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Load config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionCalibrate">
+   <property name="text">
+    <string>Calibrate</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionAutorun">
+   <property name="text">
+    <string>Autorun</string>
+   </property>
+   <property name="toolTip">
+    <string>Autorun</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
  </widget>

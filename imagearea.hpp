@@ -19,7 +19,7 @@ class ImageArea : public QWidget
     Q_OBJECT
     QImage image;
     QString fileName;
-    QPoint square[4];
+    QPoint square[3];
     unsigned counter = 0;
     QPoint crop[2];
     QPoint zoom;
@@ -30,6 +30,8 @@ class ImageArea : public QWidget
     unsigned bound_counter[4] = {0,0,0,0};
     Modes mode = ISO;
     QVector<QRect> randrect;
+    Config conf;
+    QMap<double,int> res;
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
@@ -43,14 +45,19 @@ public:
     unsigned searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
     void switchMode();
     void saveImage();
+    void saveConf();
+    void loadConf();
     void setMode(Modes m) {mode = m;}
     void randomgen();
+    void autorun();
+    void calibrate();
 public slots:
     void align();
     void open();
     void reset();
     void run();
 private:
+    void sharpen();
     Ui::ImageArea *ui;
     int tre() const { return threshold; }
 };

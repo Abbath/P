@@ -25,8 +25,10 @@ private slots:
     void on_actionRun_triggered();
     void on_actionAlign_triggered();
     void on_action3D_triggered();
-
     void on_actionSave_triggered();
+    void on_actionLoad_triggered();
+    void on_actionCalibrate_triggered();
+    void on_actionAutorun_triggered();
 
 private:
     Ui::MainWindow *ui;

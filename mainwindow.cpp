@@ -41,7 +41,8 @@ void MainWindow::on_action3D_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    ui->widget->saveImage();
+    //ui->widget->saveImage();
+    ui->widget->saveConf();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *e){
@@ -57,4 +58,19 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
     if(e->key() == Qt::Key_4){
         ui->widget->setMode(RIGHT);
     }
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    ui->widget->loadConf();
+}
+
+void MainWindow::on_actionCalibrate_triggered()
+{
+    ui->widget->calibrate();
+}
+
+void MainWindow::on_actionAutorun_triggered()
+{
+    ui->widget->autorun();
 }

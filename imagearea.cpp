@@ -60,7 +60,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" down: ")+QString::number(bound_counter[3])+
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
-    if(!image.isNull()){
+    /*if(!image.isNull()){
         randomgen();
         for(QRect x : randrect){
             if(x.height() == 40){
@@ -73,7 +73,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
             }
             painter.setPen(Qt::white);
         }
-    }
+    }*/
     e->accept();
     releaseMouse();
 }
@@ -183,6 +183,7 @@ void ImageArea::load(){
             image.setPixel(i,j,qRgb(gray,gray,gray));
         }
     }
+    sharpen();
     counter = 0;
 }
 
@@ -257,6 +258,55 @@ void ImageArea::saveImage()
     }
 }
 
+void ImageArea::saveConf()
+{
+    static bool fp = true;
+    static QString filename = QString("save.conf");
+    if(fp){
+        filename = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
+        QFile file(filename);
+        if(file.open(QFile::WriteOnly)){
+            QTextStream str(&file);
+            str << crop[0].x() << " " << crop[0].y() << "\n";
+            str << crop[1].x() << " " << crop[1].y() << "\n";
+            str << square[0].x() << " " << square[0].y() << "\n";
+            str << square[1].x() << " " << square[1].y() << "\n";
+            str << square[2].x() << " " << square[2].y() << "\n";
+            QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
+        }
+        fp = false;
+    }else{
+        QFile file(filename);
+        if(file.open(QFile::Append)){
+            QTextStream str(&file);
+            str << square[0].x() << " " << square[0].y() << "\n";
+            str << square[1].x() << " " << square[1].y() << "\n";
+            str << square[2].x() << " " << square[2].y() << "\n";
+        }
+        fp = true;
+    }
+
+}
+
+void ImageArea::loadConf()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    QFile file(filename);
+    if(file.open(QFile::ReadOnly)){
+        QTextStream str(&file);
+        str >> conf.crop[0].rx() >> conf.crop[0].ry();
+        str >> conf.crop[1].rx() >> conf.crop[1].ry();
+        str >> conf.square[0].rx() >> conf.square[0].ry();
+        str >> conf.square[1].rx() >> conf.square[1].ry();
+        str >> conf.square[2].rx() >> conf.square[2].ry();
+        str >> conf.square0[0].rx() >> conf.square0[0].ry();
+        str >> conf.square0[1].rx() >> conf.square0[1].ry();
+        str >> conf.square0[2].rx() >> conf.square0[2].ry();
+    }else{
+        repaint();
+    }
+}
+
 void ImageArea::align()
 {
     QMatrix matrix;
@@ -264,6 +314,11 @@ void ImageArea::align()
     image = image.transformed(matrix);
     counter = 0;
     repaint();
+    /*qDebug() << "We are aligning"  << crop[0].x() << " " << crop[0].y() << "\n"
+             << crop[1].x() << " " << crop[1].y() << "\n"
+             << square[0].x() << " " << square[0].y() << "\n"
+             << square[1].x() << " " << square[1].y() << "\n"
+             << square[2].x() << " " << square[2].y() << "\n";*/
 }
 
 void ImageArea::randomgen(){
@@ -294,8 +349,93 @@ void ImageArea::randomgen(){
             }
             //qDebug() << sum1 << sum2 << sum3 << sum4;
         }
-       // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
+        // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
     }
+}
+
+void ImageArea::autorun()
+{
+        crop[0] = conf.crop[0];
+        crop[1] = conf.crop[1];
+        square[0] = conf.square[0];
+        square[1] = conf.square[1];
+        square[2] = conf.square[2];
+        image = image.copy(crop[0].x(),crop[0].y(),crop[1].x()-crop[0].x(),crop[1].y()-crop[0].y());
+        counter = 3;
+        align();
+        counter = 3;
+        square[0] = conf.square0[0];
+        square[1] = conf.square0[1];
+        square[2] = conf.square0[2];
+        run();
+}
+
+void ImageArea::calibrate()
+{
+    loadConf();
+    QStringList names = QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
+    for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
+        image.load(*it);
+        for(int i = 0; i < image.width(); ++i){
+            for(int j = 0; j < image.height(); ++j){
+                int gray = qGray(image.pixel(i,j));
+                image.setPixel(i,j,qRgb(gray,gray,gray));
+            }
+        }
+        sharpen();
+        int a = (*it).lastIndexOf('.');
+        (*it).chop((*it).size() - a);
+        a = (*it).lastIndexOf('/');
+        (*it) = (*it).right((*it).size() - a - 1 );
+        int n = (*it).toInt();
+        autorun();
+        res[n] = bound_counter[0]+bound_counter[1]+bound_counter[2]+bound_counter[3];
+        qDebug() << n << res[n];
+    }
+}
+
+void  ImageArea::sharpen(){
+    QImage oldImage = image;
+
+    int kernel [3][3]= {{0,-1,0},
+                        {-1,5,-1},
+                        {0,-1,0}};
+    /* int kernel  [5][5] ={
+        {0,0,-1,0,0},
+        {0,-1,-2,-1,0},
+        {-1,-2,20,-2,-1},
+        {0,-1,-2,-1,0},
+        {0,0,-1,0,0}};*/
+    int kernelSize = 3;
+    int sumKernel = 1;
+    int r,g,b;
+    QColor color;
+
+    for(int x=kernelSize/2; x<image.width()-(kernelSize/2); x++){
+        for(int y=kernelSize/2; y<image.height()-(kernelSize/2); y++){
+
+            r = 0;
+            g = 0;
+            b = 0;
+
+            for(int i = -kernelSize/2; i<= kernelSize/2; i++){
+                for(int j = -kernelSize/2; j<= kernelSize/2; j++){
+                    color = QColor(oldImage.pixel(x+i, y+j));
+                    r += color.red()*kernel[kernelSize/2+i][kernelSize/2+j];
+                    g += color.green()*kernel[kernelSize/2+i][kernelSize/2+j];
+                    b += color.blue()*kernel[kernelSize/2+i][kernelSize/2+j];
+                }
+            }
+
+            r = qBound(0, r/sumKernel, 255);
+            g = qBound(0, g/sumKernel, 255);
+            b = qBound(0, b/sumKernel, 255);
+
+            image.setPixel(x,y, qRgb(r,g,b));
+
+        }
+    }
+    repaint();
 }
 
 ImageArea::~ImageArea()
