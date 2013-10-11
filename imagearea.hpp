@@ -31,7 +31,8 @@ class ImageArea : public QWidget
     Modes mode = ISO;
     QVector<QRect> randrect;
     Config conf;
-    QMap<double,int> res;
+    QVector<double> pres;
+    QVector<int> res;
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
@@ -48,7 +49,7 @@ public:
     void saveConf();
     void loadConf();
     void setMode(Modes m) {mode = m;}
-    void randomgen();
+ // void randomgen();
     void autorun();
     void calibrate();
 public slots:

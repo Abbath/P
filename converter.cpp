@@ -97,9 +97,9 @@ QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top,
     origin.z = 0.0;*/
     switch (mode) {
     case ISO:
-        rotate(result, 3.1415/180*35.2,0,0);
-        rotate(result, 0,3.1415/4,0);
-        rotate(result, 0,0,-3.1415/4);
+        rotate(result, 3.1415/180*35.2,3.1415/4,-3.1415/4);
+        //rotate(result, 0,,0);
+        //rotate(result, 0,0,-3.1415/4);
         break;
     case BOTTOM:
         rotate(result, 3.1415/180*90,0,0);

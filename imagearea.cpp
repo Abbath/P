@@ -2,6 +2,10 @@
 #include "ui_imagearea.h"
 
 #include <QtConcurrent/QtConcurrent>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/math/tools/solve.hpp>
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageArea)
@@ -86,12 +90,10 @@ void ImageArea::keyPressEvent(QKeyEvent *e){
         reset();
     }
     if(e->key() == Qt::Key_E && e->modifiers() == Qt::ControlModifier){
-        qDebug() << "We are here!";
         d3 = !d3;
     }
 
     repaint();
-    e->accept();
 }
 
 void ImageArea::mousePressEvent(QMouseEvent *e){
@@ -101,11 +103,12 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
         crop[0].setY(e->y());
         repaint();
     }
-    if(e->button() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton && !image.isNull()){
         zoom_b = true;
+        zoom.setX(e->x());
+        zoom.setY(e->y());
         repaint();
     }
-
 
 }
 
@@ -176,15 +179,18 @@ void ImageArea::reset()
 }
 
 void ImageArea::load(){
-    image.load(fileName);
-    for(int i = 0; i < image.width(); ++i){
-        for(int j = 0; j < image.height(); ++j){
-            int gray = qGray(image.pixel(i,j));
-            image.setPixel(i,j,qRgb(gray,gray,gray));
+    if(image.load(fileName)){
+        for(int i = 0; i < image.width(); ++i){
+            for(int j = 0; j < image.height(); ++j){
+                int gray = qGray(image.pixel(i,j));
+                image.setPixel(i,j,qRgb(gray,gray,gray));
+            }
         }
+        sharpen();
+        counter = 0;
+    }else{
+        QMessageBox::warning(this, tr("Error"), tr("Can not load an image"));
     }
-    sharpen();
-    counter = 0;
 }
 
 void ImageArea::run()
@@ -224,7 +230,6 @@ void ImageArea::run()
         QMessageBox::critical(this,"No points or image","Put 3 points or open image");
     }
     repaint();
-    image.save("test.bmp");
     image = timage;
 }
 
@@ -249,6 +254,7 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
 void ImageArea::switchMode()
 {
     d3 = !d3;
+    repaint();
 }
 
 void ImageArea::saveImage()
@@ -273,6 +279,8 @@ void ImageArea::saveConf()
             str << square[1].x() << " " << square[1].y() << "\n";
             str << square[2].x() << " " << square[2].y() << "\n";
             QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
+        }else{
+            QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
         }
         fp = false;
     }else{
@@ -282,6 +290,8 @@ void ImageArea::saveConf()
             str << square[0].x() << " " << square[0].y() << "\n";
             str << square[1].x() << " " << square[1].y() << "\n";
             str << square[2].x() << " " << square[2].y() << "\n";
+        }else{
+            QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
         }
         fp = true;
     }
@@ -314,60 +324,55 @@ void ImageArea::align()
     image = image.transformed(matrix);
     counter = 0;
     repaint();
-    /*qDebug() << "We are aligning"  << crop[0].x() << " " << crop[0].y() << "\n"
-             << crop[1].x() << " " << crop[1].y() << "\n"
-             << square[0].x() << " " << square[0].y() << "\n"
-             << square[1].x() << " " << square[1].y() << "\n"
-             << square[2].x() << " " << square[2].y() << "\n";*/
 }
 
-void ImageArea::randomgen(){
-    randrect.clear();
-    srand(time(NULL));
-    for(int i = 0; i < 10000; ++i){
-        int x = rand() % (image.width() - 40) + 20;
-        int y = rand() % (image.height() - 40) + 20;
-        int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
-        for(int i = 0; i < 500; ++i){
-            int x1 = rand() % 41 - 20;
-            int y1 = rand() % 41 - 20;
-            if(x1 > 0 && y1 < 0){
-                sum1+= qGray(image.pixel(x+x1, y+y1));
-            }
-            if(x1 > 0 && y1 > 0){
-                sum2+= qGray(image.pixel(x+x1, y+y1));
-            }
-            if(x1 < 0 && y1 > 0){
-                sum3+= qGray(image.pixel(x+x1, y+y1));
-            }
-            if(x1 < 0 && y1 < 0){
-                sum4+= qGray(image.pixel(x+x1, y+y1));
-            }
-            if(sum1 - sum3 > 300 && sum2 - sum3 > 300 && sum4 - sum2 > 300 && sum3 < 200 && sum2 > 600){
-                randrect.push_back(QRect(x - 10, y - 10, 20, 20));
-                qDebug() << "Yabadabadu!";
-            }
-            //qDebug() << sum1 << sum2 << sum3 << sum4;
-        }
-        // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
-    }
-}
+//void ImageArea::randomgen(){
+//    randrect.clear();
+//    srand(time(NULL));
+//    for(int i = 0; i < 10000; ++i){
+//        int x = rand() % (image.width() - 40) + 20;
+//        int y = rand() % (image.height() - 40) + 20;
+//        int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+//        for(int i = 0; i < 500; ++i){
+//            int x1 = rand() % 41 - 20;
+//            int y1 = rand() % 41 - 20;
+//            if(x1 > 0 && y1 < 0){
+//                sum1+= qGray(image.pixel(x+x1, y+y1));
+//            }
+//            if(x1 > 0 && y1 > 0){
+//                sum2+= qGray(image.pixel(x+x1, y+y1));
+//            }
+//            if(x1 < 0 && y1 > 0){
+//                sum3+= qGray(image.pixel(x+x1, y+y1));
+//            }
+//            if(x1 < 0 && y1 < 0){
+//                sum4+= qGray(image.pixel(x+x1, y+y1));
+//            }
+//            if(sum1 - sum3 > 300 && sum2 - sum3 > 300 && sum4 - sum2 > 300 && sum3 < 200 && sum2 > 600){
+//                randrect.push_back(QRect(x - 10, y - 10, 20, 20));
+//                qDebug() << "Yabadabadu!";
+//            }
+//            //qDebug() << sum1 << sum2 << sum3 << sum4;
+//        }
+//        // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
+//    }
+//}
 
 void ImageArea::autorun()
 {
-        crop[0] = conf.crop[0];
-        crop[1] = conf.crop[1];
-        square[0] = conf.square[0];
-        square[1] = conf.square[1];
-        square[2] = conf.square[2];
-        image = image.copy(crop[0].x(),crop[0].y(),crop[1].x()-crop[0].x(),crop[1].y()-crop[0].y());
-        counter = 3;
-        align();
-        counter = 3;
-        square[0] = conf.square0[0];
-        square[1] = conf.square0[1];
-        square[2] = conf.square0[2];
-        run();
+    crop[0] = conf.crop[0];
+    crop[1] = conf.crop[1];
+    square[0] = conf.square[0];
+    square[1] = conf.square[1];
+    square[2] = conf.square[2];
+    image = image.copy(crop[0].x(),crop[0].y(),crop[1].x()-crop[0].x(),crop[1].y()-crop[0].y());
+    counter = 3;
+    align();
+    counter = 3;
+    square[0] = conf.square0[0];
+    square[1] = conf.square0[1];
+    square[2] = conf.square0[2];
+    run();
 }
 
 void ImageArea::calibrate()
@@ -389,9 +394,32 @@ void ImageArea::calibrate()
         (*it) = (*it).right((*it).size() - a - 1 );
         int n = (*it).toInt();
         autorun();
-        res[n] = bound_counter[0]+bound_counter[1]+bound_counter[2]+bound_counter[3];
-        qDebug() << n << res[n];
+        res.push_back(bound_counter[0]+bound_counter[1]+bound_counter[2]+bound_counter[3]);
+        pres.push_back(n);
+        //qDebug() << n << res[n];
     }
+    boost::numeric::ublas::matrix<double> A(res.size(),res.size());
+    boost::numeric::ublas::vector<double> b(res.size());
+    for(int i = 0;i < res.size();++i){
+        for(int j = 0 ; j < res.size();++j){
+            if(j == res.size()-1){
+                A(i,j) = 1;
+                continue;
+            }
+            A(i,j) = std::pow(res[i],res.size()-1-j);
+        }
+        b[i] = pres[i];
+    }
+    boost::numeric::ublas::vector<double> a = boost::math::tools::solve(A,b);
+    std::cerr << A;
+    std::cerr << b;
+    std::cerr << a;
+    double sum = 0;
+    double x = 2700;
+    for(auto it = a.begin(); it != a.end(); ++it){
+        sum += (*it)*pow(x,a.size()-1-(int)(it-a.begin()));
+    }
+    std::cerr << sum;
 }
 
 void  ImageArea::sharpen(){
@@ -401,11 +429,11 @@ void  ImageArea::sharpen(){
                         {-1,5,-1},
                         {0,-1,0}};
     /* int kernel  [5][5] ={
-        {0,0,-1,0,0},
-        {0,-1,-2,-1,0},
-        {-1,-2,20,-2,-1},
-        {0,-1,-2,-1,0},
-        {0,0,-1,0,0}};*/
+                        {0,0,-1,0,0},
+                        {0,-1,-2,-1,0},
+                        {-1,-2,20,-2,-1},
+                        {0,-1,-2,-1,0},
+                        {0,0,-1,0,0}};*/
     int kernelSize = 3;
     int sumKernel = 1;
     int r,g,b;
