@@ -18,7 +18,7 @@ class ImageArea : public QWidget
 {
     Q_OBJECT
     QImage image;
-    QString fileName;
+    QString fileName, fileNameV;
     QPoint square[3];
     unsigned counter = 0;
     QPoint crop[2];
@@ -52,9 +52,11 @@ public:
  // void randomgen();
     void autorun();
     void calibrate();
+    void getFrame(int n);
 public slots:
     void align();
     void open();
+    int openVideo();
     void reset();
     void run();
 private:

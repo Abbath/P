@@ -26,3 +26,5 @@ FORMS    += mainwindow.ui \
     imagearea.ui
 
 QMAKE_CXXFLAGS += -std=c++11
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+

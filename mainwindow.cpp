@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->showMaximized();
+    ui->horizontalSlider->hide();
 }
 
 MainWindow::~MainWindow()
@@ -73,4 +74,18 @@ void MainWindow::on_actionCalibrate_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     ui->widget->autorun();
+}
+
+void MainWindow::on_actionOpen_Video_triggered()
+{
+    int n = ui->widget->openVideo();
+    ui->horizontalSlider->show();
+    ui->horizontalSlider->setMaximum(n);
+    ui->horizontalSlider->setValue(0);
+    ui->widget->getFrame(0);
+}
+
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    ui->widget->getFrame(value);
 }

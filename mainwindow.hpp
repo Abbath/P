@@ -30,6 +30,10 @@ private slots:
     void on_actionCalibrate_triggered();
     void on_actionAutorun_triggered();
 
+    void on_actionOpen_Video_triggered();
+
+    void on_horizontalSlider_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
     };

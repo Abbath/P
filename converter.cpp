@@ -88,6 +88,8 @@ QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top,
                     points.push_back(p0);
                 }*/
                 p.z2 = p.z1 - min;
+            }else{
+                p.z2 = p.z1;
             }
             result.push_back(p);
         }

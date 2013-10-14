@@ -6,6 +6,9 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/math/tools/solve.hpp>
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
+
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageArea)
@@ -170,6 +173,69 @@ void ImageArea::open()
     fileName = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
     load();
     repaint();
+}
+
+int ImageArea::openVideo()
+{
+    fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
+    CvCapture * capture = cvCaptureFromAVI(fileNameV.toStdString().c_str());
+    if(!capture)
+    {
+       QMessageBox::warning(this, "Error", "cvCaptureFromAVI failed (file not found?)\n");
+        return 0;
+    }
+
+    int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+    qDebug() << "* FPS: %d" <<  fps << "\n";
+
+    IplImage* frame = NULL;
+    int frame_number = 0;
+    //char key = 0;
+
+    while ((frame = cvQueryFrame(capture))) {
+        // get frame
+/*
+        if (!frame)
+        {
+            printf("!!! cvQueryFrame failed: no frame\n");
+            break;
+        }
+*/
+        char filename[100];
+        strcpy(filename, "frame_");
+
+        char frame_id[30];
+        //itoa(frame_number, frame_id, 10);
+        sprintf(frame_id,"%d",frame_number);
+        strcat(filename, frame_id);
+        strcat(filename, ".bmp");
+
+
+        printf("* Saving: %s\n", filename);
+       /* int p[3];
+        p[0] = CV_IMWRITE_PNG_COMPRESSION;
+        p[1] = 0;
+        p[2] = 0;*/
+
+        QMatrix matrix;
+        matrix.rotate(180);
+        QImage img = IplImage2QImage(frame).transformed(matrix).mirrored(true, false);
+        img.save(QString(filename), "BMP", 100);
+        /*
+        if (!cvSaveImage(filename, frame,p))
+        {
+            QMessageBox::warning(this, "Error", "cvSaveImage failed\n");
+            break;
+        }
+*/
+        frame_number++;
+
+        // quit when user press 'q'
+        //key = cvWaitKey(1000 / fps);
+    }
+    // free resources
+    cvReleaseCapture(&capture);
+    return frame_number;
 }
 
 void ImageArea::reset()
@@ -420,6 +486,13 @@ void ImageArea::calibrate()
         sum += (*it)*pow(x,a.size()-1-(int)(it-a.begin()));
     }
     std::cerr << sum;
+}
+
+void ImageArea::getFrame(int n)
+{
+    fileName = QString("frame_")+QString::number(n)+QString(".bmp");
+    load();
+    repaint();
 }
 
 void  ImageArea::sharpen(){

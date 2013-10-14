@@ -2,6 +2,7 @@
 #define HELPERS_HPP
 
 #include <QtCore>
+#include <opencv/cv.h>
 
 enum Modes{ ISO, TOP, LEFT, BOTTOM, RIGHT};
 
@@ -21,4 +22,13 @@ struct Config{
     QPoint square0[3];
 };
 
+static QImage IplImage2QImage(const IplImage *iplImage)
+{
+       int height = iplImage->height;
+       int width = iplImage->width;
+
+       const uchar *qImageBuffer =(const uchar*)iplImage->imageData;
+       QImage img(qImageBuffer, width, height, QImage::Format_RGB888);
+       return img.rgbSwapped();
+}
 #endif // HELPERS_HPP
