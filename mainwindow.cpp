@@ -17,7 +17,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    ui->widget->open();
+    ui->widget->openImage();
+    ui->horizontalSlider->hide();
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -38,12 +39,13 @@ void MainWindow::on_actionAlign_triggered()
 void MainWindow::on_action3D_triggered()
 {
     ui->widget->switchMode();
+    ui->horizontalSlider->hide();
 }
 
 void MainWindow::on_actionSave_triggered()
 {
     //ui->widget->saveImage();
-    ui->widget->saveConf();
+    ui->widget->saveConf(false);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *e){
@@ -63,12 +65,13 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 
 void MainWindow::on_actionLoad_triggered()
 {
-    ui->widget->loadConf();
+    ui->widget->loadConf(false);
 }
 
 void MainWindow::on_actionCalibrate_triggered()
 {
     ui->widget->calibrate();
+    ui->horizontalSlider->hide();
 }
 
 void MainWindow::on_actionAutorun_triggered()
@@ -88,4 +91,24 @@ void MainWindow::on_actionOpen_Video_triggered()
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
     ui->widget->getFrame(value);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
+}
+
+void MainWindow::on_actionSave_as_Default_triggered()
+{
+    ui->widget->saveConf(true);
+}
+
+void MainWindow::on_actionSave_2_triggered()
+{
+    ui->widget->saveData();
+}
+
+void MainWindow::on_actionLoad_2_triggered()
+{
+    ui->widget->loadData();
 }

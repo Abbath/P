@@ -2,18 +2,15 @@
 #include "ui_imagearea.h"
 
 #include <QtConcurrent/QtConcurrent>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/math/tools/solve.hpp>
-#include "opencv/cv.h"
-#include "opencv/highgui.h"
+
+
 
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageArea)
 {
     ui->setupUi(this);
+    loadConf(true);
 }
 
 void ImageArea::paintEvent(QPaintEvent *e){
@@ -33,7 +30,6 @@ void ImageArea::paintEvent(QPaintEvent *e){
             }
             p.drawLine(l.x1+300,l.y1+500,l.x2+300,l.y2+500);
         }
-        //pix.save("pix.bmp");
         painter.drawImage(0,0,pix);
         e->accept();
         releaseMouse();
@@ -59,7 +55,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
             painter.drawImage(zoom.x(),zoom.y(),zoomed);
         }
     }
-    painter.drawText(30,30,QString::number(image.width())+QString(", ")+QString::number(image.height())+", "+QString::number(threshold)+ QString(" ") + QString::number(d3));
+    painter.drawText(30,30,QString::number(image.width())+QString(", ")+QString::number(image.height())+", "+QString::number(threshold)+", "+QString::number(sum));
     painter.drawText(30,50,
                      QString("left: ")+QString::number(bound_counter[2])+
             QString(" up: ")+QString::number(bound_counter[1])+
@@ -67,27 +63,13 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" down: ")+QString::number(bound_counter[3])+
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
-    /*if(!image.isNull()){
-        randomgen();
-        for(QRect x : randrect){
-            if(x.height() == 40){
-                //painter.setPen(Qt::yellow);
-                //painter.drawRect(x);
-            }else{
-                painter.setPen(Qt::red);
-                painter.drawRect(x.left()-10,x.top()-10,40,40);
-
-            }
-            painter.setPen(Qt::white);
-        }
-    }*/
     e->accept();
     releaseMouse();
 }
 
 void ImageArea::keyPressEvent(QKeyEvent *e){
     if(e->key() == Qt::Key_O && e->modifiers() == Qt::ControlModifier){
-        open();
+        openImage();
     }
     if(e->key() == Qt::Key_R && e->modifiers() == Qt::ControlModifier){
         reset();
@@ -168,83 +150,30 @@ void ImageArea::wheelEvent(QWheelEvent *e){
     }
 }
 
-void ImageArea::open()
+void ImageArea::openImage()
 {
     fileName = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
-    load();
+    loadImage();
     repaint();
 }
 
 int ImageArea::openVideo()
 {
     fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
-    CvCapture * capture = cvCaptureFromAVI(fileNameV.toStdString().c_str());
-    if(!capture)
-    {
-       QMessageBox::warning(this, "Error", "cvCaptureFromAVI failed (file not found?)\n");
-        return 0;
-    }
-
-    int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-    qDebug() << "* FPS: %d" <<  fps << "\n";
-
-    IplImage* frame = NULL;
-    int frame_number = 0;
-    //char key = 0;
-
-    while ((frame = cvQueryFrame(capture))) {
-        // get frame
-/*
-        if (!frame)
-        {
-            printf("!!! cvQueryFrame failed: no frame\n");
-            break;
-        }
-*/
-        char filename[100];
-        strcpy(filename, "frame_");
-
-        char frame_id[30];
-        //itoa(frame_number, frame_id, 10);
-        sprintf(frame_id,"%d",frame_number);
-        strcat(filename, frame_id);
-        strcat(filename, ".bmp");
-
-
-        printf("* Saving: %s\n", filename);
-       /* int p[3];
-        p[0] = CV_IMWRITE_PNG_COMPRESSION;
-        p[1] = 0;
-        p[2] = 0;*/
-
-        QMatrix matrix;
-        matrix.rotate(180);
-        QImage img = IplImage2QImage(frame).transformed(matrix).mirrored(true, false);
-        img.save(QString(filename), "BMP", 100);
-        /*
-        if (!cvSaveImage(filename, frame,p))
-        {
-            QMessageBox::warning(this, "Error", "cvSaveImage failed\n");
-            break;
-        }
-*/
-        frame_number++;
-
-        // quit when user press 'q'
-        //key = cvWaitKey(1000 / fps);
-    }
-    // free resources
-    cvReleaseCapture(&capture);
-    return frame_number;
+    this->setCursor(Qt::WaitCursor);
+    QFuture<int> fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
+    int frame_num = fn.result();
+    this->setCursor(Qt::ArrowCursor);
+    return frame_num;
 }
 
 void ImageArea::reset()
 {
-    load();
+    loadImage();
     repaint();
 }
 
-void ImageArea::load(){
+void ImageArea::loadImage(){
     if(image.load(fileName)){
         for(int i = 0; i < image.width(); ++i){
             for(int j = 0; j < image.height(); ++j){
@@ -261,6 +190,7 @@ void ImageArea::load(){
 
 void ImageArea::run()
 {
+    qDebug() <<counter << image.isNull();
     QImage timage = image;
     for(unsigned& x : bound_counter){
         x = 0;
@@ -330,43 +260,61 @@ void ImageArea::saveImage()
     }
 }
 
-void ImageArea::saveConf()
+void ImageArea::saveConf(bool def)
 {
     static bool fp = true;
-    static QString filename = QString("save.conf");
-    if(fp){
+    static QString filename = QString("default.conf");
+    if(!def){
         filename = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
+        if(fp){
+            QFile file(filename);
+            if(file.open(QFile::WriteOnly)){
+                QTextStream str(&file);
+                str << crop[0].x() << " " << crop[0].y() << "\n";
+                str << crop[1].x() << " " << crop[1].y() << "\n";
+                str << square[0].x() << " " << square[0].y() << "\n";
+                str << square[1].x() << " " << square[1].y() << "\n";
+                str << square[2].x() << " " << square[2].y() << "\n";
+                QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
+            }else{
+                QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+            }
+            fp = false;
+        }else{
+            QFile file(filename);
+            if(file.open(QFile::Append)){
+                QTextStream str(&file);
+                str << square[0].x() << " " << square[0].y() << "\n";
+                str << square[1].x() << " " << square[1].y() << "\n";
+                str << square[2].x() << " " << square[2].y() << "\n";
+            }else{
+                QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+            }
+            fp = true;
+        }
+    }else{
         QFile file(filename);
         if(file.open(QFile::WriteOnly)){
             QTextStream str(&file);
-            str << crop[0].x() << " " << crop[0].y() << "\n";
-            str << crop[1].x() << " " << crop[1].y() << "\n";
-            str << square[0].x() << " " << square[0].y() << "\n";
-            str << square[1].x() << " " << square[1].y() << "\n";
-            str << square[2].x() << " " << square[2].y() << "\n";
-            QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
-        }else{
-            QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+            str << conf.crop[0].x() << " " << conf.crop[0].y() << "\n";
+            str << conf.crop[1].x() << " " << conf.crop[1].y() << "\n";
+            str << conf.square[0].x() << " " << conf.square[0].y() << "\n";
+            str << conf.square[1].x() << " " << conf.square[1].y() << "\n";
+            str << conf.square[2].x() << " " << conf.square[2].y() << "\n";
+            str << conf.square0[0].x() << " " << conf.square0[0].y() << "\n";
+            str << conf.square0[1].x() << " " << conf.square0[1].y() << "\n";
+            str << conf.square0[2].x() << " " << conf.square0[2].y() << "\n";
         }
-        fp = false;
-    }else{
-        QFile file(filename);
-        if(file.open(QFile::Append)){
-            QTextStream str(&file);
-            str << square[0].x() << " " << square[0].y() << "\n";
-            str << square[1].x() << " " << square[1].y() << "\n";
-            str << square[2].x() << " " << square[2].y() << "\n";
-        }else{
-            QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
-        }
-        fp = true;
     }
 
 }
 
-void ImageArea::loadConf()
+void ImageArea::loadConf(bool def)
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    QString filename = "default.conf";
+    if(!def){
+        filename = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    }
     QFile file(filename);
     if(file.open(QFile::ReadOnly)){
         QTextStream str(&file);
@@ -378,9 +326,14 @@ void ImageArea::loadConf()
         str >> conf.square0[0].rx() >> conf.square0[0].ry();
         str >> conf.square0[1].rx() >> conf.square0[1].ry();
         str >> conf.square0[2].rx() >> conf.square0[2].ry();
+        if(str.status() & QTextStream::ReadCorruptData || str.status() & QTextStream::ReadPastEnd){
+            QMessageBox::warning(this, "Error", "Can not read config!");
+            return;
+        }
     }else{
         repaint();
     }
+    counter = 3;
 }
 
 void ImageArea::align()
@@ -391,38 +344,6 @@ void ImageArea::align()
     counter = 0;
     repaint();
 }
-
-//void ImageArea::randomgen(){
-//    randrect.clear();
-//    srand(time(NULL));
-//    for(int i = 0; i < 10000; ++i){
-//        int x = rand() % (image.width() - 40) + 20;
-//        int y = rand() % (image.height() - 40) + 20;
-//        int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
-//        for(int i = 0; i < 500; ++i){
-//            int x1 = rand() % 41 - 20;
-//            int y1 = rand() % 41 - 20;
-//            if(x1 > 0 && y1 < 0){
-//                sum1+= qGray(image.pixel(x+x1, y+y1));
-//            }
-//            if(x1 > 0 && y1 > 0){
-//                sum2+= qGray(image.pixel(x+x1, y+y1));
-//            }
-//            if(x1 < 0 && y1 > 0){
-//                sum3+= qGray(image.pixel(x+x1, y+y1));
-//            }
-//            if(x1 < 0 && y1 < 0){
-//                sum4+= qGray(image.pixel(x+x1, y+y1));
-//            }
-//            if(sum1 - sum3 > 300 && sum2 - sum3 > 300 && sum4 - sum2 > 300 && sum3 < 200 && sum2 > 600){
-//                randrect.push_back(QRect(x - 10, y - 10, 20, 20));
-//                qDebug() << "Yabadabadu!";
-//            }
-//            //qDebug() << sum1 << sum2 << sum3 << sum4;
-//        }
-//        // randrect.push_back(QRect(x - 20, y - 20, 40, 40));
-//    }
-//}
 
 void ImageArea::autorun()
 {
@@ -439,12 +360,16 @@ void ImageArea::autorun()
     square[1] = conf.square0[1];
     square[2] = conf.square0[2];
     run();
+    sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&bound_counter[0], bound_counter+4,0)).result();
+    repaint();
 }
 
 void ImageArea::calibrate()
 {
-    loadConf();
+    loadConf(false);
     QStringList names = QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
+    res.clear();
+    pres.clear();
     for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
         image.load(*it);
         for(int i = 0; i < image.width(); ++i){
@@ -462,42 +387,53 @@ void ImageArea::calibrate()
         autorun();
         res.push_back(bound_counter[0]+bound_counter[1]+bound_counter[2]+bound_counter[3]);
         pres.push_back(n);
-        //qDebug() << n << res[n];
     }
-    boost::numeric::ublas::matrix<double> A(res.size(),res.size());
-    boost::numeric::ublas::vector<double> b(res.size());
-    for(int i = 0;i < res.size();++i){
-        for(int j = 0 ; j < res.size();++j){
-            if(j == res.size()-1){
-                A(i,j) = 1;
-                continue;
-            }
-            A(i,j) = std::pow(res[i],res.size()-1-j);
-        }
-        b[i] = pres[i];
-    }
-    boost::numeric::ublas::vector<double> a = boost::math::tools::solve(A,b);
-    std::cerr << A;
-    std::cerr << b;
-    std::cerr << a;
-    double sum = 0;
-    double x = 2700;
-    for(auto it = a.begin(); it != a.end(); ++it){
-        sum += (*it)*pow(x,a.size()-1-(int)(it-a.begin()));
-    }
-    std::cerr << sum;
+
 }
 
 void ImageArea::getFrame(int n)
 {
     fileName = QString("frame_")+QString::number(n)+QString(".bmp");
-    load();
+    loadImage();
     repaint();
+}
+
+void ImageArea::loadData()
+{
+    QString filename = QFileDialog::getOpenFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QFile file(filename);
+    int r = 0;
+    double p = 0;
+    res.clear();
+    pres.clear();
+    if(file.open(QFile::ReadOnly)){
+        QTextStream str(&file);
+        while(!str.atEnd()){
+            str >> r >> p;
+            res.push_back(r);
+            pres.push_back(p);
+        }
+    }else{
+        repaint();
+    }
+}
+
+void ImageArea::saveData()
+{
+    QString filename = QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QFile file(filename);
+    if(file.open(QFile::WriteOnly)){
+        QTextStream str(&file);
+        for(int i = 0; i < res.size(); ++i){
+            str << res[i] << " " << pres[i] << " \n";
+        }
+    }else{
+        repaint();
+    }
 }
 
 void  ImageArea::sharpen(){
     QImage oldImage = image;
-
     int kernel [3][3]= {{0,-1,0},
                         {-1,5,-1},
                         {0,-1,0}};
@@ -511,14 +447,11 @@ void  ImageArea::sharpen(){
     int sumKernel = 1;
     int r,g,b;
     QColor color;
-
     for(int x=kernelSize/2; x<image.width()-(kernelSize/2); x++){
         for(int y=kernelSize/2; y<image.height()-(kernelSize/2); y++){
-
             r = 0;
             g = 0;
             b = 0;
-
             for(int i = -kernelSize/2; i<= kernelSize/2; i++){
                 for(int j = -kernelSize/2; j<= kernelSize/2; j++){
                     color = QColor(oldImage.pixel(x+i, y+j));
@@ -527,13 +460,10 @@ void  ImageArea::sharpen(){
                     b += color.blue()*kernel[kernelSize/2+i][kernelSize/2+j];
                 }
             }
-
             r = qBound(0, r/sumKernel, 255);
             g = qBound(0, g/sumKernel, 255);
             b = qBound(0, b/sumKernel, 255);
-
             image.setPixel(x,y, qRgb(r,g,b));
-
         }
     }
     repaint();

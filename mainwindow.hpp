@@ -34,6 +34,14 @@ private slots:
 
     void on_horizontalSlider_valueChanged(int value);
 
+    void on_actionExit_triggered();
+
+    void on_actionSave_as_Default_triggered();
+
+    void on_actionSave_2_triggered();
+
+    void on_actionLoad_2_triggered();
+
 private:
     Ui::MainWindow *ui;
     };

@@ -1,4 +1,7 @@
 #include "converter.hpp"
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
+#include <QMessageBox>
 
 Converter::Converter()
 {
@@ -118,4 +121,61 @@ QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top,
         break;
     }
     return result;
+}
+
+int Converter::processVideo(QString s)
+{
+    CvCapture * capture = cvCaptureFromAVI(s.toStdString().c_str());
+    if(!capture)
+    {
+        QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
+        return 0;
+    }
+    int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+    qDebug() << "* FPS: %d" <<  fps << "\n";
+    IplImage* frame = NULL;
+    int frame_number = 0;
+    while ((frame = cvQueryFrame(capture))) {
+        char filename[100];
+        strcpy(filename, "frame_");
+        char frame_id[30];
+        sprintf(frame_id,"%d",frame_number);
+        strcat(filename, frame_id);
+        strcat(filename, ".bmp");
+        QMatrix matrix;
+        matrix.rotate(180);
+        QImage img = IplImage2QImage(frame).transformed(matrix).mirrored(true, false);
+        img.save(QString(filename), "BMP", 100);
+        frame_number++;
+    }
+    cvReleaseCapture(&capture);
+    return frame_number;
+}
+
+double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
+{
+    std::cerr << val << "\n";
+    boost::numeric::ublas::matrix<double> A(res.size(),res.size());
+    boost::numeric::ublas::vector<double> b(res.size());
+    for(int i = 0;i < res.size();++i){
+        for(int j = 0 ; j < res.size();++j){
+            if(j == res.size()-1){
+                A(i,j) = 1;
+                continue;
+            }
+            A(i,j) = std::pow(res[i],res.size()-1-j);
+        }
+        b[i] = pres[i];
+    }
+    boost::numeric::ublas::vector<double> a = boost::math::tools::solve(A,b);
+    std::cerr << A << "\n";
+    std::cerr << b << "\n";
+    std::cerr << a << "\n";
+    double sum = 0;
+    //double x = 27.0;
+    for(auto it = a.begin(); it != a.end(); ++it){
+        sum += (*it)*pow(val,a.size()-1-(int)(it-a.begin()));
+    }
+    std::cerr << sum << "\n";
+    return sum;
 }

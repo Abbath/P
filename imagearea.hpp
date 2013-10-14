@@ -21,6 +21,7 @@ class ImageArea : public QWidget
     QString fileName, fileNameV;
     QPoint square[3];
     unsigned counter = 0;
+    double sum = 0;
     QPoint crop[2];
     QPoint zoom;
     QVector<Line> lines;
@@ -42,20 +43,22 @@ public:
     void mouseReleaseEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
     ~ImageArea();
-    void load();
+    void loadImage();
     unsigned searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
     void switchMode();
     void saveImage();
-    void saveConf();
-    void loadConf();
+    void saveConf(bool def);
+    void loadConf(bool def);
     void setMode(Modes m) {mode = m;}
- // void randomgen();
     void autorun();
     void calibrate();
     void getFrame(int n);
+    void processVideo();
+    void loadData();
+    void saveData();
 public slots:
     void align();
-    void open();
+    void openImage();
     int openVideo();
     void reset();
     void run();
