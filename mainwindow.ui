@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>654</width>
-    <height>435</height>
+    <width>683</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="ImageArea" name="widget" native="true"/>
-    </item>
-    <item row="1" column="0">
+    <item row="1" column="0" colspan="2">
      <widget class="QSlider" name="horizontalSlider">
       <property name="enabled">
        <bool>true</bool>
@@ -34,6 +31,9 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="ImageArea" name="widget" native="true"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -41,7 +41,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>654</width>
+     <width>683</width>
      <height>20</height>
     </rect>
    </property>
@@ -84,18 +84,26 @@
     <addaction name="actionSave_2"/>
     <addaction name="actionCalibrate"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
    <addaction name="menuView"/>
    <addaction name="menuConfig"/>
    <addaction name="menuData"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
     <enum>BottomToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionAutorun"/>
@@ -226,20 +234,42 @@
    <property name="text">
     <string>Exit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
   </action>
   <action name="actionSave_as_Default">
    <property name="text">
     <string>Save as Default</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
   <action name="actionLoad_2">
    <property name="text">
     <string>Load</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
   </action>
   <action name="actionSave_2">
    <property name="text">
     <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+S</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

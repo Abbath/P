@@ -8,7 +8,7 @@ Converter::Converter()
 }
 
 void Converter::rotate(QVector<Line> &l, double angle_x, double angle_y, double angle_z){
-    Point origin = {0,0,0};
+    Point origin = {0, 0, 0};
     for(auto it = l.begin();it != l.end();++it){
         double xt = it->x1;double yt = it->y1;double zt = it->z1;
         if(fabs(angle_x)  > std::numeric_limits<double>::epsilon()){
@@ -154,13 +154,13 @@ int Converter::processVideo(QString s)
 
 double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
 {
-    std::cerr << val << "\n";
+    /*std::cerr << val << "\n";
     boost::numeric::ublas::matrix<double> A(res.size(),res.size());
     boost::numeric::ublas::vector<double> b(res.size());
     for(int i = 0;i < res.size();++i){
         for(int j = 0 ; j < res.size();++j){
             if(j == res.size()-1){
-                A(i,j) = 1;
+                A(i,j) = 1.0;
                 continue;
             }
             A(i,j) = std::pow(res[i],res.size()-1-j);
@@ -170,12 +170,28 @@ double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
     boost::numeric::ublas::vector<double> a = boost::math::tools::solve(A,b);
     std::cerr << A << "\n";
     std::cerr << b << "\n";
-    std::cerr << a << "\n";
-    double sum = 0;
-    //double x = 27.0;
-    for(auto it = a.begin(); it != a.end(); ++it){
+    std::cerr << a << "\n";*/
+    double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
+    /*for(auto it = a.begin(); it != a.end(); ++it){
         sum += (*it)*pow(val,a.size()-1-(int)(it-a.begin()));
     }
-    std::cerr << sum << "\n";
+    std::cerr << sum << "\n";*/
+    for(auto it = res.begin(); it != res.end(); ++it){
+        if(*it > val){
+            if(it == res.begin()){
+                return 0;
+            }
+            x1 = *it;
+            y1 = pres[it - res.begin()];
+            x0 = *(it-1);
+            y0 = pres[it - res.begin() - 1];
+            break;
+        }
+        if(it + 1 == res.end()){
+            return 0;
+        }
+    }
+    sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);
     return sum;
+
 }
