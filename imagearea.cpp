@@ -54,7 +54,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
     }
-    painter.drawText(30,30,QString::number(image.width()) + QString(", ") + QString::number(image.height()) + ", " + QString::number(threshold) + ", " + QString::number(sum));
+    painter.drawText(30,30,/*QString::number(image.width()) +*/ QString("threshold: ") +/* QString::number(image.height()) + ", " + */QString::number(threshold) + ", light: " + QString::number(sum));
     painter.drawText(30, 50,
                      QString("left: ")+QString::number(bound_counter[2])+
             QString(" up: ")+QString::number(bound_counter[1])+
@@ -62,13 +62,13 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" down: ")+QString::number(bound_counter[3])+
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
-    if(std::accumulate(bound_counter+0, bound_counter + 4, 0) <= 2500){
+    if(sum <= GY){
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);
-    }else if(std::accumulate(bound_counter + 0, bound_counter + 4, 0) > 2500 && std::accumulate(bound_counter+0,bound_counter+4,0) < 2700){
+    }else if(sum > GY && sum < YR){
         painter.setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
         painter.setPen(Qt::yellow);
-    }else if(std::accumulate(bound_counter + 0, bound_counter + 4, 0) >= 2700){
+    }else if(sum >= YR){
         painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
         painter.setPen(Qt::red);
     }

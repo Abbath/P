@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->showMaximized();
     ui->horizontalSlider->hide();
+    ui->groupBox->hide();
 }
 
 MainWindow::~MainWindow()
@@ -111,4 +112,19 @@ void MainWindow::on_actionSave_2_triggered()
 void MainWindow::on_actionLoad_2_triggered()
 {
     ui->widget->loadData();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, tr("About"), tr("Danylo Lizanets © 2013"));
+}
+
+
+void MainWindow::on_actionBounds_triggered(bool checked)
+{
+    if(checked){
+        ui->groupBox->show();
+    }else{
+        ui->groupBox->hide();
+    }
 }

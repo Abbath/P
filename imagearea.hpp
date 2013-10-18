@@ -21,7 +21,7 @@ class ImageArea : public QWidget
     QString fileName, fileNameV;
     QPoint square[3];
     unsigned counter = 0;
-    double sum = 0;
+    double sum = 0,GY=25,YR=35;
     QPoint crop[2];
     QPoint zoom;
     QVector<Line> lines;
@@ -62,6 +62,8 @@ public slots:
     int openVideo();
     void reset();
     void run();
+    void setGY(double val){GY = val;}
+    void setYR(double val){YR = val;}
 private:
     void sharpen();
     Ui::ImageArea *ui;
