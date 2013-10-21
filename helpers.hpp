@@ -11,9 +11,9 @@ struct Point {
 };
 
 struct Line{
-double x1,y1,z1;
-double x2,y2,z2;
-int c;
+    double x1,y1,z1;
+    double x2,y2,z2;
+    int c;
 };
 
 struct Config{
@@ -22,13 +22,14 @@ struct Config{
     QPoint square0[3];
 };
 
-static QImage IplImage2QImage(const IplImage *iplImage)
-{
-       int height = iplImage->height;
-       int width = iplImage->width;
+struct Image{
+    QImage image;
+    QPoint crop[2];
+    QPoint square[3];
+    Config conf;
+    QString fileName;
+    unsigned threshold, sum = 0,bound_counter[4] = {0,0,0,0};
+};
 
-       const uchar *qImageBuffer =(const uchar*)iplImage->imageData;
-       QImage img(qImageBuffer, width, height, QImage::Format_RGB888);
-       return img.rgbSwapped();
-}
+
 #endif // HELPERS_HPP

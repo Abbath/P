@@ -195,3 +195,13 @@ double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
     return sum;
 
 }
+
+QImage Converter::IplImage2QImage(const IplImage *iplImage)
+{
+    int height = iplImage->height;
+    int width = iplImage->width;
+
+    const uchar *qImageBuffer =(const uchar*)iplImage->imageData;
+    QImage img(qImageBuffer, width, height, QImage::Format_RGB888);
+    return img.rgbSwapped();
+}

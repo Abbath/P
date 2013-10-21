@@ -5,7 +5,8 @@
 
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ImageArea)
+    ui(new Ui::ImageArea),
+    images{nullptr}
 {
     ui->setupUi(this);
     loadConf(true);
@@ -54,7 +55,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
     }
-    painter.drawText(30,30,/*QString::number(image.width()) +*/ QString("threshold: ") +/* QString::number(image.height()) + ", " + */QString::number(threshold) + ", light: " + QString::number(sum));
+    painter.drawText(30,30,/*QString::number(image.width()) +*/ QString("threshold: ") +/* QString::number(image.height()) + ", " + */QString::number(threshold) + ", pressure: " + QString::number(sum));
     painter.drawText(30, 50,
                      QString("left: ")+QString::number(bound_counter[2])+
             QString(" up: ")+QString::number(bound_counter[1])+
@@ -162,7 +163,7 @@ void ImageArea::wheelEvent(QWheelEvent *e){
 
 void ImageArea::openImage()
 {
-    fileName = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
+    fileNames = QFileDialog::getOpenFileNames( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
     loadImage();
     repaint();
 }

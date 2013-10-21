@@ -29,25 +29,14 @@ private slots:
     void on_actionLoad_triggered();
     void on_actionCalibrate_triggered();
     void on_actionAutorun_triggered();
-
     void on_actionOpen_Video_triggered();
-
     void on_horizontalSlider_valueChanged(int value);
-
     void on_actionExit_triggered();
-
     void on_actionSave_as_Default_triggered();
-
     void on_actionSave_2_triggered();
-
     void on_actionLoad_2_triggered();
-
     void on_actionAbout_triggered();
-
-
-
     void on_actionBounds_triggered(bool checked);
-
 private:
     Ui::MainWindow *ui;
     };

@@ -16,6 +16,8 @@ public:
     QVector<Line> convert(QImage &image, Modes mode);
     int processVideo(QString s);
     double calculate(QVector<int> &res, QVector<double> &pres, int val);
+private:
+    QImage IplImage2QImage(const IplImage *iplImage);
 };
 
 #endif // CONVERTER_HPP

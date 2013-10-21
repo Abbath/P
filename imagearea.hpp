@@ -17,8 +17,10 @@ class ImageArea;
 class ImageArea : public QWidget
 {
     Q_OBJECT
+    Image* images;
     QImage image;
     QString fileName, fileNameV;
+    QStringList fileNames;
     QPoint square[3];
     unsigned counter = 0;
     double sum = 0,GY=25,YR=35;
@@ -30,7 +32,7 @@ class ImageArea : public QWidget
     unsigned threshold = 128;
     unsigned bound_counter[4] = {0,0,0,0};
     Modes mode = ISO;
-    QVector<QRect> randrect;
+    //QVector<QRect> randrect;
     Config conf;
     QVector<double> pres;
     QVector<int> res;
