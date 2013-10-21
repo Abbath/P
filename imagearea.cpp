@@ -5,19 +5,20 @@
 
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ImageArea),
-    images{nullptr}
+    images{new Image[1]},
+    ui(new Ui::ImageArea)
 {
     ui->setupUi(this);
     loadConf(true);
 }
 
 void ImageArea::paintEvent(QPaintEvent *e){
+    Image * image = &images[curr];
     grabMouse();
     QPainter painter(this);
-    if(d3 && !image.isNull()){
+    if(d3 && !image->image.isNull()){
         std::sort(lines.begin(),lines.end(), [](Line a, Line b) { return a.z1 < b.z1; });
-        QImage pix(this->width(),this->height(), image.format());
+        QImage pix(this->width(),this->height(), image->image.format());
         pix.fill(Qt::black);
         QPainter p;
         p.begin(&pix);
@@ -34,28 +35,29 @@ void ImageArea::paintEvent(QPaintEvent *e){
         releaseMouse();
         return;
     }
-    painter.drawImage(0, 0, image);
-    if(counter > 0){
-        for(unsigned i = 0; i < counter; ++i){
+    painter.drawImage(0, 0, image->image);
+    if(image->counter > 0){
+        for(unsigned i = 0; i < image->counter; ++i){
             painter.setPen(Qt::red);
-            painter.drawLine(square[i].x() - 4, square[i].y(), square[i].x() + 4, square[i].y());
-            painter.drawLine(square[i].x(), square[i].y() - 4, square[i].x(), square[i].y() + 4);
-            painter.drawText(square[i].x() + 3, square[i].y() - 3, QString::number(counter));
+            painter.drawLine(image->square[i].x() - 4, image->square[i].y(), image->square[i].x() + 4, image->square[i].y());
+            painter.drawLine(image->square[i].x(), image->square[i].y() - 4, image->square[i].x(), image->square[i].y() + 4);
+            painter.drawText(image->square[i].x() + 3, image->square[i].y() - 3, QString::number(i+1));
             painter.setPen(Qt::white);
         }
     }
     if(rect){
         painter.setPen(Qt::green);
-        painter.drawRect(crop[0].x(), crop[0].y(), crop[1].x() - crop[0].x(), crop[1].y() - crop[0].y());
+        painter.drawRect(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
         painter.setPen(Qt::white);
     }else{
         if(zoom_b){
-            QImage zoomed = image.copy(zoom.x() - 10, zoom.y() - 10, 20, 20).scaled(41, 41);
+            QImage zoomed = image->image.copy(zoom.x() - 10, zoom.y() - 10, 20, 20).scaled(41, 41);
             zoomed.setPixel(20, 20, qRgb(0, 255, 0));
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
     }
-    painter.drawText(30,30,/*QString::number(image.width()) +*/ QString("threshold: ") +/* QString::number(image.height()) + ", " + */QString::number(threshold) + ", pressure: " + QString::number(sum));
+    emit giveImage(*image);
+    /*painter.drawText(30,30, QString("threshold: ") +QString::number(threshold) + ", pressure: " + QString::number(sum));
     painter.drawText(30, 50,
                      QString("left: ")+QString::number(bound_counter[2])+
             QString(" up: ")+QString::number(bound_counter[1])+
@@ -63,43 +65,45 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" down: ")+QString::number(bound_counter[3])+
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
-    if(sum <= GY){
+    */
+    if(image->sum <= GY){
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);
-    }else if(sum > GY && sum < YR){
+    }else if(image->sum > GY && image->sum < YR){
         painter.setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
         painter.setPen(Qt::yellow);
-    }else if(sum >= YR){
+    }else if(image->sum >= YR){
         painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
         painter.setPen(Qt::red);
     }
-    painter.drawEllipse(this->width() - 40, this->height() - 40, 30, 30);
+    painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
     e->accept();
     releaseMouse();
 }
 
-void ImageArea::keyPressEvent(QKeyEvent *e){
-    if(e->key() == Qt::Key_O && e->modifiers() == Qt::ControlModifier){
-        openImage();
-    }
-    if(e->key() == Qt::Key_R && e->modifiers() == Qt::ControlModifier){
-        reset();
-    }
-    if(e->key() == Qt::Key_E && e->modifiers() == Qt::ControlModifier){
-        d3 = !d3;
-    }
+//void ImageArea::keyPressEvent(QKeyEvent *e){
+//    if(e->key() == Qt::Key_O && e->modifiers() == Qt::ControlModifier){
+//        openImage();
+//    }
+//    if(e->key() == Qt::Key_R && e->modifiers() == Qt::ControlModifier){
+//        reset();
+//    }
+//    if(e->key() == Qt::Key_E && e->modifiers() == Qt::ControlModifier){
+//        d3 = !d3;
+//    }
 
-    repaint();
-}
+//    repaint();
+//}
 
 void ImageArea::mousePressEvent(QMouseEvent *e){
-    if(e->button() == Qt::RightButton && !image.isNull() ){
+    Image * image = &images[curr];
+    if(e->button() == Qt::RightButton && !image->image.isNull() ){
         rect = true;
-        crop[0].setX(e->x());
-        crop[0].setY(e->y());
+        image->crop[0].setX(e->x());
+        image->crop[0].setY(e->y());
         repaint();
     }
-    if(e->button() == Qt::LeftButton && !image.isNull()){
+    if(e->button() == Qt::LeftButton && !image->image.isNull()){
         zoom_b = true;
         zoom.setX(e->x());
         zoom.setY(e->y());
@@ -109,10 +113,11 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
 }
 
 void ImageArea::mouseMoveEvent(QMouseEvent *e){
-    if(!image.isNull()){
+    Image * image = &images[curr];
+    if(!image->image.isNull()){
         if(rect){
-            crop[1].setX(e->x());
-            crop[1].setY(e->y());
+            image->crop[1].setX(e->x());
+            image->crop[1].setY(e->y());
 
         }else{
             zoom.setX(e->x());
@@ -123,27 +128,28 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e){
 }
 
 void ImageArea::mouseReleaseEvent(QMouseEvent *e){
-    if(e->button() == Qt::RightButton && !image.isNull()){
-        if(crop[0].x() > crop[1].x()){
-            int tmp = crop[0].x();
-            crop[0].setX(crop[1].x());
-            crop[1].setX(tmp);
+    Image * image = &images[curr];
+    if(e->button() == Qt::RightButton && !image->image.isNull()){
+        if(image->crop[0].x() > image->crop[1].x()){
+            int tmp = image->crop[0].x();
+            image->crop[0].setX(image->crop[1].x());
+            image->crop[1].setX(tmp);
         }
-        if(crop[0].y() > crop[1].y()){
-            int tmp = crop[0].y();
-            crop[0].setY(crop[1].y());
-            crop[1].setY(tmp);
+        if(image->crop[0].y() > image->crop[1].y()){
+            int tmp = image->crop[0].y();
+            image->crop[0].setY(image->crop[1].y());
+            image->crop[1].setY(tmp);
         }
-        image = image.copy(crop[0].x(),crop[0].y(),crop[1].x()-crop[0].x(),crop[1].y()-crop[0].y());
+        image->image = image->image.copy(image->crop[0].x(),image->crop[0].y(),image->crop[1].x() - image->crop[0].x(),image->crop[1].y() - image->crop[0].y());
         rect = false;
     }
-    if(e->button() == Qt::LeftButton && !image.isNull()){
-        if(counter < 3){
-            square[counter].setX(e->x());
-            square[counter].setY(e->y());
-            counter++;
+    if(e->button() == Qt::LeftButton && !image->image.isNull()){
+        if(image->counter < 3){
+            image->square[image->counter].setX(e->x());
+            image->square[image->counter].setY(e->y());
+            image->counter++;
         }else{
-            counter = 0;
+            image->counter = 0;
         }
         zoom_b = false;
     }
@@ -152,11 +158,12 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
 }
 
 void ImageArea::wheelEvent(QWheelEvent *e){
-    qint32 a = threshold + e->delta()/80;
+    Image * image = &images[curr];
+    qint32 a = image->threshold + e->delta()/80;
     if( a > 255 ) a = 255;
     if( a < 0 ) a = 0;
-    threshold = quint8(a);
-    if(!image.isNull()){
+    image->threshold = quint8(a);
+    if(!image->image.isNull()){
         run();
     }
 }
@@ -164,7 +171,14 @@ void ImageArea::wheelEvent(QWheelEvent *e){
 void ImageArea::openImage()
 {
     fileNames = QFileDialog::getOpenFileNames( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
-    loadImage();
+    if(images){
+        delete[] images;
+    }
+    images = new Image[fileNames.length()];
+    for(curr = 0; curr < static_cast<unsigned>(fileNames.length()); ++curr){
+        loadImage();
+    }
+    curr = 0;
     repaint();
 }
 
@@ -185,73 +199,76 @@ void ImageArea::reset()
 }
 
 void ImageArea::loadImage(){
-    if(image.load(fileName)){
-        for(int i = 0; i < image.width(); ++i){
-            for(int j = 0; j < image.height(); ++j){
-                int gray = qGray(image.pixel(i,j));
-                image.setPixel(i,j,qRgb(gray,gray,gray));
+    QImage * image = &images[curr].image;
+    if(image->load(fileNames[curr])){
+        for(int i = 0; i < image->width(); ++i){
+            for(int j = 0; j < image->height(); ++j){
+                int gray = qGray(image->pixel(i,j));
+                image->setPixel(i,j,qRgb(gray,gray,gray));
             }
         }
         sharpen();
-        counter = 0;
+        images[curr].counter = 0;
     }else{
-        QMessageBox::warning(this, tr("Error"), tr("Can not load an image"));
+        QMessageBox::warning(this, tr("Error"), tr("Can not load an image(s)"));
     }
 }
 
 void ImageArea::run()
 {
-    qDebug() <<counter << image.isNull();
-    QImage timage = image;
-    for(unsigned& x : bound_counter){
+    Image * image = &images[curr];
+    //qDebug() <<counter << image.isNull();
+    QImage timage = image->image;
+    for(unsigned& x : image->bound_counter){
         x = 0;
     }
-    if(d3 && !image.isNull()){
-        QFuture<QVector<Line> > tmp = QtConcurrent::run(&conv, &Converter::convert, image, mode);
+    if(d3 && !image->image.isNull()){
+        QFuture<QVector<Line> > tmp = QtConcurrent::run(&conv, &Converter::convert, image->image, mode);
         lines = tmp.result();
         repaint();
         return;
     }
-    if( counter == 3 && !image.isNull()){
-        unsigned x1 = square[1].x();
-        unsigned x2 = image.width()-1;
-        unsigned y1 = square[1].y();
-        unsigned y2 = square[2].y();
-        bound_counter[0] = searchTheLight(x1,y1,x2,y2);
+    if( image->counter == 3 && !image->image.isNull()){
+        unsigned x1 = image->square[1].x();
+        unsigned x2 = image->image.width()-1;
+        unsigned y1 = image->square[1].y();
+        unsigned y2 = image->square[2].y();
+        image->bound_counter[0] = searchTheLight(x1,y1,x2,y2);
         x1 = 0;
-        x2 = square[0].x();
-        y1 = square[0].y();
-        y2 = square[2].y();
-        bound_counter[1] = searchTheLight(x1,y1,x2,y2);
-        x1 = square[0].x();
-        x2 = square[1].x();
+        x2 = image->square[0].x();
+        y1 = image->square[0].y();
+        y2 = image->square[2].y();
+        image->bound_counter[1] = searchTheLight(x1,y1,x2,y2);
+        x1 = image->square[0].x();
+        x2 = image->square[1].x();
         y1 = 0;
-        y2 = square[0].y();
-        bound_counter[2] = searchTheLight(x1,y1,x2,y2);
-        x1 = square[0].x();
-        x2 = square[1].x();
-        y1 = square[2].y();
-        y2 = image.height()-1;
-        bound_counter[3] = searchTheLight(x1,y1,x2,y2);
+        y2 = image->square[0].y();
+        image->bound_counter[2] = searchTheLight(x1,y1,x2,y2);
+        x1 = image->square[0].x();
+        x2 = image->square[1].x();
+        y1 = image->square[2].y();
+        y2 = image->image.height()-1;
+        image->bound_counter[3] = searchTheLight(x1,y1,x2,y2);
     }else{
         QMessageBox::critical(this,"No points or image","Put 3 points or open image");
     }
     repaint();
-    image = timage;
+    image->image = timage;
 }
 
 unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2){
+    QImage * image = &images[curr].image;
     unsigned counter=0;
     for (unsigned  i = x1 + 1; i != x2; x1 < x2 ? ++i : --i ) {
         for(unsigned j = y1 + 1; j != y2; y1 < y2 ? ++j : --j) {
-            if(qGray(image.pixel(i, j)) >= tre()) {
+            if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
             }
-            if(qGray(image.pixel(i,j)) <= tre() && (qGray(image.pixel(i + 1, j)) > tre() ||
-                                                    qGray(image.pixel(i, j + 1)) > tre() ||
-                                                    qGray(image.pixel(i - 1, j)) > tre() ||
-                                                    qGray(image.pixel(i, j - 1)) > tre() )) {
-                image.setPixel(i, j, qRgb(0,255,0));
+            if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
+                                                    qGray(image->pixel(i, j + 1)) > tre() ||
+                                                    qGray(image->pixel(i - 1, j)) > tre() ||
+                                                    qGray(image->pixel(i, j - 1)) > tre() )) {
+                image->setPixel(i, j, qRgb(0,255,0));
             }
         }
     }
@@ -266,13 +283,14 @@ void ImageArea::switchMode()
 
 void ImageArea::saveImage()
 {
-    if(!image.isNull()){
-        image.save(QFileDialog::getSaveFileName(this,tr("Save image"), "", tr("Image files (*.bmp)")));
+    if(!images[curr].image.isNull()){
+        images[curr].image.save(QFileDialog::getSaveFileName(this,tr("Save image"), "", tr("Image files (*.bmp)")));
     }
 }
 
 void ImageArea::saveConf(bool def)
 {
+    Image * image = &images[curr];
     static bool fp = true;
     static QString filename = QString("default.conf");
     if(!def){
@@ -281,11 +299,11 @@ void ImageArea::saveConf(bool def)
             QFile file(filename);
             if(file.open(QFile::WriteOnly)){
                 QTextStream str(&file);
-                str << crop[0].x() << " " << crop[0].y() << "\n";
-                str << crop[1].x() << " " << crop[1].y() << "\n";
-                str << square[0].x() << " " << square[0].y() << "\n";
-                str << square[1].x() << " " << square[1].y() << "\n";
-                str << square[2].x() << " " << square[2].y() << "\n";
+                str << image->crop[0].x() << " " << image->crop[0].y() << "\n";
+                str << image->crop[1].x() << " " << image->crop[1].y() << "\n";
+                str << image->square[0].x() << " " << image->square[0].y() << "\n";
+                str << image->square[1].x() << " " << image->square[1].y() << "\n";
+                str << image->square[2].x() << " " << image->square[2].y() << "\n";
                 QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
             }else{
                 QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
@@ -295,9 +313,9 @@ void ImageArea::saveConf(bool def)
             QFile file(filename);
             if(file.open(QFile::Append)){
                 QTextStream str(&file);
-                str << square[0].x() << " " << square[0].y() << "\n";
-                str << square[1].x() << " " << square[1].y() << "\n";
-                str << square[2].x() << " " << square[2].y() << "\n";
+                str << image->square[0].x() << " " << image->square[0].y() << "\n";
+                str << image->square[1].x() << " " << image->square[1].y() << "\n";
+                str << image->square[2].x() << " " << image->square[2].y() << "\n";
             }else{
                 QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
             }
@@ -324,6 +342,7 @@ void ImageArea::saveConf(bool def)
 
 void ImageArea::loadConf(bool def)
 {
+    Image * image = &images[curr];
     QString filename = "default.conf";
     if(!def){
         filename = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
@@ -347,34 +366,37 @@ void ImageArea::loadConf(bool def)
         QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
         repaint();
     }
-    counter = 3;
+    image->conf = conf;
+    image->counter = 3;
 }
 
 void ImageArea::align()
 {
+    Image * image = &images[curr];
     QMatrix matrix;
-    matrix.shear(4*(square[1].x() - square[2].x())/(double)image.width(), 4*(square[0].y() - square[1].y())/(double)image.height());
-    image = image.transformed(matrix);
-    counter = 0;
+    matrix.shear(4*(image->square[1].x() - image->square[2].x())/(double)image->image.width(), 4*(image->square[0].y() - image->square[1].y())/(double)image->image.height());
+    image->image = image->image.transformed(matrix);
+    image->counter = 0;
     repaint();
 }
 
 void ImageArea::autorun()
 {
-    crop[0] = conf.crop[0];
-    crop[1] = conf.crop[1];
-    square[0] = conf.square[0];
-    square[1] = conf.square[1];
-    square[2] = conf.square[2];
-    image = image.copy(crop[0].x(), crop[0].y(), crop[1].x() - crop[0].x(), crop[1].y() - crop[0].y());
-    counter = 3;
+    Image * image = &images[curr];
+    image->crop[0] = conf.crop[0];
+    image->crop[1] = conf.crop[1];
+    image->square[0] = conf.square[0];
+    image->square[1] = conf.square[1];
+    image->square[2] = conf.square[2];
+    image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
+    image->counter = 3;
     align();
-    counter = 3;
-    square[0] = conf.square0[0];
-    square[1] = conf.square0[1];
-    square[2] = conf.square0[2];
+    image->counter = 3;
+    image->square[0] = conf.square0[0];
+    image->square[1] = conf.square0[1];
+    image->square[2] = conf.square0[2];
     run();
-    sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&bound_counter[0], bound_counter+4,0)).result();
+    image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
     repaint();
 }
 
@@ -382,14 +404,17 @@ void ImageArea::calibrate()
 {
     loadConf(false);
     QStringList names = QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
+    delete[] images;
+    images = new Image[1];
     res.clear();
     pres.clear();
+    curr = 0;
     for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
-        image.load(*it);
-        for(int i = 0; i < image.width(); ++i){
-            for(int j = 0; j < image.height(); ++j){
-                int gray = qGray(image.pixel(i,j));
-                image.setPixel(i, j, qRgb(gray, gray, gray));
+        images[0].image.load(*it);
+        for(int i = 0; i < images[0].image.width(); ++i){
+            for(int j = 0; j < images[0].image.height(); ++j){
+                int gray = qGray(images[0].image.pixel(i,j));
+                images[0].image.setPixel(i, j, qRgb(gray, gray, gray));
             }
         }
         sharpen();
@@ -399,15 +424,17 @@ void ImageArea::calibrate()
         (*it) = (*it).right((*it).size() - a - 1 );
         int n = (*it).toInt();
         autorun();
-        res.push_back(bound_counter[0] + bound_counter[1] + bound_counter[2] + bound_counter[3]);
+        res.push_back(images[0].bound_counter[0] + images[0].bound_counter[1] + images[0].bound_counter[2] + images[0].bound_counter[3]);
         pres.push_back(n);
     }
-
 }
 
 void ImageArea::getFrame(int n)
 {
     fileName = QString("frame_")+QString::number(n)+QString(".bmp");
+    delete[] images;
+    images = new Image[1];
+    curr = 0;
     loadImage();
     repaint();
 }
@@ -447,7 +474,8 @@ void ImageArea::saveData()
 }
 
 void  ImageArea::sharpen(){
-    QImage oldImage = image;
+    QImage * image = &images[curr].image;
+    QImage oldImage = images[curr].image;
     int kernel [3][3]= {{0,-1,0},
                         {-1,5,-1},
                         {0,-1,0}};
@@ -461,8 +489,8 @@ void  ImageArea::sharpen(){
     int sumKernel = 1;
     int r,g,b;
     QColor color;
-    for(int x=kernelSize/2; x<image.width()-(kernelSize/2); x++){
-        for(int y=kernelSize/2; y<image.height()-(kernelSize/2); y++){
+    for(int x=kernelSize/2; x<image->width()-(kernelSize/2); x++){
+        for(int y=kernelSize/2; y<image->height()-(kernelSize/2); y++){
             r = 0;
             g = 0;
             b = 0;
@@ -477,7 +505,7 @@ void  ImageArea::sharpen(){
             r = qBound(0, r/sumKernel, 255);
             g = qBound(0, g/sumKernel, 255);
             b = qBound(0, b/sumKernel, 255);
-            image.setPixel(x,y, qRgb(r,g,b));
+            image->setPixel(x,y, qRgb(r,g,b));
         }
     }
     repaint();

@@ -18,6 +18,7 @@ class ImageArea : public QWidget
 {
     Q_OBJECT
     Image* images;
+    unsigned curr = 0;
     QImage image;
     QString fileName, fileNameV;
     QStringList fileNames;
@@ -39,7 +40,7 @@ class ImageArea : public QWidget
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
-    void keyPressEvent(QKeyEvent *e);
+ //   void keyPressEvent(QKeyEvent *e);
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
@@ -70,6 +71,8 @@ private:
     void sharpen();
     Ui::ImageArea *ui;
     int tre() const { return threshold; }
+signals:
+    void giveImage(Image im);
 };
 
 #endif // IMAGEAREA_HPP

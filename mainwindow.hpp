@@ -37,6 +37,7 @@ private slots:
     void on_actionLoad_2_triggered();
     void on_actionAbout_triggered();
     void on_actionBounds_triggered(bool checked);
+    void getImage(Image im);
 private:
     Ui::MainWindow *ui;
     };

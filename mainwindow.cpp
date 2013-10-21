@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->showMaximized();
     ui->horizontalSlider->hide();
     ui->groupBox->hide();
+    connect(ui->widget,SIGNAL(giveImage(Image)),this,SLOT(getImage(Image)));
 }
 
 MainWindow::~MainWindow()
@@ -83,10 +84,12 @@ void MainWindow::on_actionAutorun_triggered()
 void MainWindow::on_actionOpen_Video_triggered()
 {
     int n = ui->widget->openVideo();
-    ui->horizontalSlider->show();
-    ui->horizontalSlider->setMaximum(n);
-    ui->horizontalSlider->setValue(0);
-    ui->widget->getFrame(0);
+    if(n){
+        ui->horizontalSlider->show();
+        ui->horizontalSlider->setMaximum(n-1);
+        ui->horizontalSlider->setValue(0);
+        ui->widget->getFrame(0);
+    }
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -127,4 +130,16 @@ void MainWindow::on_actionBounds_triggered(bool checked)
     }else{
         ui->groupBox->hide();
     }
+}
+
+void MainWindow::getImage(Image im)
+{
+    ui->thresh_sb->setValue(im.threshold);
+    ui->pressure_l->setNum(im.sum);
+    ui->left_l->setNum(static_cast<int>(im.bound_counter[2]));
+    ui->top_l->setNum(static_cast<int>(im.bound_counter[1]));
+    ui->right_l->setNum(static_cast<int>(im.bound_counter[0]));
+    ui->bottom_l->setNum(static_cast<int>(im.bound_counter[3]));
+    ui->ave_l->setNum(static_cast<int>((im.bound_counter[2]+im.bound_counter[1]+im.bound_counter[0]+im.bound_counter[3])/4));
+    ui->sum_l->setNum(static_cast<int>(im.bound_counter[2]+im.bound_counter[1]+im.bound_counter[0]+im.bound_counter[3]));
 }

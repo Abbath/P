@@ -28,7 +28,8 @@ struct Image{
     QPoint square[3];
     Config conf;
     QString fileName;
-    unsigned threshold, sum = 0,bound_counter[4] = {0,0,0,0};
+    unsigned threshold = 128, counter = 0,bound_counter[4] = {0,0,0,0};
+    double sum = 0.0;
 };
 
 
