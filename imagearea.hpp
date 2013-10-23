@@ -18,7 +18,7 @@ class ImageArea : public QWidget
 {
     Q_OBJECT
     Image* images;
-    unsigned curr = 0;
+    unsigned curr = 0, frame_num = 0;
     QImage image;
     QString fileName, fileNameV;
     QStringList fileNames;
@@ -35,6 +35,8 @@ class ImageArea : public QWidget
     Modes mode = ISO;
     //QVector<QRect> randrect;
     Config conf;
+    QVector<int> vres;
+    QVector<int> vres0;
     QVector<double> pres;
     QVector<int> res;
 public:
@@ -65,8 +67,12 @@ public slots:
     int openVideo();
     void reset();
     void run();
+    void prev();
+    void next();
     void setGY(double val){GY = val;}
     void setYR(double val){YR = val;}
+    const QVector<int>& getRes() const {return vres;}
+    const QVector<int>& getPol() const {return vres0;}
 private:
     void sharpen();
     Ui::ImageArea *ui;

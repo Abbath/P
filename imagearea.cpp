@@ -170,6 +170,7 @@ void ImageArea::wheelEvent(QWheelEvent *e){
 
 void ImageArea::openImage()
 {
+    fileNameV.clear();
     fileNames = QFileDialog::getOpenFileNames( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
     if(images){
         delete[] images;
@@ -184,10 +185,12 @@ void ImageArea::openImage()
 
 int ImageArea::openVideo()
 {
+    fileNames.clear();
+    fileNameV.clear();
     fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
     this->setCursor(Qt::WaitCursor);
     QFuture<int> fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
-    int frame_num = fn.result();
+    frame_num = fn.result();
     this->setCursor(Qt::ArrowCursor);
     return frame_num;
 }
@@ -210,12 +213,14 @@ void ImageArea::loadImage(){
         sharpen();
         images[curr].counter = 0;
     }else{
-        QMessageBox::warning(this, tr("Error"), tr("Can not load an image(s)"));
+        QMessageBox::critical(this, tr("Error"), tr("Can not load an image(s)"));
     }
 }
 
 void ImageArea::run()
 {
+
+
     Image * image = &images[curr];
     //qDebug() <<counter << image.isNull();
     QImage timage = image->image;
@@ -254,6 +259,27 @@ void ImageArea::run()
     }
     repaint();
     image->image = timage;
+
+}
+
+void ImageArea::prev()
+{
+    if(!curr){
+        return;
+    }else{
+        curr--;
+        repaint();
+    }
+}
+
+void ImageArea::next()
+{
+    if(curr == (unsigned)fileNames.length()-1){
+        return;
+    }else{
+        curr++;
+        repaint();
+    }
 }
 
 unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2){
@@ -264,12 +290,12 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
             if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
             }
-            if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
-                                                    qGray(image->pixel(i, j + 1)) > tre() ||
-                                                    qGray(image->pixel(i - 1, j)) > tre() ||
-                                                    qGray(image->pixel(i, j - 1)) > tre() )) {
+           /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
+                                                     qGray(image->pixel(i, j + 1)) > tre() ||
+                                                     qGray(image->pixel(i - 1, j)) > tre() ||
+                                                     qGray(image->pixel(i, j - 1)) > tre() )) {
                 image->setPixel(i, j, qRgb(0,255,0));
-            }
+            }*/
         }
     }
     return counter;
@@ -382,22 +408,51 @@ void ImageArea::align()
 
 void ImageArea::autorun()
 {
-    Image * image = &images[curr];
-    image->crop[0] = conf.crop[0];
-    image->crop[1] = conf.crop[1];
-    image->square[0] = conf.square[0];
-    image->square[1] = conf.square[1];
-    image->square[2] = conf.square[2];
-    image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
-    image->counter = 3;
-    align();
-    image->counter = 3;
-    image->square[0] = conf.square0[0];
-    image->square[1] = conf.square0[1];
-    image->square[2] = conf.square0[2];
-    run();
-    image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
-    repaint();
+    if(!fileNameV.isEmpty()){
+        fileNames.clear();
+        delete[] images;
+        images = new Image[frame_num];
+        for(unsigned i = 0 ; i < frame_num; ++i){
+            fileNames.push_back(QString("frame_")+QString::number(i)+QString(".bmp"));
+            curr = i;
+            loadImage();
+            Image * image = &images[curr];
+            image->crop[0] = conf.crop[0];
+            image->crop[1] = conf.crop[1];
+            image->square[0] = conf.square[0];
+            image->square[1] = conf.square[1];
+            image->square[2] = conf.square[2];
+            image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
+            image->counter = 3;
+            align();
+            image->counter = 3;
+            image->square[0] = conf.square0[0];
+            image->square[1] = conf.square0[1];
+            image->square[2] = conf.square0[2];
+            run();
+            image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
+            repaint();
+            vres.push_back(images[curr].sum);
+            vres0.push_back(std::accumulate(&image->bound_counter[0], image->bound_counter+4,0));
+        }
+    }else{
+        Image * image = &images[curr];
+        image->crop[0] = conf.crop[0];
+        image->crop[1] = conf.crop[1];
+        image->square[0] = conf.square[0];
+        image->square[1] = conf.square[1];
+        image->square[2] = conf.square[2];
+        image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
+        image->counter = 3;
+        align();
+        image->counter = 3;
+        image->square[0] = conf.square0[0];
+        image->square[1] = conf.square0[1];
+        image->square[2] = conf.square0[2];
+        run();
+        image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
+        repaint();
+    }
 }
 
 void ImageArea::calibrate()
@@ -431,7 +486,8 @@ void ImageArea::calibrate()
 
 void ImageArea::getFrame(int n)
 {
-    fileName = QString("frame_")+QString::number(n)+QString(".bmp");
+    fileNames.clear();
+    fileNames.push_back(QString("frame_")+QString::number(n)+QString(".bmp"));
     delete[] images;
     images = new Image[1];
     curr = 0;

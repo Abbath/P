@@ -7,6 +7,60 @@ Converter::Converter()
 {
 }
 
+long double Converter::sum(const QVector<int> &x, const QVector<int> &y, std::function<long double (int, int)> f)
+{
+    long double res = 0;
+    for(int i = 0; i < x.size(); ++i){
+        res += f(x[i],y[i]);
+    }
+    return res;
+}
+
+std::pair<long double, long double> Converter::leastsquares(const QVector<int> &x, const QVector<int> &y)
+{
+    long double A,B,a,b;
+
+    a = sum(x,y,[](int x, int y){
+        return x*x*y;
+    })*sum(x,y,[](int x, int y){
+        return y*log(y);
+    })-sum(x,y,[](int x, int y){
+        return x*y;
+    })*sum(x,y,[](int x, int y){
+        return x*y*log(y);
+    })/(sum(x,y,[](int x, int y){
+        return y;
+    })*sum(x,y,[](int x, int y){
+        return x*x*y;
+    })-pow(sum(x,y,[](int x, int y){
+        return x*y;
+    }),2.)
+        );
+
+    A = exp(a);
+
+    b = sum(x,y,[](int x, int y){
+        return y;
+    })*sum(x,y,[](int x, int y){
+        return y*log(y);
+    })-sum(x,y,[](int x, int y){
+        return x*y;
+    })*sum(x,y,[](int x, int y){
+        return y*log(y);
+    })/(sum(x,y,[](int x, int y){
+        return y;
+    })*sum(x,y,[](int x, int y){
+        return x*x*y;
+    })-pow(sum(x,y,[](int x, int y){
+        return x*y;
+    }),2.)
+        );
+
+    B = b;
+
+    return std::make_pair(A,B);
+}
+
 void Converter::rotate(QVector<Line> &l, double angle_x, double angle_y, double angle_z){
     Point origin = {0, 0, 0};
     for(auto it = l.begin();it != l.end();++it){
@@ -47,7 +101,7 @@ void Converter::rotate(QVector<Line> &l, double angle_x, double angle_y, double 
 
 QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top, int right, int bottom*/){
     QVector<Line> result;
-   /* if(left < 0) left = 0;
+    /* if(left < 0) left = 0;
     if(top < 0) top = 0;
     //if(right > image.width()) right = image.width();
     //if(bottom > image.height()) bottom = image.height();
@@ -82,7 +136,7 @@ QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top,
             if(i < right-1 && j < bottom-1) v.push_back(qGray(image.pixel(i+1,j+1)));
             int min = *(std::min_element(v.begin(),v.end()));
             if(min < qGray(image.pixel(i,j))){
-               /* for( unsigned k = 0; k < p.c-min; ++k){
+                /* for( unsigned k = 0; k < p.c-min; ++k){
                     Point p0;
                     p0.x = i;
                     p0.y = j;
@@ -131,8 +185,8 @@ int Converter::processVideo(QString s)
         QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
         return 0;
     }
-    int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-    qDebug() << "* FPS: %d" <<  fps << "\n";
+    //int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+    // qDebug() << "* FPS: %d" <<  fps << "\n";
     IplImage* frame = NULL;
     int frame_number = 0;
     while ((frame = cvQueryFrame(capture))) {
@@ -154,32 +208,17 @@ int Converter::processVideo(QString s)
 
 double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
 {
-    /*std::cerr << val << "\n";
-    boost::numeric::ublas::matrix<double> A(res.size(),res.size());
-    boost::numeric::ublas::vector<double> b(res.size());
-    for(int i = 0;i < res.size();++i){
-        for(int j = 0 ; j < res.size();++j){
-            if(j == res.size()-1){
-                A(i,j) = 1.0;
-                continue;
-            }
-            A(i,j) = std::pow(res[i],res.size()-1-j);
-        }
-        b[i] = pres[i];
-    }
-    boost::numeric::ublas::vector<double> a = boost::math::tools::solve(A,b);
-    std::cerr << A << "\n";
-    std::cerr << b << "\n";
-    std::cerr << a << "\n";*/
-    double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
-    /*for(auto it = a.begin(); it != a.end(); ++it){
-        sum += (*it)*pow(val,a.size()-1-(int)(it-a.begin()));
-    }
-    std::cerr << sum << "\n";*/
+
+    /* double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
+
     for(auto it = res.begin(); it != res.end(); ++it){
         if(*it > val){
             if(it == res.begin()){
-                return 0;
+                x0 = *res.begin();
+                y0 = *pres.begin();
+                x1 = *(res.begin()+1);
+                y1 = *(pres.begin()+1);
+                break;
             }
             x1 = *it;
             y1 = pres[it - res.begin()];
@@ -188,10 +227,25 @@ double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
             break;
         }
         if(it + 1 == res.end()){
-            return 0;
+            x0 = *(it-1);
+            y0 = pres[res.size()-2];
+            x1 = *it;
+            y1 = pres[res.size()-1];
         }
     }
-    sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);
+    sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);*/
+
+    double sum=0,l=1;
+
+    for(int j = 0;j < res.size(); ++j){
+        for(int i = 0; i < res.size(); ++i){
+            if( j != i){
+                l*= (val - res[i])/(double)(res[j]-res[i]);
+            }
+        }
+        sum += l*pres[j];
+        l = 1;
+    }
     return sum;
 
 }

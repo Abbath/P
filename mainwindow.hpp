@@ -7,6 +7,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <helpers.hpp>
+#include <qwt/qwt_plot.h>
+#include <qwt/qwt.h>
+#include <qwt/qwt_plot_curve.h>
+#include <qwt/qwt_plot_zoomer.h>
 namespace Ui {
 class MainWindow;
 }
@@ -19,6 +23,8 @@ public:
     void keyPressEvent(QKeyEvent *e);
     ~MainWindow();
 
+    void displayResults(const QVector<int> &res, QwtPlot* widget_2);
+    void displayResults(const QVector<int> &res, const QVector<int> &res0, QwtPlot *widget_2);
 private slots:
     void on_actionOpen_triggered();
     void on_actionReset_triggered();
@@ -38,7 +44,15 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionBounds_triggered(bool checked);
     void getImage(Image im);
+    void on_actionPrev_triggered();
+
+    void on_actionNext_triggered();
+
 private:
+    QwtPlotZoomer *zoom;
+    QwtPlotCurve curve;
+    QwtPlotZoomer *zoom0;
+    QwtPlotCurve curve0;
     Ui::MainWindow *ui;
     };
 

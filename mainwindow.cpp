@@ -10,6 +10,29 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalSlider->hide();
     ui->groupBox->hide();
     connect(ui->widget,SIGNAL(giveImage(Image)),this,SLOT(getImage(Image)));
+    ui->widget_2->setTitle("Pressure");
+    ui->widget_2->setAxisTitle(ui->widget_2->xBottom, "Frame");
+    ui->widget_2->setAxisTitle(ui->widget_2->yLeft,"Pressure");
+    ui->widget_2->setAxisAutoScale( ui->widget_2->xBottom, true );
+    ui->widget_2->setAxisAutoScale( ui->widget_2->yLeft, true );
+    zoom = new QwtPlotZoomer(ui->widget_2->canvas());
+    zoom->setRubberBandPen(QPen(Qt::white));
+    QPen pen = QPen( Qt::red );
+    curve.setRenderHint( QwtPlotItem::RenderAntialiased );
+    curve.setPen( pen );
+    curve.attach( ui->widget_2 );
+
+    ui->widget_2->setTitle("Pressure");
+    ui->widget_2->setAxisTitle(ui->widget_3->xBottom, "Pressure");
+    ui->widget_2->setAxisTitle(ui->widget_3->yLeft,"Point of lights");
+    ui->widget_2->setAxisAutoScale( ui->widget_3->xBottom, true );
+    ui->widget_2->setAxisAutoScale( ui->widget_3->yLeft, true );
+    zoom0 = new QwtPlotZoomer(ui->widget_3->canvas());
+    zoom0->setRubberBandPen(QPen(Qt::white));
+    QPen pen0 = QPen( Qt::red );
+    curve0.setRenderHint( QwtPlotItem::RenderAntialiased );
+    curve0.setPen( pen0 );
+    curve0.attach( ui->widget_3 );
 }
 
 MainWindow::~MainWindow()
@@ -79,6 +102,9 @@ void MainWindow::on_actionCalibrate_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     ui->widget->autorun();
+    displayResults(ui->widget->getRes(), ui->widget_2);
+    displayResults(ui->widget->getRes(), ui->widget->getPol(), ui->widget_3);
+
 }
 
 void MainWindow::on_actionOpen_Video_triggered()
@@ -142,4 +168,58 @@ void MainWindow::getImage(Image im)
     ui->bottom_l->setNum(static_cast<int>(im.bound_counter[3]));
     ui->ave_l->setNum(static_cast<int>((im.bound_counter[2]+im.bound_counter[1]+im.bound_counter[0]+im.bound_counter[3])/4));
     ui->sum_l->setNum(static_cast<int>(im.bound_counter[2]+im.bound_counter[1]+im.bound_counter[0]+im.bound_counter[3]));
+}
+
+void MainWindow::on_actionPrev_triggered()
+{
+    ui->widget->prev();
+}
+
+void MainWindow::on_actionNext_triggered()
+{
+    ui->widget->next();
+}
+
+void MainWindow::displayResults(const QVector<int> &res, QwtPlot* widget_2)
+{
+
+
+    widget_2->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+    widget_2->replot();
+
+    QVector < QPointF > points( res.size() );
+    quint32 counter = 0;
+    auto pointsIt = points.begin();
+
+    for ( auto ri = res.constBegin(); ri != res.constEnd(); ++ ri, ++ pointsIt, ++ counter ) {
+        (*pointsIt) = QPointF( counter, (*ri) );
+    }
+
+    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+    curve.setData(data);
+    curve.attach( ui->widget_2 );
+    widget_2->replot();
+
+}
+
+void MainWindow::displayResults(const QVector<int> &res,const QVector<int> &res0, QwtPlot* widget_2)
+{
+
+
+    widget_2->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+    widget_2->replot();
+
+    QVector < QPointF > points( res.size() );
+    quint32 counter = 0;
+    auto pointsIt = points.begin();
+
+    for ( unsigned i = 0; i < res.size(); ++i) {
+        (*pointsIt) = QPointF( res[i], res0[i] );
+    }
+
+    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+    curve0.setData(data);
+    curve0.attach( widget_2 );
+    widget_2->replot();
+
 }

@@ -26,7 +26,7 @@ FORMS    += mainwindow.ui \
     imagearea.ui
 
 QMAKE_CXXFLAGS += -std=c++11
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
 
 RESOURCES += \
     Icons.qrc
