@@ -394,6 +394,7 @@ void ImageArea::loadConf(bool def)
     }
     image->conf = conf;
     image->counter = 3;
+
 }
 
 void ImageArea::align()
@@ -430,7 +431,7 @@ void ImageArea::autorun()
             image->square[1] = conf.square0[1];
             image->square[2] = conf.square0[2];
             run();
-            image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
+            image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
             repaint();
             vres.push_back(images[curr].sum);
             vres0.push_back(std::accumulate(&image->bound_counter[0], image->bound_counter+4,0));
@@ -450,7 +451,7 @@ void ImageArea::autorun()
         image->square[1] = conf.square0[1];
         image->square[2] = conf.square0[2];
         run();
-        image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)).result();
+        image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
         repaint();
     }
 }
@@ -499,20 +500,24 @@ void ImageArea::loadData()
 {
     QString filename = QFileDialog::getOpenFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
     QFile file(filename);
-    int r = 0;
+    double r = 0;
     double p = 0;
     res.clear();
     pres.clear();
     if(file.open(QFile::ReadOnly)){
         QTextStream str(&file);
-        while(!str.atEnd()){
+        while(1){
+
             str >> r >> p;
-            res.push_back(r);
+            if(str.atEnd()) break;
+            res.push_back(r/1000);
             pres.push_back(p);
         }
     }else{
         repaint();
     }
+    auto pp = conv.leastsquares(res,pres);
+    qDebug() << (double)pp.first << (double)pp.second;
 }
 
 void ImageArea::saveData()

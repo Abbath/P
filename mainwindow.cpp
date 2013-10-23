@@ -22,11 +22,11 @@ MainWindow::MainWindow(QWidget *parent) :
     curve.setPen( pen );
     curve.attach( ui->widget_2 );
 
-    ui->widget_2->setTitle("Pressure");
-    ui->widget_2->setAxisTitle(ui->widget_3->xBottom, "Pressure");
-    ui->widget_2->setAxisTitle(ui->widget_3->yLeft,"Point of lights");
-    ui->widget_2->setAxisAutoScale( ui->widget_3->xBottom, true );
-    ui->widget_2->setAxisAutoScale( ui->widget_3->yLeft, true );
+    ui->widget_3->setTitle("Pressure");
+    ui->widget_3->setAxisTitle(ui->widget_3->xBottom, "Pressure");
+    ui->widget_3->setAxisTitle(ui->widget_3->yLeft,"Point of lights");
+    ui->widget_3->setAxisAutoScale( ui->widget_3->xBottom, true );
+    ui->widget_3->setAxisAutoScale( ui->widget_3->yLeft, true );
     zoom0 = new QwtPlotZoomer(ui->widget_3->canvas());
     zoom0->setRubberBandPen(QPen(Qt::white));
     QPen pen0 = QPen( Qt::red );
@@ -180,7 +180,7 @@ void MainWindow::on_actionNext_triggered()
     ui->widget->next();
 }
 
-void MainWindow::displayResults(const QVector<int> &res, QwtPlot* widget_2)
+void MainWindow::displayResults(const QVector<double> &res, QwtPlot* widget_2)
 {
 
 
@@ -202,7 +202,7 @@ void MainWindow::displayResults(const QVector<int> &res, QwtPlot* widget_2)
 
 }
 
-void MainWindow::displayResults(const QVector<int> &res,const QVector<int> &res0, QwtPlot* widget_2)
+void MainWindow::displayResults(const QVector<double> &res, const QVector<double> &res0, QwtPlot* widget_2)
 {
 
 
@@ -210,11 +210,11 @@ void MainWindow::displayResults(const QVector<int> &res,const QVector<int> &res0
     widget_2->replot();
 
     QVector < QPointF > points( res.size() );
-    quint32 counter = 0;
+    //quint32 counter = 0;
     auto pointsIt = points.begin();
 
-    for ( unsigned i = 0; i < res.size(); ++i) {
-        (*pointsIt) = QPointF( res[i], res0[i] );
+    for ( int i = 0; i < res.size(); ++i) {
+        (*(pointsIt+i)) = QPointF( res[i], res0[i] );
     }
 
     QwtPointSeriesData * data = new QwtPointSeriesData(points);

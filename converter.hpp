@@ -14,12 +14,12 @@ class Converter
 {
 public:
     Converter();
-    long double sum(const QVector<int> &x, const QVector<int>&y,std::function<long double (int, int)> f );
-    std::pair<long double,long double> leastsquares(const QVector<int> &x, const QVector<int>&y);
+    long double sum(const QVector<double> &x, const QVector<double>&y,std::function<long double (double, double)> f );
+    std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &y);
     void rotate(QVector<Line> &l, double angle_x =0, double angle_y =0, double angle_z =0);
     QVector<Line> convert(QImage &image, Modes mode);
     int processVideo(QString s);
-    double calculate(QVector<int> &res, QVector<double> &pres, int val);
+    double calculate(QVector<double> &res, QVector<double> &pres, double val);
 private:
     QImage IplImage2QImage(const IplImage *iplImage);
 };

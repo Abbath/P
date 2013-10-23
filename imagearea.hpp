@@ -19,26 +19,26 @@ class ImageArea : public QWidget
     Q_OBJECT
     Image* images;
     unsigned curr = 0, frame_num = 0;
-    QImage image;
+    //QImage image;
     QString fileName, fileNameV;
     QStringList fileNames;
-    QPoint square[3];
-    unsigned counter = 0;
+    //QPoint square[3];
+    //unsigned counter = 0;
     double sum = 0,GY=25,YR=35;
-    QPoint crop[2];
+    //QPoint crop[2];
     QPoint zoom;
     QVector<Line> lines;
     Converter conv;
-    bool rect = false,zoom_b = false,d3 = false,interf = false;
-    unsigned threshold = 128;
-    unsigned bound_counter[4] = {0,0,0,0};
+    bool rect = false,zoom_b = false,d3 = false;
+    //unsigned threshold = 128;
+    //unsigned bound_counter[4] = {0,0,0,0};
     Modes mode = ISO;
     //QVector<QRect> randrect;
     Config conf;
-    QVector<int> vres;
-    QVector<int> vres0;
+    QVector<double> vres;
+    QVector<double> vres0;
     QVector<double> pres;
-    QVector<int> res;
+    QVector<double> res;
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
@@ -71,12 +71,12 @@ public slots:
     void next();
     void setGY(double val){GY = val;}
     void setYR(double val){YR = val;}
-    const QVector<int>& getRes() const {return vres;}
-    const QVector<int>& getPol() const {return vres0;}
+    const QVector<double>& getRes() const {return vres;}
+    const QVector<double>& getPol() const {return vres0;}
 private:
     void sharpen();
     Ui::ImageArea *ui;
-    int tre() const { return threshold; }
+    int tre() const { return images[curr].threshold; }
 signals:
     void giveImage(Image im);
 };

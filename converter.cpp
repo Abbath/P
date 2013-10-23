@@ -7,54 +7,140 @@ Converter::Converter()
 {
 }
 
-long double Converter::sum(const QVector<int> &x, const QVector<int> &y, std::function<long double (int, int)> f)
+long double Converter::sum(const QVector<double> &x, const QVector<double> &y, std::function<long double (double, double)> f)
 {
     long double res = 0;
     for(int i = 0; i < x.size(); ++i){
-        res += f(x[i],y[i]);
+        double tmp = f(x[i],y[i]);
+        res += tmp;
     }
     return res;
 }
 
-std::pair<long double, long double> Converter::leastsquares(const QVector<int> &x, const QVector<int> &y)
+std::pair<long double, long double> Converter::leastsquares(const QVector<double> &x, const QVector<double> &y)
 {
-    long double A,B,a,b;
+    long double A,B,a=0,b=0, at=0, tt = 0, bt =0, tmp=0;
+    for(int i = 0; i < x.size(); ++i){
+        tmp += x[i]*x[i]*y[i];
+    }
 
-    a = sum(x,y,[](int x, int y){
-        return x*x*y;
-    })*sum(x,y,[](int x, int y){
-        return y*log(y);
-    })-sum(x,y,[](int x, int y){
-        return x*y;
-    })*sum(x,y,[](int x, int y){
-        return x*y*log(y);
-    })/(sum(x,y,[](int x, int y){
-        return y;
-    })*sum(x,y,[](int x, int y){
-        return x*x*y;
-    })-pow(sum(x,y,[](int x, int y){
-        return x*y;
-    }),2.)
-        );
+    a = tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i]*log(y[i]);
+    }
+
+    a *= tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i]*x[i];
+    }
+
+    at = tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i]*x[i]*log(y[i]);
+    }
+
+    at *= tmp;
+    tmp = 0;
+
+    a -= at;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i];
+    }
+
+    at = tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += x[i]*x[i]*y[i];
+    }
+
+    tt = at*tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += x[i]*y[i];
+    }
+
+    tt -= tmp*tmp;
+    tmp = 0;
+
+    a /= tt;
+
+
+//    a = sum(x,y,[](double x, double y){ return x*x*y; });
+
+
+//    at = sum(x,y,[](double x, double y){ return y*log(y); });
+
+//    a *= at;
+
+//    at = sum(x,y,[](double x, double y){ return x*y; });
+
+//    at *= sum(x,y,[](double x, double y){ return x*y*log(y); });
+
+//    a /= (sum(x,y,[](double x, double y){ return y; })*sum(x,y,[](double x, double y){
+//        return x*x*y;
+//    })-pow(sum(x,y,[](double x, double y){
+//        return x*y;
+//    }),2.)
+//        );
 
     A = exp(a);
 
-    b = sum(x,y,[](int x, int y){
-        return y;
-    })*sum(x,y,[](int x, int y){
-        return y*log(y);
-    })-sum(x,y,[](int x, int y){
-        return x*y;
-    })*sum(x,y,[](int x, int y){
-        return y*log(y);
-    })/(sum(x,y,[](int x, int y){
-        return y;
-    })*sum(x,y,[](int x, int y){
-        return x*x*y;
-    })-pow(sum(x,y,[](int x, int y){
-        return x*y;
-    }),2.)
-        );
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i];
+    }
+
+    b = tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += x[i]*y[i]*log(y[i]);
+    }
+
+    b *= tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i]*x[i];
+    }
+
+    bt = tmp;
+    tmp = 0;
+
+    for(int i = 0; i < x.size(); ++i){
+        tmp += y[i]*log(y[i]);
+    }
+
+    bt *= tmp;
+    tmp = 0;
+
+    b -= bt;
+
+    b /= tt;
+//    b = sum(x,y,[](double x, double y){
+//        return y;
+//    })*sum(x,y,[](double x, double y){
+//        return y*log(y);
+//    })-sum(x,y,[](double x, double y){
+//        return x*y;
+//    })*sum(x,y,[](double x, double y){
+//        return y*log(y);
+//    })/(sum(x,y,[](double x, double y){
+//        return y;
+//    })*sum(x,y,[](double x, double y){
+//        return x*x*y;
+//    })-pow(sum(x,y,[](double x, double y){
+//        return x*y;
+//    }),2.)
+//        );
 
     B = b;
 
@@ -206,10 +292,10 @@ int Converter::processVideo(QString s)
     return frame_number;
 }
 
-double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
+double Converter::calculate(QVector<double> &res, QVector<double> &pres, double val)
 {
 
-    /* double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
+    /*double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
 
     for(auto it = res.begin(); it != res.end(); ++it){
         if(*it > val){
@@ -235,7 +321,8 @@ double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
     }
     sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);*/
 
-    double sum=0,l=1;
+    auto p = leastsquares(res,pres);
+    /*double sum=0,l=1;
 
     for(int j = 0;j < res.size(); ++j){
         for(int i = 0; i < res.size(); ++i){
@@ -245,7 +332,8 @@ double Converter::calculate(QVector<int> &res, QVector<double> &pres, int val)
         }
         sum += l*pres[j];
         l = 1;
-    }
+    }*/
+    double sum = p.first * exp(p.second*val);
     return sum;
 
 }

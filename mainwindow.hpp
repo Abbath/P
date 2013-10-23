@@ -23,8 +23,8 @@ public:
     void keyPressEvent(QKeyEvent *e);
     ~MainWindow();
 
-    void displayResults(const QVector<int> &res, QwtPlot* widget_2);
-    void displayResults(const QVector<int> &res, const QVector<int> &res0, QwtPlot *widget_2);
+    void displayResults(const QVector<double> &res, QwtPlot* widget_2);
+    void displayResults(const QVector<double> &res, const QVector<double> &res0, QwtPlot *widget_2);
 private slots:
     void on_actionOpen_triggered();
     void on_actionReset_triggered();
