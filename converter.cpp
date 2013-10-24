@@ -271,6 +271,11 @@ int Converter::processVideo(QString s)
         QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
         return 0;
     }
+    QWidget * w = new QWidget();
+    w->setLayout(new QGridLayout);
+    QProgressBar * b = new QProgressBar();
+    w->layout()->addWidget(b);
+    w->show();
     //int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
     // qDebug() << "* FPS: %d" <<  fps << "\n";
     IplImage* frame = NULL;
@@ -282,11 +287,12 @@ int Converter::processVideo(QString s)
         sprintf(frame_id,"%d",frame_number);
         strcat(filename, frame_id);
         strcat(filename, ".bmp");
-        QMatrix matrix;
-        matrix.rotate(180);
-        QImage img = IplImage2QImage(frame).transformed(matrix).mirrored(true, false);
+        /*QMatrix matrix;
+        matrix.rotate(180);*/
+        QImage img = IplImage2QImage(frame).mirrored(false, true);
         img.save(QString(filename), "BMP", 100);
         frame_number++;
+        b->setValue((b->value()+1)%100);
     }
     cvReleaseCapture(&capture);
     return frame_number;

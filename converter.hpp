@@ -2,6 +2,8 @@
 #define CONVERTER_HPP
 #include <QtCore>
 #include <QtGui>
+#include <QGridLayout>
+#include <QProgressBar>
 #include <helpers.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>

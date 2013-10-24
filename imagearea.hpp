@@ -9,7 +9,7 @@
 #include <QVector>
 #include <helpers.hpp>
 #include <converter.hpp>
-#include <algorithm>
+#include <QtMultimediaWidgets/QVideoWidget>
 namespace Ui {
 class ImageArea;
 }
@@ -20,20 +20,21 @@ class ImageArea : public QWidget
     Image* images;
     unsigned curr = 0, frame_num = 0;
     //QImage image;
-    QString fileName, fileNameV;
-    QStringList fileNames;
     //QPoint square[3];
     //unsigned counter = 0;
-    double sum = 0,GY=25,YR=35;
     //QPoint crop[2];
+    //unsigned threshold = 128;
+    //unsigned bound_counter[4] = {0,0,0,0};
+    //QVector<QRect> randrect;
+    QPoint origin[2] = {{0,0},{0,0}};
+    QString fileName, fileNameV;
+    QStringList fileNames;
+    double sum = 0,GY=25,YR=35;
     QPoint zoom;
     QVector<Line> lines;
     Converter conv;
     bool rect = false,zoom_b = false,d3 = false;
-    //unsigned threshold = 128;
-    //unsigned bound_counter[4] = {0,0,0,0};
     Modes mode = ISO;
-    //QVector<QRect> randrect;
     Config conf;
     QVector<double> vres;
     QVector<double> vres0;

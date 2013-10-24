@@ -44,6 +44,8 @@ void MainWindow::on_actionOpen_triggered()
 {
     ui->widget->openImage();
     ui->horizontalSlider->hide();
+    ui->graphicsView->setBackgroundBrush(QImage("membrana/0.bmp"));
+    ui->graphicsView->repaint();
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -104,7 +106,6 @@ void MainWindow::on_actionAutorun_triggered()
     ui->widget->autorun();
     displayResults(ui->widget->getRes(), ui->widget_2);
     displayResults(ui->widget->getRes(), ui->widget->getPol(), ui->widget_3);
-
 }
 
 void MainWindow::on_actionOpen_Video_triggered()

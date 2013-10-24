@@ -35,7 +35,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
         releaseMouse();
         return;
     }
-    painter.drawImage(0, 0, image->image);
+    painter.drawImage(origin[1].x(), origin[1].y(), image->image);
     if(image->counter > 0){
         for(unsigned i = 0; i < image->counter; ++i){
             painter.setPen(Qt::red);
@@ -51,7 +51,7 @@ void ImageArea::paintEvent(QPaintEvent *e){
         painter.setPen(Qt::white);
     }else{
         if(zoom_b){
-            QImage zoomed = image->image.copy(zoom.x() - 10, zoom.y() - 10, 20, 20).scaled(41, 41);
+            QImage zoomed = image->image.copy(zoom.x() - origin[1].x() - 10, zoom.y() - origin[1].y() - 10, 20, 20).scaled(41, 41);
             zoomed.setPixel(20, 20, qRgb(0, 255, 0));
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
@@ -99,15 +99,19 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
     Image * image = &images[curr];
     if(e->button() == Qt::RightButton && !image->image.isNull() ){
         rect = true;
-        image->crop[0].setX(e->x());
-        image->crop[0].setY(e->y());
+        image->crop[0].setX(e->x()/* + origin[1].x()*/);
+        image->crop[0].setY(e->y() /*+ origin[1].y()*/);
         repaint();
     }
     if(e->button() == Qt::LeftButton && !image->image.isNull()){
         zoom_b = true;
-        zoom.setX(e->x());
-        zoom.setY(e->y());
+        zoom.setX(e->x()/*+ origin[1].x()*/);
+        zoom.setY(e->y()/*+ origin[1].y()*/);
         repaint();
+    }
+    if(e->button() == Qt::MiddleButton && !image->image.isNull()){
+        origin[0].setX(origin[0].x() + e->x());
+        origin[0].setY(origin[0].y() + e->y());
     }
 
 }
@@ -120,9 +124,12 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e){
             image->crop[1].setY(e->y());
 
         }else{
-            zoom.setX(e->x());
-            zoom.setY(e->y());
+            zoom.setX(e->x() /*+ origin[1].x()*/);
+            zoom.setY(e->y() /*+ origin[1].y()*/);
         }
+    }if(e->buttons() & Qt::MiddleButton && !image->image.isNull()){
+        origin[1].setX(e->x() - origin[0].x());
+        origin[1].setY(e->y() - origin[0].y());
     }
     repaint();
 }
@@ -140,18 +147,26 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
             image->crop[0].setY(image->crop[1].y());
             image->crop[1].setY(tmp);
         }
-        image->image = image->image.copy(image->crop[0].x(),image->crop[0].y(),image->crop[1].x() - image->crop[0].x(),image->crop[1].y() - image->crop[0].y());
+        image->image = image->image.copy(image->crop[0].x()- origin[1].x(),image->crop[0].y()-origin[1].y(),image->crop[1].x() - image->crop[0].x(),image->crop[1].y() - image->crop[0].y());
+        origin[0].setX(0);
+        origin[0].setY(0);
+        origin[1].setX(0);
+        origin[1].setY(0);
         rect = false;
     }
     if(e->button() == Qt::LeftButton && !image->image.isNull()){
         if(image->counter < 3){
-            image->square[image->counter].setX(e->x());
-            image->square[image->counter].setY(e->y());
+            image->square[image->counter].setX(e->x() + origin[1].x());
+            image->square[image->counter].setY(e->y() + origin[1].y());
             image->counter++;
         }else{
             image->counter = 0;
         }
         zoom_b = false;
+    }
+    if(e->button() == Qt::MiddleButton && !image->image.isNull()){
+        origin[0].setX(origin[0].x()- e->x());
+        origin[0].setY(origin[0].y()- e->y());
     }
     repaint();
     e->accept();
