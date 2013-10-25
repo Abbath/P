@@ -348,6 +348,17 @@ QVector<QPoint> Converter::gethull(QVector<QPoint> _p)
 {
     p = _p;
 
+    QPoint a = mid(p);
+    double md = 0;
+    for (int i = 0; i < p.size(); ++i){
+        md += sqrt( (a.x()-p[i].x())*(a.x()-p[i].x()) + (a.y()-p[i].y())*(a.y()-p[i].y()));
+    }
+    md /= p.size();
+    for (int i = 0; i < p.size(); ++i){
+        if(sqrt( (a.x()-p[i].x())*(a.x()-p[i].x()) + (a.y()-p[i].y())*(a.y()-p[i].y())) / md > 0.5){
+            p.remove(i);
+        }
+    }
     QVector<QPoint> res;
     int uppercnt, lowercnt;
 
@@ -432,8 +443,8 @@ void Converter::inithull( QVector<int> pt, int n, int &minx, int &maxx )
 
 int Converter::pivotize( QVector<int> pt, int n )    /* n>=3 is assumed */
 /* as pivot, select the point in pt[]-{p1,p2} with maximal
-   * cross_prod( pivot-p1, p2-p1 )
-   */
+           * cross_prod( pivot-p1, p2-p1 )
+           */
 {
     int i, p1=pt[0], p2=pt[1];
     int pivotpos = 2;

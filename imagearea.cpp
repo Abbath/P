@@ -86,26 +86,10 @@ void ImageArea::paintEvent(QPaintEvent *e){
     }
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
 
-    //painter.drawChord(0,0,100,100,0,90*16);
-
     e->accept();
     releaseMouse();
 
 }
-
-//void ImageArea::keyPressEvent(QKeyEvent *e){
-//    if(e->key() == Qt::Key_O && e->modifiers() == Qt::ControlModifier){
-//        openImage();
-//    }
-//    if(e->key() == Qt::Key_R && e->modifiers() == Qt::ControlModifier){
-//        reset();
-//    }
-//    if(e->key() == Qt::Key_E && e->modifiers() == Qt::ControlModifier){
-//        d3 = !d3;
-//    }
-
-//    repaint();
-//}
 
 void ImageArea::mousePressEvent(QMouseEvent *e){
     Image * image = &images[curr];
@@ -256,7 +240,6 @@ void ImageArea::run()
 
 
     Image * image = &images[curr];
-    //qDebug() <<counter << image.isNull();
     QImage timage = image->image;
     for(unsigned& x : image->bound_counter){
         x = 0;
@@ -494,7 +477,11 @@ void ImageArea::autorun()
             Comparator c(conv.mid(hull[i]));
             std::sort(hull[i].begin(), hull[i].end(), c);
         }
+        /*for(int i = 0; i < 4; ++i){
+            image->sums[i] = QtConcurrent::run(&conv, &Converter::calculate, res4[i], pres, image->bound_counter[i]/1000.).result();
+        }*/
         image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
+        //image->sum = std::accumulate(&image->sums[0],image->sums+4,0)/4;
         repaint();
     }
 }
@@ -507,6 +494,9 @@ void ImageArea::calibrate()
     images = new Image[1];
     res.clear();
     pres.clear();
+    for (int i = 0; i < 4; ++i) {
+        res4[i].clear();
+    }
     curr = 0;
     for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
         images[0].image.load(*it);
@@ -523,7 +513,11 @@ void ImageArea::calibrate()
         (*it) = (*it).right((*it).size() - a - 1 );
         int n = (*it).toInt();
         autorun();
-        res.push_back(images[0].bound_counter[0] + images[0].bound_counter[1] + images[0].bound_counter[2] + images[0].bound_counter[3]);
+        //QVector<double> r4 = {images[0].bound_counter[0]/1000., images[0].bound_counter[1]/1000., images[0].bound_counter[2]/1000., images[0].bound_counter[3]/1000. };
+        for (int i = 0; i < 4; ++i) {
+            res4[i].push_back(images[0].bound_counter[i]/1000.);
+        }
+        res.push_back((images[0].bound_counter[0] + images[0].bound_counter[1] + images[0].bound_counter[2] + images[0].bound_counter[3])/1000.);
         pres.push_back(n);
     }
 }
@@ -543,6 +537,8 @@ void ImageArea::loadData()
 {
     QString filename = QFileDialog::getOpenFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
     QFile file(filename);
+    QVector<double> r4;
+    r4.resize(4);
     double r = 0;
     double p = 0;
     res.clear();
@@ -550,17 +546,19 @@ void ImageArea::loadData()
     if(file.open(QFile::ReadOnly)){
         QTextStream str(&file);
         while(1){
-
+            str >> r4[0] >> r4[1] >> r4[2] >> r4[3];
             str >> r >> p;
             if(str.atEnd()) break;
-            res.push_back(r/1000);
+            res4[0].push_back(r4[0]);
+            res4[1].push_back(r4[1]);
+            res4[2].push_back(r4[2]);
+            res4[3].push_back(r4[3]);
+            res.push_back(r);
             pres.push_back(p);
         }
     }else{
         repaint();
     }
-    auto pp = conv.leastsquares(res,pres);
-    qDebug() << (double)pp.first << (double)pp.second;
 }
 
 void ImageArea::saveData()
@@ -570,6 +568,7 @@ void ImageArea::saveData()
     if(file.open(QFile::WriteOnly)){
         QTextStream str(&file);
         for(int i = 0; i < res.size(); ++i){
+            str << res4[0][i] << " " << res4[1][i] << " " << res4[2][i] << " " << res4[3][i] << " ";
             str << res[i] << " " << pres[i] << " \n";
         }
     }else{

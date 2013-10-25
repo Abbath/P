@@ -43,6 +43,7 @@ struct Image{
     Config conf;
     QString fileName;
     unsigned threshold = 128, counter = 0,bound_counter[4] = {0,0,0,0};
+    double sums[4] = {0.0};
     double sum = 0.0;
 };
 

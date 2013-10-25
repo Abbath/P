@@ -41,6 +41,7 @@ class ImageArea : public QWidget
     QVector<double> vres0;
     QVector<double> pres;
     QVector<double> res;
+    QVector<double> res4[4];
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
