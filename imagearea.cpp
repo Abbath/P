@@ -66,6 +66,14 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
     */
+    for(int i = 0 ; i <  4; ++i){
+        for(auto it = lasts[i].begin(); it != lasts[i].end(); ++it){
+            painter.drawPoint(*it);
+        }
+        if(!hull[i].isEmpty()){
+            painter.drawPolygon(hull[i].data(),hull[i].size());
+        }
+    }
     if(image->sum <= GY){
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);
@@ -77,8 +85,12 @@ void ImageArea::paintEvent(QPaintEvent *e){
         painter.setPen(Qt::red);
     }
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
+
+    //painter.drawChord(0,0,100,100,0,90*16);
+
     e->accept();
     releaseMouse();
+
 }
 
 //void ImageArea::keyPressEvent(QKeyEvent *e){
@@ -156,8 +168,8 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
     }
     if(e->button() == Qt::LeftButton && !image->image.isNull()){
         if(image->counter < 3){
-            image->square[image->counter].setX(e->x() + origin[1].x());
-            image->square[image->counter].setY(e->y() + origin[1].y());
+            image->square[image->counter].setX(e->x());
+            image->square[image->counter].setY(e->y());
             image->counter++;
         }else{
             image->counter = 0;
@@ -213,6 +225,12 @@ int ImageArea::openVideo()
 void ImageArea::reset()
 {
     loadImage();
+    origin[0] = {0, 0};
+    origin[1] = {0, 0};
+    for(int i = 0; i < 4 ; ++i){
+        lasts[i].clear();
+        hull[i].clear();
+    }
     repaint();
 }
 
@@ -227,6 +245,7 @@ void ImageArea::loadImage(){
         }
         sharpen();
         images[curr].counter = 0;
+        emit imageChanged(fileNames[curr]);
     }else{
         QMessageBox::critical(this, tr("Error"), tr("Can not load an image(s)"));
     }
@@ -249,24 +268,27 @@ void ImageArea::run()
         return;
     }
     if( image->counter == 3 && !image->image.isNull()){
-        unsigned x1 = image->square[1].x();
+        for (int i = 0; i < 4; ++i) {
+            lasts[i].clear();
+        }
+        unsigned x1 = image->square[1].x()-origin[1].x();
         unsigned x2 = image->image.width()-1;
-        unsigned y1 = image->square[1].y();
-        unsigned y2 = image->square[2].y();
+        unsigned y1 = image->square[1].y()-origin[1].y();
+        unsigned y2 = image->square[2].y()-origin[1].y();
         image->bound_counter[0] = searchTheLight(x1,y1,x2,y2);
         x1 = 0;
-        x2 = image->square[0].x();
-        y1 = image->square[0].y();
-        y2 = image->square[2].y();
+        x2 = image->square[0].x()-origin[1].x();
+        y1 = image->square[0].y()-origin[1].y();
+        y2 = image->square[2].y()-origin[1].y();
         image->bound_counter[1] = searchTheLight(x1,y1,x2,y2);
-        x1 = image->square[0].x();
-        x2 = image->square[1].x();
+        x1 = image->square[0].x()-origin[1].x();
+        x2 = image->square[1].x()-origin[1].x();
         y1 = 0;
-        y2 = image->square[0].y();
+        y2 = image->square[0].y()-origin[1].y();
         image->bound_counter[2] = searchTheLight(x1,y1,x2,y2);
-        x1 = image->square[0].x();
-        x2 = image->square[1].x();
-        y1 = image->square[2].y();
+        x1 = image->square[0].x()-origin[1].x();
+        x2 = image->square[1].x()-origin[1].x();
+        y1 = image->square[2].y()-origin[1].y();
         y2 = image->image.height()-1;
         image->bound_counter[3] = searchTheLight(x1,y1,x2,y2);
     }else{
@@ -305,7 +327,7 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
             if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
             }
-           /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
+            /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
                                                      qGray(image->pixel(i, j + 1)) > tre() ||
                                                      qGray(image->pixel(i - 1, j)) > tre() ||
                                                      qGray(image->pixel(i, j - 1)) > tre() )) {
@@ -466,6 +488,12 @@ void ImageArea::autorun()
         image->square[1] = conf.square0[1];
         image->square[2] = conf.square0[2];
         run();
+        searchShape();
+        for(int i = 0 ; i < 4 ; ++i){
+            hull[i] = conv.gethull(lasts[i]);
+            Comparator c(conv.mid(hull[i]));
+            std::sort(hull[i].begin(), hull[i].end(), c);
+        }
         image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
         repaint();
     }
@@ -547,6 +575,92 @@ void ImageArea::saveData()
     }else{
         repaint();
     }
+}
+
+void ImageArea::searchShape()
+{
+    Image * image = &images[curr];
+    QPoint last;
+    lasts[0].clear();
+    lasts[1].clear();
+    lasts[2].clear();
+    lasts[3].clear();
+    for(auto i = image->square[0].x(); i != image->square[1].x(); ++i){
+        last.setX(0);
+        last.setY(0);
+        for(auto j = image->square[0].y(); j != 0; --j){
+            if(qGray(image->image.pixel(i, j)) >= tre()) {
+                last.setX(i);
+                last.setY(j);
+            }
+        }
+        if(!(last.x() == 0 && last.y() == 0)){
+            lasts[0].push_back(last);
+        }
+    }
+    for(auto i = image->square[1].y(); i != image->square[2].y(); ++i){
+        last.setX(0);
+        last.setY(0);
+        for(auto j = image->square[1].x(); j != image->image.width(); ++j){
+            if(qGray(image->image.pixel(j, i)) >= tre()) {
+                last.setX(j);
+                last.setY(i);
+            }
+        }
+        if(!(last.x() == 0 && last.y() == 0)){
+            lasts[1].push_back(last);
+        }
+    }
+
+    for(auto i = image->square[0].x(); i != image->square[1].x(); ++i){
+        last.setX(0);
+        last.setY(0);
+        for(auto j = image->square[2].y(); j != image->image.height(); ++j){
+            if(qGray(image->image.pixel(i, j)) >= tre()) {
+                last.setX(i);
+                last.setY(j);
+            }
+        }
+        if(!(last.x() == 0 && last.y() == 0)){
+            lasts[2].push_back(last);
+        }
+    }
+
+    for(auto i = image->square[0].y(); i != image->square[2].y(); ++i){
+        last.setX(0);
+        last.setY(0);
+        for(auto j = image->square[0].x(); j != 0; --j){
+            if(qGray(image->image.pixel(j, i)) >= tre()) {
+                last.setX(j);
+                last.setY(i);
+            }
+        }
+        if(!(last.x() == 0 && last.y() == 0)){
+            lasts[3].push_back(last);
+        }
+    }
+
+
+    /*for(auto j = 0; j < 200; ++j){
+        for(auto i = 0 ; i < lasts.size()-2; ++i){
+            auto x0 = lasts[i].x();
+            auto y0 = lasts[i].y();
+            auto x1 = lasts[i+1].x();
+            auto y1 = lasts[i+1].y();
+            auto x2 = lasts[i+2].x();
+            auto y2 = lasts[i+2].y();
+            if(abs(x1-x0) == 1 && abs(x1-x2) == 1){
+                if(abs(y1 - y0) > 5 && abs(y1 - y2) > 5){
+                    lasts[i+1].ry() = (y1+y2)/2;
+                }
+            }
+            if(abs(y1-y1) == 1 && abs(y1-y2) == 1){
+                if(abs(x1 - x0) > 5 && abs(x1-x2) > 5){
+                    lasts[i+1].rx() = (x1+x2)/2;
+                }
+            }
+        }
+    }*/
 }
 
 void  ImageArea::sharpen(){

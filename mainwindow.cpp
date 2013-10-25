@@ -33,6 +33,14 @@ MainWindow::MainWindow(QWidget *parent) :
     curve0.setRenderHint( QwtPlotItem::RenderAntialiased );
     curve0.setPen( pen0 );
     curve0.attach( ui->widget_3 );
+
+    scene = new QGraphicsScene(this);
+    ui->graphicsView->setScene(scene);
+    QList<int> sizes;
+    sizes.push_back(0);
+    sizes.push_back(300);
+    sizes.push_back(200);
+    ui->splitter->setSizes(sizes);
 }
 
 MainWindow::~MainWindow()
@@ -44,8 +52,6 @@ void MainWindow::on_actionOpen_triggered()
 {
     ui->widget->openImage();
     ui->horizontalSlider->hide();
-    ui->graphicsView->setBackgroundBrush(QImage("membrana/0.bmp"));
-    ui->graphicsView->repaint();
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -171,6 +177,11 @@ void MainWindow::getImage(Image im)
     ui->sum_l->setNum(static_cast<int>(im.bound_counter[2]+im.bound_counter[1]+im.bound_counter[0]+im.bound_counter[3]));
 }
 
+void MainWindow::updateView(QString filename)
+{
+    scene->addPixmap(QPixmap(filename));
+}
+
 void MainWindow::on_actionPrev_triggered()
 {
     ui->widget->prev();
@@ -183,8 +194,6 @@ void MainWindow::on_actionNext_triggered()
 
 void MainWindow::displayResults(const QVector<double> &res, QwtPlot* widget_2)
 {
-
-
     widget_2->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
     widget_2->replot();
 
@@ -200,7 +209,6 @@ void MainWindow::displayResults(const QVector<double> &res, QwtPlot* widget_2)
     curve.setData(data);
     curve.attach( ui->widget_2 );
     widget_2->replot();
-
 }
 
 void MainWindow::displayResults(const QVector<double> &res, const QVector<double> &res0, QwtPlot* widget_2)

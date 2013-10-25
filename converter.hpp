@@ -22,8 +22,25 @@ public:
     QVector<Line> convert(QImage &image, Modes mode);
     int processVideo(QString s);
     double calculate(QVector<double> &res, QVector<double> &pres, double val);
+    QVector<QPoint> gethull(QVector<QPoint> _p);
+    QPoint mid(QVector<QPoint> v);
 private:
+
+    const int N = 3;
+    QVector<QPoint> p;
+    QVector<int> belongs_to_hull;
+    QVector<int> pt;
     QImage IplImage2QImage(const IplImage *iplImage);
+    void qh(QVector<int> pt, int n);
+    int pivotize(QVector<int> pt, int n);
+    void inithull(QVector<int> pt, int n, int &minx, int &maxx);
+    QVector<int> delete_right(QVector<int> pt, int &num, int p1, int p2);
+    int cross (int pp,int a,int b){
+        return  ((p[a].x()-p[pp].x())*(p[b].y()-p[pp].y()) - (p[a].y()-p[pp].y())*(p[b].x()-p[pp].x()));
+    }
+    int leftturn (int a,int b,int c) {
+        return (cross(c,a,b)>0.0);
+    }
 };
 
 #endif // CONVERTER_HPP

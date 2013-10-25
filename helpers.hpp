@@ -3,6 +3,20 @@
 
 #include <QtCore>
 #include <opencv/cv.h>
+#include <cmath>
+
+class Comparator  {
+public:
+    QPoint M;
+    Comparator(QPoint origin) {
+        M = origin;
+    }
+    bool operator()(QPoint o1, QPoint o2) {
+        double angle1 = atan2(o1.y() - M.y(), o1.x() - M.x());
+        double angle2 = atan2(o2.y() - M.y(), o2.x() - M.x());
+        return (angle1 < angle2);
+    }
+};
 
 enum Modes{ ISO, TOP, LEFT, BOTTOM, RIGHT};
 
@@ -31,6 +45,7 @@ struct Image{
     unsigned threshold = 128, counter = 0,bound_counter[4] = {0,0,0,0};
     double sum = 0.0;
 };
+
 
 
 #endif // HELPERS_HPP

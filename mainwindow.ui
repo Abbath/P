@@ -35,7 +35,7 @@
         <enum>QTabWidget::West</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -584,6 +584,7 @@
    <container>1</container>
    <slots>
     <signal>rectChanged(QRect)</signal>
+    <signal>imageChanged(QString)</signal>
     <slot>setGY(double)</slot>
     <slot>setYR(double)</slot>
    </slots>
@@ -604,12 +605,12 @@
    <slot>setGY(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>162</x>
-     <y>357</y>
+     <x>282</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
-     <x>127</x>
-     <y>230</y>
+     <x>386</x>
+     <y>261</y>
     </hint>
    </hints>
   </connection>
@@ -620,14 +621,33 @@
    <slot>setYR(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>463</x>
-     <y>355</y>
+     <x>551</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
-     <x>446</x>
-     <y>187</y>
+     <x>386</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widget</sender>
+   <signal>imageChanged(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateView(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>349</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>242</x>
+     <y>24</y>
     </hint>
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>updateView(QString)</slot>
+ </slots>
 </ui>

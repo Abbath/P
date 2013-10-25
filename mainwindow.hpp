@@ -5,6 +5,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <QFileDialog>
+#include <QGraphicsScene>
 #include <QMessageBox>
 #include <helpers.hpp>
 #include <qwt/qwt_plot.h>
@@ -44,11 +45,12 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionBounds_triggered(bool checked);
     void getImage(Image im);
+    void updateView(QString filename);
     void on_actionPrev_triggered();
-
     void on_actionNext_triggered();
 
 private:
+    QGraphicsScene * scene = nullptr;
     QwtPlotZoomer *zoom;
     QwtPlotCurve curve;
     QwtPlotZoomer *zoom0;

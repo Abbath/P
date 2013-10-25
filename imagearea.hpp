@@ -32,6 +32,7 @@ class ImageArea : public QWidget
     double sum = 0,GY=25,YR=35;
     QPoint zoom;
     QVector<Line> lines;
+    QVector<QPoint> lasts[4], hull[4];
     Converter conv;
     bool rect = false,zoom_b = false,d3 = false;
     Modes mode = ISO;
@@ -62,6 +63,7 @@ public:
     void processVideo();
     void loadData();
     void saveData();
+    void searchShape();
 public slots:
     void align();
     void openImage();
@@ -80,6 +82,7 @@ private:
     int tre() const { return images[curr].threshold; }
 signals:
     void giveImage(Image im);
+    void imageChanged(QString filename);
 };
 
 #endif // IMAGEAREA_HPP
