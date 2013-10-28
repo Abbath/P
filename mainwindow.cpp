@@ -1,5 +1,7 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
+#include <QtMultimedia/QMediaPlayer>
+#include <QVideoWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,11 +38,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
-    QList<int> sizes;
+    /*QList<int> sizes;
     sizes.push_back(0);
     sizes.push_back(300);
     sizes.push_back(200);
-    ui->splitter->setSizes(sizes);
+    ui->splitter->setSizes(sizes);*/
+
+    QVideoWidget * w = new QVideoWidget;
+    ui->groupBox_3->layout()->addWidget(w);
+    QMediaPlayer * player = new QMediaPlayer;
+    player->setMedia(QUrl::fromLocalFile("/home/dan/C/build-P-Desktop_Qt_5_1_1_GCC_64bit-Debug/membrana/1.avi"));
+    player->setVideoOutput(w);
+    w->show();
+    player->play();
 }
 
 MainWindow::~MainWindow()
@@ -207,7 +217,7 @@ void MainWindow::displayResults(const QVector<double> &res, QwtPlot* widget_2)
 
     QwtPointSeriesData * data = new QwtPointSeriesData(points);
     curve.setData(data);
-    curve.attach( ui->widget_2 );
+    curve.attach( widget_2 );
     widget_2->replot();
 }
 

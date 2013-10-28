@@ -1,6 +1,7 @@
 #include "converter.hpp"
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
+#include <fstream>
 #include <QMessageBox>
 
 Converter::Converter()
@@ -438,6 +439,71 @@ void Converter::inithull( QVector<int> pt, int n, int &minx, int &maxx )
     belongs_to_hull[p1] = 1;
     belongs_to_hull[p2] = 1;
     minx = p1; maxx = p2;
+}
+
+QVector<int> Converter::dbscan(QVector<QPoint> &v)
+{
+const int n = v.size();
+int L_min = 10;
+int kol = 5;
+std::fstream f("dbscan.cfg");
+f >> L_min >> kol;
+QVector<QVector<int>> L;
+QVector<int> rez;
+QVector<int> marked;
+QVector<int> group;
+rez.resize(n);
+L.resize(n);
+marked.resize(n);
+group.resize(n);
+for(QVector<int> &x : L ){
+    x.resize(n);
+}
+for(int i = 0; i < n; ++i){
+    for(int j = 0; j < n; ++j){
+        L[i][j] = dist(v[i],v[j]) <= L_min;
+        if(L[i][j]){
+            rez[i]++;
+        }
+    }
+    for(int j = 0; j < n; j++){
+        L[i][j] *= j;
+    }
+}
+int c = 1;
+for(int i = 0; i < n; ++i){
+    if(marked[i] == 0){
+        if(rez[i] < kol){
+            marked[i] = 1;
+            group[i] = -1;
+        }else{
+            auto uvec = group;
+            group[i] = c;
+            while(!std::equal(uvec.begin(),uvec.end(),group.begin())){
+                uvec = group;
+                for(int j = 0; j < n; ++j){
+                    if(group[j] == c && marked[j] == 0){
+                        if(rez[i] < kol){
+                            marked[j] = 1;
+                            group[j] = -1;
+                        }else{
+                            marked[j] = 1;
+                            for(int k = 0; k < n; ++k){
+                                if(L[j][k] > 0){
+                                    group[k] = c;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            c++;
+        }
+    }else{
+        continue;
+    }
+}
+return group;
 }
 
 

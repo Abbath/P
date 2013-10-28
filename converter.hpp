@@ -24,6 +24,7 @@ public:
     double calculate(QVector<double> &res, QVector<double> &pres, double val);
     QVector<QPoint> gethull(QVector<QPoint> _p);
     QPoint mid(QVector<QPoint> v);
+    QVector<int> dbscan(QVector<QPoint> &v);
 private:
 
     const int N = 3;
@@ -35,6 +36,10 @@ private:
     int pivotize(QVector<int> pt, int n);
     void inithull(QVector<int> pt, int n, int &minx, int &maxx);
     QVector<int> delete_right(QVector<int> pt, int &num, int p1, int p2);
+    double dist(QPoint &a, QPoint &b){
+        return sqrt((a.x()-b.x())*(a.x()-b.x()) + (a.y() - b.y())*(a.y()-b.y()));
+    }
+
     int cross (int pp,int a,int b){
         return  ((p[a].x()-p[pp].x())*(p[b].y()-p[pp].y()) - (p[a].y()-p[pp].y())*(p[b].x()-p[pp].x()));
     }

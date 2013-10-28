@@ -67,11 +67,22 @@ void ImageArea::paintEvent(QPaintEvent *e){
             QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
     */
     for(int i = 0 ; i <  4; ++i){
+        auto dbs = conv.dbscan(lasts[i]);
         for(auto it = lasts[i].begin(); it != lasts[i].end(); ++it){
-            painter.drawPoint(*it);
+            if(dbs[i] == -1){
+               painter.setPen(Qt::red);
+               painter.drawPoint(*it);
+            }else if(dbs[i] != 1){
+                painter.setPen(Qt::blue);
+                painter.drawPoint(*it);
+            }else{
+                painter.setPen(Qt::green);
+                painter.drawPoint(*it);
+            }
         }
         if(!hull[i].isEmpty()){
-            painter.drawPolygon(hull[i].data(),hull[i].size());
+            painter.setPen(Qt::green);
+            //painter.drawPolygon(hull[i].data(),hull[i].size());
         }
     }
     if(image->sum <= GY){
@@ -473,6 +484,12 @@ void ImageArea::autorun()
         run();
         searchShape();
         for(int i = 0 ; i < 4 ; ++i){
+            auto dbs = conv.dbscan(lasts[i]);
+            for(int i = 0; i < lasts[i].size(); ++i){
+                if(dbs[i] == -1 || dbs[i] != 1){
+                    lasts[i].remove(i);
+                }
+            }
             hull[i] = conv.gethull(lasts[i]);
             Comparator c(conv.mid(hull[i]));
             std::sort(hull[i].begin(), hull[i].end(), c);
@@ -535,7 +552,7 @@ void ImageArea::getFrame(int n)
 
 void ImageArea::loadData()
 {
-    QString filename = QFileDialog::getOpenFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QString filename = QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)"));
     QFile file(filename);
     QVector<double> r4;
     r4.resize(4);
