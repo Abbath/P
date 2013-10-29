@@ -74,25 +74,6 @@ std::pair<long double, long double> Converter::leastsquares(const QVector<double
 
     a /= tt;
 
-
-    //    a = sum(x,y,[](double x, double y){ return x*x*y; });
-
-
-    //    at = sum(x,y,[](double x, double y){ return y*log(y); });
-
-    //    a *= at;
-
-    //    at = sum(x,y,[](double x, double y){ return x*y; });
-
-    //    at *= sum(x,y,[](double x, double y){ return x*y*log(y); });
-
-    //    a /= (sum(x,y,[](double x, double y){ return y; })*sum(x,y,[](double x, double y){
-    //        return x*x*y;
-    //    })-pow(sum(x,y,[](double x, double y){
-    //        return x*y;
-    //    }),2.)
-    //        );
-
     A = exp(a);
 
     for(int i = 0; i < x.size(); ++i){
@@ -126,22 +107,6 @@ std::pair<long double, long double> Converter::leastsquares(const QVector<double
     b -= bt;
 
     b /= tt;
-    //    b = sum(x,y,[](double x, double y){
-    //        return y;
-    //    })*sum(x,y,[](double x, double y){
-    //        return y*log(y);
-    //    })-sum(x,y,[](double x, double y){
-    //        return x*y;
-    //    })*sum(x,y,[](double x, double y){
-    //        return y*log(y);
-    //    })/(sum(x,y,[](double x, double y){
-    //        return y;
-    //    })*sum(x,y,[](double x, double y){
-    //        return x*x*y;
-    //    })-pow(sum(x,y,[](double x, double y){
-    //        return x*y;
-    //    }),2.)
-    //        );
 
     B = b;
 
@@ -272,11 +237,6 @@ int Converter::processVideo(QString s)
         QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
         return 0;
     }
-    QWidget * w = new QWidget();
-    w->setLayout(new QGridLayout);
-    QProgressBar * b = new QProgressBar();
-    w->layout()->addWidget(b);
-    w->show();
     //int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
     // qDebug() << "* FPS: %d" <<  fps << "\n";
     IplImage* frame = NULL;
@@ -293,7 +253,6 @@ int Converter::processVideo(QString s)
         QImage img = IplImage2QImage(frame).mirrored(false, true);
         img.save(QString(filename), "BMP", 100);
         frame_number++;
-        b->setValue((b->value()+1)%100);
     }
     cvReleaseCapture(&capture);
     return frame_number;
@@ -443,67 +402,67 @@ void Converter::inithull( QVector<int> pt, int n, int &minx, int &maxx )
 
 QVector<int> Converter::dbscan(QVector<QPoint> &v)
 {
-const int n = v.size();
-int L_min = 10;
-int kol = 5;
-std::fstream f("dbscan.cfg");
-f >> L_min >> kol;
-QVector<QVector<int>> L;
-QVector<int> rez;
-QVector<int> marked;
-QVector<int> group;
-rez.resize(n);
-L.resize(n);
-marked.resize(n);
-group.resize(n);
-for(QVector<int> &x : L ){
-    x.resize(n);
-}
-for(int i = 0; i < n; ++i){
-    for(int j = 0; j < n; ++j){
-        L[i][j] = dist(v[i],v[j]) <= L_min;
-        if(L[i][j]){
-            rez[i]++;
+    const int n = v.size();
+    int L_min = 10;
+    int kol = 5;
+    std::fstream f("dbscan.cfg");
+    f >> L_min >> kol;
+    QVector<QVector<int>> L;
+    QVector<int> rez;
+    QVector<int> marked;
+    QVector<int> group;
+    rez.resize(n);
+    L.resize(n);
+    marked.resize(n);
+    group.resize(n);
+    for(QVector<int> &x : L ){
+        x.resize(n);
+    }
+    for(int i = 0; i < n; ++i){
+        for(int j = 0; j < n; ++j){
+            L[i][j] = dist(v[i],v[j]) <= L_min;
+            if(L[i][j]){
+                rez[i]++;
+            }
+        }
+        for(int j = 0; j < n; j++){
+            L[i][j] *= j;
         }
     }
-    for(int j = 0; j < n; j++){
-        L[i][j] *= j;
-    }
-}
-int c = 1;
-for(int i = 0; i < n; ++i){
-    if(marked[i] == 0){
-        if(rez[i] < kol){
-            marked[i] = 1;
-            group[i] = -1;
-        }else{
-            auto uvec = group;
-            group[i] = c;
-            while(!std::equal(uvec.begin(),uvec.end(),group.begin())){
-                uvec = group;
-                for(int j = 0; j < n; ++j){
-                    if(group[j] == c && marked[j] == 0){
-                        if(rez[i] < kol){
-                            marked[j] = 1;
-                            group[j] = -1;
-                        }else{
-                            marked[j] = 1;
-                            for(int k = 0; k < n; ++k){
-                                if(L[j][k] > 0){
-                                    group[k] = c;
+    int c = 1;
+    for(int i = 0; i < n; ++i){
+        if(marked[i] == 0){
+            if(rez[i] < kol){
+                marked[i] = 1;
+                group[i] = -1;
+            }else{
+                auto uvec = group;
+                group[i] = c;
+                while(!std::equal(uvec.begin(),uvec.end(),group.begin())){
+                    uvec = group;
+                    for(int j = 0; j < n; ++j){
+                        if(group[j] == c && marked[j] == 0){
+                            if(rez[i] < kol){
+                                marked[j] = 1;
+                                group[j] = -1;
+                            }else{
+                                marked[j] = 1;
+                                for(int k = 0; k < n; ++k){
+                                    if(L[j][k] > 0){
+                                        group[k] = c;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                c++;
             }
-            c++;
+        }else{
+            continue;
         }
-    }else{
-        continue;
     }
-}
-return group;
+    return group;
 }
 
 

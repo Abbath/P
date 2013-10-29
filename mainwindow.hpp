@@ -12,6 +12,8 @@
 #include <qwt/qwt.h>
 #include <qwt/qwt_plot_curve.h>
 #include <qwt/qwt_plot_zoomer.h>
+#include <QVideoWidget>
+#include <QMediaPlayer>
 namespace Ui {
 class MainWindow;
 }
@@ -48,6 +50,9 @@ private slots:
     void updateView(QString filename);
     void on_actionPrev_triggered();
     void on_actionNext_triggered();
+    void on_horizontalSlider_2_valueChanged(int value);
+    void on_pushButton_toggled(bool checked);
+    void on_actionSave_3_triggered();
 
 private:
     QGraphicsScene * scene = nullptr;
@@ -56,6 +61,8 @@ private:
     QwtPlotZoomer *zoom0;
     QwtPlotCurve curve0;
     Ui::MainWindow *ui;
+    QVideoWidget * w;
+    QMediaPlayer * player;
     };
 
 #endif // MAINWINDOW_HPP

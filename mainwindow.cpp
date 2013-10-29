@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QtMultimedia/QMediaPlayer>
 #include <QVideoWidget>
+#include <QtConcurrent/QtConcurrent>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,19 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
-    /*QList<int> sizes;
-    sizes.push_back(0);
-    sizes.push_back(300);
-    sizes.push_back(200);
-    ui->splitter->setSizes(sizes);*/
+    player = new QMediaPlayer;
+    player->setVideoOutput(ui->widget_4);
 
-    QVideoWidget * w = new QVideoWidget;
-    ui->groupBox_3->layout()->addWidget(w);
-    QMediaPlayer * player = new QMediaPlayer;
-    player->setMedia(QUrl::fromLocalFile("/home/dan/C/build-P-Desktop_Qt_5_1_1_GCC_64bit-Debug/membrana/1.avi"));
-    player->setVideoOutput(w);
-    w->show();
-    player->play();
 }
 
 MainWindow::~MainWindow()
@@ -104,6 +95,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
     if(e->key() == Qt::Key_4){
         ui->widget->setMode(RIGHT);
     }
+    if(e->key() == Qt::Key_Escape){
+        ui->widget->stop();
+    }
 }
 
 void MainWindow::on_actionLoad_triggered()
@@ -133,6 +127,7 @@ void MainWindow::on_actionOpen_Video_triggered()
         ui->horizontalSlider->setValue(0);
         ui->widget->getFrame(0);
     }
+    player->setMedia(QUrl::fromLocalFile(ui->widget->getVName()));
 }
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
@@ -229,7 +224,6 @@ void MainWindow::displayResults(const QVector<double> &res, const QVector<double
     widget_2->replot();
 
     QVector < QPointF > points( res.size() );
-    //quint32 counter = 0;
     auto pointsIt = points.begin();
 
     for ( int i = 0; i < res.size(); ++i) {
@@ -241,4 +235,23 @@ void MainWindow::displayResults(const QVector<double> &res, const QVector<double
     curve0.attach( widget_2 );
     widget_2->replot();
 
+}
+
+void MainWindow::on_horizontalSlider_2_valueChanged(int value)
+{
+    player->setPosition(player->duration() / 100 * value);
+}
+
+void MainWindow::on_pushButton_toggled(bool checked)
+{
+    if(checked){
+        player->play();
+    }else{
+        player->pause();
+    }
+}
+
+void MainWindow::on_actionSave_3_triggered()
+{
+    ui->widget->saveResults();
 }

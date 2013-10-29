@@ -57,32 +57,10 @@ void ImageArea::paintEvent(QPaintEvent *e){
         }
     }
     emit giveImage(*image);
-    /*painter.drawText(30,30, QString("threshold: ") +QString::number(threshold) + ", pressure: " + QString::number(sum));
-    painter.drawText(30, 50,
-                     QString("left: ")+QString::number(bound_counter[2])+
-            QString(" up: ")+QString::number(bound_counter[1])+
-            QString(" right: ")+QString::number(bound_counter[0])+
-            QString(" down: ")+QString::number(bound_counter[3])+
-            QString(" ave: ")+QString::number((bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3])/4.)+
-            QString(" sum: ")+QString::number(bound_counter[2]+bound_counter[1]+bound_counter[0]+bound_counter[3]) );
-    */
     for(int i = 0 ; i <  4; ++i){
-        auto dbs = conv.dbscan(lasts[i]);
-        for(auto it = lasts[i].begin(); it != lasts[i].end(); ++it){
-            if(dbs[i] == -1){
-               painter.setPen(Qt::red);
-               painter.drawPoint(*it);
-            }else if(dbs[i] != 1){
-                painter.setPen(Qt::blue);
-                painter.drawPoint(*it);
-            }else{
-                painter.setPen(Qt::green);
-                painter.drawPoint(*it);
-            }
-        }
         if(!hull[i].isEmpty()){
             painter.setPen(Qt::green);
-            //painter.drawPolygon(hull[i].data(),hull[i].size());
+            painter.drawPolygon(hull[i].data(),hull[i].size());
         }
     }
     if(image->sum <= GY){
@@ -209,7 +187,7 @@ int ImageArea::openVideo()
 {
     fileNames.clear();
     fileNameV.clear();
-    fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
+    fileNameV = QFileDialog::getOpenFileName( this, tr("Open video file"), "", tr("Video files (*.avi)"));
     this->setCursor(Qt::WaitCursor);
     QFuture<int> fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
     frame_num = fn.result();
@@ -269,22 +247,22 @@ void ImageArea::run()
         unsigned x2 = image->image.width()-1;
         unsigned y1 = image->square[1].y()-origin[1].y();
         unsigned y2 = image->square[2].y()-origin[1].y();
-        image->bound_counter[0] = searchTheLight(x1,y1,x2,y2);
+        image->bound_counter[0] = searchTheLight(x1,y1,x2,y2,0);
         x1 = 0;
         x2 = image->square[0].x()-origin[1].x();
         y1 = image->square[0].y()-origin[1].y();
         y2 = image->square[2].y()-origin[1].y();
-        image->bound_counter[1] = searchTheLight(x1,y1,x2,y2);
+        image->bound_counter[1] = searchTheLight(x1,y1,x2,y2,1);
         x1 = image->square[0].x()-origin[1].x();
         x2 = image->square[1].x()-origin[1].x();
         y1 = 0;
         y2 = image->square[0].y()-origin[1].y();
-        image->bound_counter[2] = searchTheLight(x1,y1,x2,y2);
+        image->bound_counter[2] = searchTheLight(x1,y1,x2,y2,2);
         x1 = image->square[0].x()-origin[1].x();
         x2 = image->square[1].x()-origin[1].x();
         y1 = image->square[2].y()-origin[1].y();
         y2 = image->image.height()-1;
-        image->bound_counter[3] = searchTheLight(x1,y1,x2,y2);
+        image->bound_counter[3] = searchTheLight(x1,y1,x2,y2,3);
     }else{
         QMessageBox::critical(this,"No points or image","Put 3 points or open image");
     }
@@ -313,13 +291,14 @@ void ImageArea::next()
     }
 }
 
-unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2){
+unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int k){
     QImage * image = &images[curr].image;
     unsigned counter=0;
     for (unsigned  i = x1 + 1; i != x2; x1 < x2 ? ++i : --i ) {
         for(unsigned j = y1 + 1; j != y2; y1 < y2 ? ++j : --j) {
             if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
+                lasts[k].push_back({(int)i,(int)j});
             }
             /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
                                                      qGray(image->pixel(i, j + 1)) > tre() ||
@@ -335,7 +314,7 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
 void ImageArea::switchMode()
 {
     d3 = !d3;
-    repaint();
+    run();
 }
 
 void ImageArea::saveImage()
@@ -463,9 +442,17 @@ void ImageArea::autorun()
             image->square[2] = conf.square0[2];
             run();
             image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
-            repaint();
+            //repaint();
             vres.push_back(images[curr].sum);
             vres0.push_back(std::accumulate(&image->bound_counter[0], image->bound_counter+4,0));
+            image->image.save(QString::number(image->sum) + QString(".bmp"));
+            if(!cont){
+                cont = true;
+                delete[] images;
+                vres.clear();
+                vres0.clear();
+                break;
+            }
         }
     }else{
         Image * image = &images[curr];
@@ -482,12 +469,18 @@ void ImageArea::autorun()
         image->square[1] = conf.square0[1];
         image->square[2] = conf.square0[2];
         run();
-        searchShape();
+        //searchShape();
+        QFuture<QVector<int>> f[4];
+
         for(int i = 0 ; i < 4 ; ++i){
-            auto dbs = conv.dbscan(lasts[i]);
-            for(int i = 0; i < lasts[i].size(); ++i){
-                if(dbs[i] == -1 || dbs[i] != 1){
-                    lasts[i].remove(i);
+            dbs[i] = conv.dbscan(lasts[i]);
+            for(int k = 0; k < 10; ++k){
+                int n = 0;
+                for(int j = 0; j < lasts[i].size(); ++j){
+                    if(dbs[i][j]== -1 || dbs[i][j] != 1){
+                        lasts[i].remove(j-n);
+                        n++;
+                    }
                 }
             }
             hull[i] = conv.gethull(lasts[i]);
@@ -536,6 +529,17 @@ void ImageArea::calibrate()
         }
         res.push_back((images[0].bound_counter[0] + images[0].bound_counter[1] + images[0].bound_counter[2] + images[0].bound_counter[3])/1000.);
         pres.push_back(n);
+    }
+}
+
+void ImageArea::saveResults()
+{
+    QFile file(QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)")));
+    if(file.open(QFile::WriteOnly)){
+        QTextStream str(&file);
+        for(int i = 0; i < vres.size(); ++i){
+            str << vres0[i] << " " << vres[i] << "\n";
+        }
     }
 }
 
