@@ -88,6 +88,12 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QGroupBox" name="groupBox_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>View</string>
        </property>
@@ -154,11 +160,17 @@
        </layout>
       </widget>
       <widget class="QTabWidget" name="tabWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="tabPosition">
         <enum>QTabWidget::West</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -650,12 +662,13 @@
     <signal>imageChanged(QString)</signal>
     <slot>setGY(double)</slot>
     <slot>setYR(double)</slot>
+    <slot>setThreshold(int)</slot>
    </slots>
   </customwidget>
   <customwidget>
    <class>QwtPlot</class>
    <extends>QWidget</extends>
-   <header>qwt/qwt_plot.h</header>
+   <header>/usr/local/qwt-6.1.0/include/qwt_plot.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -712,6 +725,22 @@
     <hint type="destinationlabel">
      <x>242</x>
      <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>thresh_sb</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widget</receiver>
+   <slot>setThreshold(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>638</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>

@@ -44,6 +44,7 @@ class ImageArea : public QWidget
     QVector<double> res;
     QVector<double> res4[4];
     volatile bool cont = true;
+    QFuture<int> fn;
 public:
     explicit ImageArea(QWidget *parent = 0);
     void paintEvent(QPaintEvent *e);
@@ -75,7 +76,6 @@ public:
     void getFrame(int n);
     void processVideo();
 
-    void searchShape();
 public slots:
 
     void openImage();
@@ -91,15 +91,20 @@ public slots:
 
     void setGY(double val){GY = val;}
     void setYR(double val){YR = val;}
+    void setThreshold(int val){ images[curr].threshold = val;}
 
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
     const QString getVName() const { return fileNameV;}
+private slots:
+    void checkVideoProcess();
 private:
     void sharpen();
     Ui::ImageArea *ui;
     int tre() const { return images[curr].threshold; }
 signals:
+    void imageUpdated(QString filename);
+    void giveFramesNumber(int n);
     void giveImage(Image im);
     void imageChanged(QString filename);
 };

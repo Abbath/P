@@ -57,10 +57,12 @@ void ImageArea::paintEvent(QPaintEvent *e){
         }
     }
     emit giveImage(*image);
-    for(int i = 0 ; i <  4; ++i){
-        if(!hull[i].isEmpty()){
-            painter.setPen(Qt::green);
-            painter.drawPolygon(hull[i].data(),hull[i].size());
+    if(images[curr].r){
+        for(int i = 0 ; i <  4; ++i){
+            if(!hull[i].isEmpty()){
+                painter.setPen(Qt::green);
+                painter.drawPolygon(hull[i].data(),hull[i].size());
+            }
         }
     }
     if(image->sum <= GY){
@@ -163,8 +165,9 @@ void ImageArea::wheelEvent(QWheelEvent *e){
     if( a > 255 ) a = 255;
     if( a < 0 ) a = 0;
     image->threshold = quint8(a);
+   // repaint();
     if(!image->image.isNull()){
-        run();
+        autorun();
     }
 }
 
@@ -175,12 +178,14 @@ void ImageArea::openImage()
     if(images){
         delete[] images;
     }
-    images = new Image[fileNames.length()];
-    for(curr = 0; curr < static_cast<unsigned>(fileNames.length()); ++curr){
-        loadImage();
+    if(!fileNames.isEmpty()){
+        images = new Image[fileNames.length()];
+        for(curr = 0; curr < static_cast<unsigned>(fileNames.length()); ++curr){
+            loadImage();
+        }
+        curr = 0;
+        repaint();
     }
-    curr = 0;
-    repaint();
 }
 
 int ImageArea::openVideo()
@@ -188,11 +193,16 @@ int ImageArea::openVideo()
     fileNames.clear();
     fileNameV.clear();
     fileNameV = QFileDialog::getOpenFileName( this, tr("Open video file"), "", tr("Video files (*.avi)"));
-    this->setCursor(Qt::WaitCursor);
-    QFuture<int> fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
-    frame_num = fn.result();
-    this->setCursor(Qt::ArrowCursor);
-    return frame_num;
+    if(!fileNameV.isEmpty()){
+        //this->setCursor(Qt::WaitCursor);
+        fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
+        QTimer::singleShot(300, this, SLOT(checkVideoProcess()) );
+        //frame_num = fn.result();
+        //this->setCursor(Qt::ArrowCursor);
+        return 0;//frame_num;
+    }else{
+        return 0;
+    }
 }
 
 void ImageArea::reset()
@@ -204,6 +214,7 @@ void ImageArea::reset()
         lasts[i].clear();
         hull[i].clear();
     }
+    images[curr].r = false;
     repaint();
 }
 
@@ -218,6 +229,7 @@ void ImageArea::loadImage(){
         }
         sharpen();
         images[curr].counter = 0;
+        images[curr].l = true;
         emit imageChanged(fileNames[curr]);
     }else{
         QMessageBox::critical(this, tr("Error"), tr("Can not load an image(s)"));
@@ -226,8 +238,6 @@ void ImageArea::loadImage(){
 
 void ImageArea::run()
 {
-
-
     Image * image = &images[curr];
     QImage timage = image->image;
     for(unsigned& x : image->bound_counter){
@@ -278,6 +288,7 @@ void ImageArea::prev()
     }else{
         curr--;
         repaint();
+        emit imageUpdated(fileNames[curr]);
     }
 }
 
@@ -288,6 +299,18 @@ void ImageArea::next()
     }else{
         curr++;
         repaint();
+        emit imageUpdated(fileNames[curr]);
+    }
+}
+
+void ImageArea::checkVideoProcess()
+{
+    if(fn.isFinished()){
+        QMessageBox::information(this,"Video Processing Has Finished","Yes it has!");
+        emit giveFramesNumber(fn.result());
+    }
+    else {
+        QTimer::singleShot(300, this, SLOT(checkVideoProcess()) );
     }
 }
 
@@ -298,7 +321,7 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
         for(unsigned j = y1 + 1; j != y2; y1 < y2 ? ++j : --j) {
             if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
-                lasts[k].push_back({(int)i,(int)j});
+                //lasts[k].push_back({(int)i,(int)j});
             }
             /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
                                                      qGray(image->pixel(i, j + 1)) > tre() ||
@@ -455,44 +478,50 @@ void ImageArea::autorun()
             }
         }
     }else{
+        //  for(curr = 0; curr < (unsigned)fileNames.size(); ++curr){
         Image * image = &images[curr];
-        image->crop[0] = conf.crop[0];
-        image->crop[1] = conf.crop[1];
-        image->square[0] = conf.square[0];
-        image->square[1] = conf.square[1];
-        image->square[2] = conf.square[2];
-        image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
-        image->counter = 3;
-        align();
-        image->counter = 3;
-        image->square[0] = conf.square0[0];
-        image->square[1] = conf.square0[1];
-        image->square[2] = conf.square0[2];
-        run();
-        //searchShape();
-        QFuture<QVector<int>> f[4];
-
-        for(int i = 0 ; i < 4 ; ++i){
-            dbs[i] = conv.dbscan(lasts[i]);
-            for(int k = 0; k < 10; ++k){
-                int n = 0;
-                for(int j = 0; j < lasts[i].size(); ++j){
-                    if(dbs[i][j]== -1 || dbs[i][j] != 1){
-                        lasts[i].remove(j-n);
-                        n++;
+        //reset();
+        if(!image->r && image->l){
+            image->crop[0] = conf.crop[0];
+            image->crop[1] = conf.crop[1];
+            image->square[0] = conf.square[0];
+            image->square[1] = conf.square[1];
+            image->square[2] = conf.square[2];
+            image->image = image->image.copy(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
+            image->counter = 3;
+            align();
+            image->counter = 3;
+            image->square[0] = conf.square0[0];
+            image->square[1] = conf.square0[1];
+            image->square[2] = conf.square0[2];
+            run();
+            //searchShape();
+            /*for(int i = 0 ; i < 4 ; ++i){
+                dbs[i] = conv.dbscan(lasts[i]);
+                for(int k = 0; k < 10; ++k){
+                    int n = 0;
+                    for(int j = 0; j < lasts[i].size(); ++j){
+                        if(dbs[i][j]== -1 || dbs[i][j] != 1){
+                            lasts[i].remove(j-n);
+                            n++;
+                        }
                     }
                 }
-            }
-            hull[i] = conv.gethull(lasts[i]);
-            Comparator c(conv.mid(hull[i]));
-            std::sort(hull[i].begin(), hull[i].end(), c);
-        }
-        /*for(int i = 0; i < 4; ++i){
+                hull[i] = conv.gethull(lasts[i]);
+                Comparator c(conv.mid(hull[i]));
+                std::sort(hull[i].begin(), hull[i].end(), c);
+            }*/
+            /*for(int i = 0; i < 4; ++i){
             image->sums[i] = QtConcurrent::run(&conv, &Converter::calculate, res4[i], pres, image->bound_counter[i]/1000.).result();
         }*/
-        image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
-        //image->sum = std::accumulate(&image->sums[0],image->sums+4,0)/4;
-        repaint();
+            image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
+            //image->sum = std::accumulate(&image->sums[0],image->sums+4,0)/4;
+            image->r = true;
+            repaint();
+        }else{
+            QMessageBox::information(this, "Fail", "Image already processed or not loaded");
+        }
+        // }
     }
 }
 
@@ -508,8 +537,12 @@ void ImageArea::calibrate()
         res4[i].clear();
     }
     curr = 0;
+    fileNames.append(names[0]);
     for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
+        fileNames[0] = *it;
         images[0].image.load(*it);
+        images[0].l = true;
+        images[0].r = false;
         for(int i = 0; i < images[0].image.width(); ++i){
             for(int j = 0; j < images[0].image.height(); ++j){
                 int gray = qGray(images[0].image.pixel(i,j));
@@ -595,92 +628,6 @@ void ImageArea::saveData()
     }else{
         repaint();
     }
-}
-
-void ImageArea::searchShape()
-{
-    Image * image = &images[curr];
-    QPoint last;
-    lasts[0].clear();
-    lasts[1].clear();
-    lasts[2].clear();
-    lasts[3].clear();
-    for(auto i = image->square[0].x(); i != image->square[1].x(); ++i){
-        last.setX(0);
-        last.setY(0);
-        for(auto j = image->square[0].y(); j != 0; --j){
-            if(qGray(image->image.pixel(i, j)) >= tre()) {
-                last.setX(i);
-                last.setY(j);
-            }
-        }
-        if(!(last.x() == 0 && last.y() == 0)){
-            lasts[0].push_back(last);
-        }
-    }
-    for(auto i = image->square[1].y(); i != image->square[2].y(); ++i){
-        last.setX(0);
-        last.setY(0);
-        for(auto j = image->square[1].x(); j != image->image.width(); ++j){
-            if(qGray(image->image.pixel(j, i)) >= tre()) {
-                last.setX(j);
-                last.setY(i);
-            }
-        }
-        if(!(last.x() == 0 && last.y() == 0)){
-            lasts[1].push_back(last);
-        }
-    }
-
-    for(auto i = image->square[0].x(); i != image->square[1].x(); ++i){
-        last.setX(0);
-        last.setY(0);
-        for(auto j = image->square[2].y(); j != image->image.height(); ++j){
-            if(qGray(image->image.pixel(i, j)) >= tre()) {
-                last.setX(i);
-                last.setY(j);
-            }
-        }
-        if(!(last.x() == 0 && last.y() == 0)){
-            lasts[2].push_back(last);
-        }
-    }
-
-    for(auto i = image->square[0].y(); i != image->square[2].y(); ++i){
-        last.setX(0);
-        last.setY(0);
-        for(auto j = image->square[0].x(); j != 0; --j){
-            if(qGray(image->image.pixel(j, i)) >= tre()) {
-                last.setX(j);
-                last.setY(i);
-            }
-        }
-        if(!(last.x() == 0 && last.y() == 0)){
-            lasts[3].push_back(last);
-        }
-    }
-
-
-    /*for(auto j = 0; j < 200; ++j){
-        for(auto i = 0 ; i < lasts.size()-2; ++i){
-            auto x0 = lasts[i].x();
-            auto y0 = lasts[i].y();
-            auto x1 = lasts[i+1].x();
-            auto y1 = lasts[i+1].y();
-            auto x2 = lasts[i+2].x();
-            auto y2 = lasts[i+2].y();
-            if(abs(x1-x0) == 1 && abs(x1-x2) == 1){
-                if(abs(y1 - y0) > 5 && abs(y1 - y2) > 5){
-                    lasts[i+1].ry() = (y1+y2)/2;
-                }
-            }
-            if(abs(y1-y1) == 1 && abs(y1-y2) == 1){
-                if(abs(x1 - x0) > 5 && abs(x1-x2) > 5){
-                    lasts[i+1].rx() = (x1+x2)/2;
-                }
-            }
-        }
-    }*/
 }
 
 void  ImageArea::sharpen(){

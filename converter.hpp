@@ -5,19 +5,15 @@
 #include <QGridLayout>
 #include <QProgressBar>
 #include <helpers.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/math/tools/solve.hpp>
 #include <functional>
 #include <memory>
 #include <tuple>
 class Converter
 {
 public:
+
     Converter();
-    long double sum(const QVector<double> &x, const QVector<double>&y,std::function<long double (double, double)> f );
-    std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &y);
+    std::pair<long double,long double> leastsquares(const QVector<double> &x, QVector<double> &y);
     void rotate(QVector<Line> &l, double angle_x =0, double angle_y =0, double angle_z =0);
     QVector<Line> convert(QImage &image, Modes mode);
     int processVideo(QString s);
@@ -27,7 +23,6 @@ public:
     QVector<int> dbscan(QVector<QPoint> &v);
 private:
 
-    const int N = 3;
     QVector<QPoint> p;
     QVector<int> belongs_to_hull;
     QVector<int> pt;
@@ -39,7 +34,6 @@ private:
     double dist(QPoint &a, QPoint &b){
         return sqrt((a.x()-b.x())*(a.x()-b.x()) + (a.y() - b.y())*(a.y()-b.y()));
     }
-
     int cross (int pp,int a,int b){
         return  ((p[a].x()-p[pp].x())*(p[b].y()-p[pp].y()) - (p[a].y()-p[pp].y())*(p[b].x()-p[pp].x()));
     }

@@ -41,7 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
     player = new QMediaPlayer;
     player->setVideoOutput(ui->widget_4);
-
+    connect(ui->widget, SIGNAL(giveFramesNumber(int)), this, SLOT(sliderAnalManipulation(int)));
+    connect(ui->widget, SIGNAL(imageUpdated(QString)), this, SLOT(updateView(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -120,13 +121,13 @@ void MainWindow::on_actionAutorun_triggered()
 
 void MainWindow::on_actionOpen_Video_triggered()
 {
-    int n = ui->widget->openVideo();
-    if(n){
+    ui->widget->openVideo();
+    /*if(n){
         ui->horizontalSlider->show();
         ui->horizontalSlider->setMaximum(n-1);
         ui->horizontalSlider->setValue(0);
         ui->widget->getFrame(0);
-    }
+    }*/
     player->setMedia(QUrl::fromLocalFile(ui->widget->getVName()));
 }
 
@@ -254,4 +255,12 @@ void MainWindow::on_pushButton_toggled(bool checked)
 void MainWindow::on_actionSave_3_triggered()
 {
     ui->widget->saveResults();
+}
+
+void MainWindow::sliderAnalManipulation(int n)
+{
+    ui->horizontalSlider->show();
+    ui->horizontalSlider->setMaximum(n-1);
+    ui->horizontalSlider->setValue(0);
+    ui->widget->getFrame(0);
 }

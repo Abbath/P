@@ -2,24 +2,24 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include <fstream>
+#include <limits>
+#include <cassert>
 #include <QMessageBox>
+#include <QtConcurrent/QtConcurrent>
 
 Converter::Converter()
 {
 }
 
-long double Converter::sum(const QVector<double> &x, const QVector<double> &y, std::function<long double (double, double)> f)
+std::pair<long double, long double> Converter::leastsquares(const QVector<double> &x,QVector<double> &y)
 {
-    long double res = 0;
-    for(int i = 0; i < x.size(); ++i){
-        double tmp = f(x[i],y[i]);
-        res += tmp;
-    }
-    return res;
-}
+    for (int i = 0; i < y.size(); ++i) {
+       /* if(qFuzzyCompare(y[i],0.0)){
+            y[i]+= std::numeric_limits<double>::epsilon();
 
-std::pair<long double, long double> Converter::leastsquares(const QVector<double> &x, const QVector<double> &y)
-{
+        }*/
+        y[i]+=1;
+    }
     long double A,B,a=0,b=0, at=0, tt = 0, bt =0, tmp=0;
     for(int i = 0; i < x.size(); ++i){
         tmp += x[i]*x[i]*y[i];
@@ -229,12 +229,19 @@ QVector<Line> Converter::convert(QImage &image, Modes mode/*, int left, int top,
     return result;
 }
 
+bool saveImageToFile(QImage image, const QString filename){
+    return image.save(filename, "BMP", 100);
+}
+
 int Converter::processVideo(QString s)
 {
+    QTime timer;
+    timer.start();
+    QList<QFuture<bool>> fv;
     CvCapture * capture = cvCaptureFromAVI(s.toStdString().c_str());
     if(!capture)
     {
-        QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
+        //QMessageBox::warning(0, "Error", "cvCaptureFromAVI failed (file not found?)\n");
         return 0;
     }
     //int fps = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
@@ -251,10 +258,16 @@ int Converter::processVideo(QString s)
         /*QMatrix matrix;
         matrix.rotate(180);*/
         QImage img = IplImage2QImage(frame).mirrored(false, true);
-        img.save(QString(filename), "BMP", 100);
+        QFuture<bool> fb = QtConcurrent::run(&saveImageToFile, img, QString(filename));
+        fv.append(fb);
+        //img.save(QString(filename), "BMP", 100);
         frame_number++;
     }
     cvReleaseCapture(&capture);
+    foreach (auto& x, fv) {
+        x.result();
+    }
+    std::cerr << "time: " << timer.elapsed() << std::endl;
     return frame_number;
 }
 
@@ -288,6 +301,7 @@ double Converter::calculate(QVector<double> &res, QVector<double> &pres, double 
     sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);*/
 
     auto p = leastsquares(res,pres);
+    //std::cerr << "p " <<  p.first << ' ' << p.second << std::endl;
     /*double sum=0,l=1;
 
     for(int j = 0;j < res.size(); ++j){
@@ -299,7 +313,7 @@ double Converter::calculate(QVector<double> &res, QVector<double> &pres, double 
         sum += l*pres[j];
         l = 1;
     }*/
-    double sum = p.first * exp(p.second*val);
+    double sum = p.first * exp(p.second*val)-1.0;
     return sum;
 
 }
@@ -362,8 +376,6 @@ QImage Converter::IplImage2QImage(const IplImage *iplImage)
     return img.rgbSwapped();
 }
 
-
-
 QVector<int> Converter::delete_right( QVector<int> pt, int &num, int p1, int p2 )
 {
     int j;
@@ -382,7 +394,6 @@ QVector<int> Converter::delete_right( QVector<int> pt, int &num, int p1, int p2 
     num = leftcnt;
     return left;
 }
-
 
 void Converter::inithull( QVector<int> pt, int n, int &minx, int &maxx )
 {
@@ -465,7 +476,6 @@ QVector<int> Converter::dbscan(QVector<QPoint> &v)
     return group;
 }
 
-
 int Converter::pivotize( QVector<int> pt, int n )    /* n>=3 is assumed */
 /* as pivot, select the point in pt[]-{p1,p2} with maximal
            * cross_prod( pivot-p1, p2-p1 )
@@ -483,7 +493,6 @@ int Converter::pivotize( QVector<int> pt, int n )    /* n>=3 is assumed */
     }
     return pt[pivotpos];
 }
-
 
 void Converter::qh( QVector<int> pt, int n )
 {

@@ -8,10 +8,10 @@
 #include <QGraphicsScene>
 #include <QMessageBox>
 #include <helpers.hpp>
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt.h>
-#include <qwt/qwt_plot_curve.h>
-#include <qwt/qwt_plot_zoomer.h>
+#include <qwt_plot.h>
+#include <qwt.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 #include <QVideoWidget>
 #include <QMediaPlayer>
 namespace Ui {
@@ -53,7 +53,7 @@ private slots:
     void on_horizontalSlider_2_valueChanged(int value);
     void on_pushButton_toggled(bool checked);
     void on_actionSave_3_triggered();
-
+    void sliderAnalManipulation(int n);
 private:
     QGraphicsScene * scene = nullptr;
     QwtPlotZoomer *zoom;
