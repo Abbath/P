@@ -19,13 +19,6 @@ class ImageArea : public QWidget
     Q_OBJECT
     Image* images;
     unsigned curr = 0, frame_num = 0;
-    //QImage image;
-    //QPoint square[3];
-    //unsigned counter = 0;
-    //QPoint crop[2];
-    //unsigned threshold = 128;
-    //unsigned bound_counter[4] = {0,0,0,0};
-    //QVector<QRect> randrect;
     QPoint origin[2] = {{0,0},{0,0}};
     QString fileName, fileNameV;
     QStringList fileNames;
@@ -63,7 +56,7 @@ public:
     void loadData();
     void saveData();
 
-    unsigned searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int i);
+    unsigned searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
     void switchMode();
     void setMode(Modes m) {mode = m;}

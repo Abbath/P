@@ -14,7 +14,6 @@ ImageArea::ImageArea(QWidget *parent) :
 
 void ImageArea::paintEvent(QPaintEvent *e){
     Image * image = &images[curr];
-    grabMouse();
     QPainter painter(this);
     if(d3 && !image->image.isNull()){
         std::sort(lines.begin(),lines.end(), [](Line a, Line b) { return a.z1 < b.z1; });
@@ -32,7 +31,6 @@ void ImageArea::paintEvent(QPaintEvent *e){
         }
         painter.drawImage(0, 0, pix);
         e->accept();
-        releaseMouse();
         return;
     }
     painter.drawImage(origin[1].x(), origin[1].y(), image->image);
@@ -78,8 +76,6 @@ void ImageArea::paintEvent(QPaintEvent *e){
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
 
     e->accept();
-    releaseMouse();
-
 }
 
 void ImageArea::mousePressEvent(QMouseEvent *e){
@@ -165,7 +161,6 @@ void ImageArea::wheelEvent(QWheelEvent *e){
     if( a > 255 ) a = 255;
     if( a < 0 ) a = 0;
     image->threshold = quint8(a);
-   // repaint();
     if(!image->image.isNull()){
         autorun();
     }
@@ -194,12 +189,10 @@ int ImageArea::openVideo()
     fileNameV.clear();
     fileNameV = QFileDialog::getOpenFileName( this, tr("Open video file"), "", tr("Video files (*.avi)"));
     if(!fileNameV.isEmpty()){
-        //this->setCursor(Qt::WaitCursor);
+        this->setCursor(Qt::WaitCursor);
         fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
         QTimer::singleShot(300, this, SLOT(checkVideoProcess()) );
-        //frame_num = fn.result();
-        //this->setCursor(Qt::ArrowCursor);
-        return 0;//frame_num;
+        return 0;
     }else{
         return 0;
     }
@@ -257,22 +250,22 @@ void ImageArea::run()
         unsigned x2 = image->image.width()-1;
         unsigned y1 = image->square[1].y()-origin[1].y();
         unsigned y2 = image->square[2].y()-origin[1].y();
-        image->bound_counter[0] = searchTheLight(x1,y1,x2,y2,0);
+        image->bound_counter[0] = searchTheLight(x1,y1,x2,y2);
         x1 = 0;
         x2 = image->square[0].x()-origin[1].x();
         y1 = image->square[0].y()-origin[1].y();
         y2 = image->square[2].y()-origin[1].y();
-        image->bound_counter[1] = searchTheLight(x1,y1,x2,y2,1);
+        image->bound_counter[1] = searchTheLight(x1,y1,x2,y2);
         x1 = image->square[0].x()-origin[1].x();
         x2 = image->square[1].x()-origin[1].x();
         y1 = 0;
         y2 = image->square[0].y()-origin[1].y();
-        image->bound_counter[2] = searchTheLight(x1,y1,x2,y2,2);
+        image->bound_counter[2] = searchTheLight(x1,y1,x2,y2);
         x1 = image->square[0].x()-origin[1].x();
         x2 = image->square[1].x()-origin[1].x();
         y1 = image->square[2].y()-origin[1].y();
         y2 = image->image.height()-1;
-        image->bound_counter[3] = searchTheLight(x1,y1,x2,y2,3);
+        image->bound_counter[3] = searchTheLight(x1,y1,x2,y2);
     }else{
         QMessageBox::critical(this,"No points or image","Put 3 points or open image");
     }
@@ -307,28 +300,23 @@ void ImageArea::checkVideoProcess()
 {
     if(fn.isFinished()){
         QMessageBox::information(this,"Video Processing Has Finished","Yes it has!");
-        emit giveFramesNumber(fn.result());
+        this->setCursor(Qt::ArrowCursor);
+        frame_num = fn.result();
+        emit giveFramesNumber(frame_num);
     }
     else {
         QTimer::singleShot(300, this, SLOT(checkVideoProcess()) );
     }
 }
 
-unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2, int k){
+unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2/*, int k*/){
     QImage * image = &images[curr].image;
     unsigned counter=0;
     for (unsigned  i = x1 + 1; i != x2; x1 < x2 ? ++i : --i ) {
         for(unsigned j = y1 + 1; j != y2; y1 < y2 ? ++j : --j) {
             if(qGray(image->pixel(i, j)) >= tre()) {
                 counter++;
-                //lasts[k].push_back({(int)i,(int)j});
             }
-            /* if(qGray(image->pixel(i,j)) <= tre() && (qGray(image->pixel(i + 1, j)) > tre() ||
-                                                     qGray(image->pixel(i, j + 1)) > tre() ||
-                                                     qGray(image->pixel(i - 1, j)) > tre() ||
-                                                     qGray(image->pixel(i, j - 1)) > tre() )) {
-                image->setPixel(i, j, qRgb(0,255,0));
-            }*/
         }
     }
     return counter;
@@ -465,7 +453,6 @@ void ImageArea::autorun()
             image->square[2] = conf.square0[2];
             run();
             image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
-            //repaint();
             vres.push_back(images[curr].sum);
             vres0.push_back(std::accumulate(&image->bound_counter[0], image->bound_counter+4,0));
             image->image.save(QString::number(image->sum) + QString(".bmp"));
@@ -478,9 +465,7 @@ void ImageArea::autorun()
             }
         }
     }else{
-        //  for(curr = 0; curr < (unsigned)fileNames.size(); ++curr){
         Image * image = &images[curr];
-        //reset();
         if(!image->r && image->l){
             image->crop[0] = conf.crop[0];
             image->crop[1] = conf.crop[1];
@@ -495,33 +480,12 @@ void ImageArea::autorun()
             image->square[1] = conf.square0[1];
             image->square[2] = conf.square0[2];
             run();
-            //searchShape();
-            /*for(int i = 0 ; i < 4 ; ++i){
-                dbs[i] = conv.dbscan(lasts[i]);
-                for(int k = 0; k < 10; ++k){
-                    int n = 0;
-                    for(int j = 0; j < lasts[i].size(); ++j){
-                        if(dbs[i][j]== -1 || dbs[i][j] != 1){
-                            lasts[i].remove(j-n);
-                            n++;
-                        }
-                    }
-                }
-                hull[i] = conv.gethull(lasts[i]);
-                Comparator c(conv.mid(hull[i]));
-                std::sort(hull[i].begin(), hull[i].end(), c);
-            }*/
-            /*for(int i = 0; i < 4; ++i){
-            image->sums[i] = QtConcurrent::run(&conv, &Converter::calculate, res4[i], pres, image->bound_counter[i]/1000.).result();
-        }*/
             image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
-            //image->sum = std::accumulate(&image->sums[0],image->sums+4,0)/4;
             image->r = true;
             repaint();
         }else{
             QMessageBox::information(this, "Fail", "Image already processed or not loaded");
         }
-        // }
     }
 }
 
@@ -556,7 +520,6 @@ void ImageArea::calibrate()
         (*it) = (*it).right((*it).size() - a - 1 );
         int n = (*it).toInt();
         autorun();
-        //QVector<double> r4 = {images[0].bound_counter[0]/1000., images[0].bound_counter[1]/1000., images[0].bound_counter[2]/1000., images[0].bound_counter[3]/1000. };
         for (int i = 0; i < 4; ++i) {
             res4[i].push_back(images[0].bound_counter[i]/1000.);
         }

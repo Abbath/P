@@ -13,13 +13,11 @@ class Converter
 public:
 
     Converter();
-    std::pair<long double,long double> leastsquares(const QVector<double> &x, QVector<double> &y);
+    std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
     void rotate(QVector<Line> &l, double angle_x =0, double angle_y =0, double angle_z =0);
-    QVector<Line> convert(QImage &image, Modes mode);
+    QVector<Line> convert(const QImage &image, Modes mode);
     int processVideo(QString s);
-    double calculate(QVector<double> &res, QVector<double> &pres, double val);
-    QVector<QPoint> gethull(QVector<QPoint> _p);
-    QPoint mid(QVector<QPoint> v);
+    double calculate(const QVector<double> &res, const QVector<double> &pres, double val) const;
     QVector<int> dbscan(QVector<QPoint> &v);
 private:
 
@@ -27,18 +25,8 @@ private:
     QVector<int> belongs_to_hull;
     QVector<int> pt;
     QImage IplImage2QImage(const IplImage *iplImage);
-    void qh(QVector<int> pt, int n);
-    int pivotize(QVector<int> pt, int n);
-    void inithull(QVector<int> pt, int n, int &minx, int &maxx);
-    QVector<int> delete_right(QVector<int> pt, int &num, int p1, int p2);
     double dist(QPoint &a, QPoint &b){
         return sqrt((a.x()-b.x())*(a.x()-b.x()) + (a.y() - b.y())*(a.y()-b.y()));
-    }
-    int cross (int pp,int a,int b){
-        return  ((p[a].x()-p[pp].x())*(p[b].y()-p[pp].y()) - (p[a].y()-p[pp].y())*(p[b].x()-p[pp].x()));
-    }
-    int leftturn (int a,int b,int c) {
-        return (cross(c,a,b)>0.0);
     }
 };
 
