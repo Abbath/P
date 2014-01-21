@@ -16,13 +16,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     imagearea.cpp \
     converter.cpp \
-    modalwaitdialog.cpp
+    modalwaitdialog.cpp \
+    imageprocessor.cpp \
+    dispatcher.cpp
 
 HEADERS  += mainwindow.hpp \
     imagearea.hpp \
     converter.hpp \
     helpers.hpp \
-    modalwaitdialog.h
+    modalwaitdialog.h \
+    imageprocessor.hpp \
+    dispatcher.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui

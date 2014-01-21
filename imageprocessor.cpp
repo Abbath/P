@@ -1,173 +1,14 @@
-#include "imagearea.hpp"
-#include "ui_imagearea.h"
-
+#include "imageprocessor.hpp"
 #include <QtConcurrent/QtConcurrent>
 
-ImageArea::ImageArea(QWidget *parent) :
-    QWidget(parent),
-    images{new Image[1]},
-    ui(new Ui::ImageArea)
+ImageProcessor::ImageProcessor(QObject* parent) : QObject(parent)
 {
-    ui->setupUi(this);
-    loadConf(true);
 }
 
-void ImageArea::paintEvent(QPaintEvent *e){
-    Image * image = &images[curr];
-    QPainter painter(this);
-    /*if(d3 && !image->image.isNull()){
-        std::sort(lines.begin(),lines.end(), [](Line a, Line b) { return a.z1 < b.z1; });
-        QImage pix(this->width(),this->height(), image->image.format());
-        pix.fill(Qt::black);
-        QPainter p;
-        p.begin(&pix);
-        for(Line l : lines){
-            if(l.c >= tre()){
-                p.setPen(qRgb(0, 255, 0));
-            }else{
-                p.setPen(qRgb(l.c, l.c, l.c));
-            }
-            p.drawLine(l.x1 + 300, l.y1 + 500, l.x2 + 300,l.y2 + 500);
-        }
-        painter.drawImage(0, 0, pix);
-        e->accept();
-        return;
-    }*/
-    painter.drawImage(origin[1].x(), origin[1].y(), image->image);
-    if(image->counter > 0){
-        for(unsigned i = 0; i < image->counter; ++i){
-            painter.setPen(Qt::red);
-            painter.drawLine(image->square[i].x() - 4, image->square[i].y(), image->square[i].x() + 4, image->square[i].y());
-            painter.drawLine(image->square[i].x(), image->square[i].y() - 4, image->square[i].x(), image->square[i].y() + 4);
-            painter.drawText(image->square[i].x() + 3, image->square[i].y() - 3, QString::number(i+1));
-            painter.setPen(Qt::white);
-        }
-    }
-    if(rect){
-        painter.setPen(Qt::green);
-        painter.drawRect(image->crop[0].x(), image->crop[0].y(), image->crop[1].x() - image->crop[0].x(), image->crop[1].y() - image->crop[0].y());
-        painter.setPen(Qt::white);
-    }else{
-        if(zoom_b){
-            QImage zoomed = image->image.copy(zoom.x() - origin[1].x() - 10, zoom.y() - origin[1].y() - 10, 20, 20).scaled(41, 41);
-            zoomed.setPixel(20, 20, qRgb(0, 255, 0));
-            painter.drawImage(zoom.x(), zoom.y(), zoomed);
-        }
-    }
-    emit giveImage(*image);
-    /*if(image->r){
-        for(int i = 0 ; i <  4; ++i){
-            if(!hull[i].isEmpty()){
-                painter.setPen(Qt::green);
-                painter.drawPolygon(hull[i].data(),hull[i].size());
-            }
-        }
-    }*/
-    if(image->sum <= GY){
-        painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
-        painter.setPen(Qt::green);
-    }else if(image->sum > GY && image->sum < YR){
-        painter.setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
-        painter.setPen(Qt::yellow);
-    }else if(image->sum >= YR){
-        painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
-        painter.setPen(Qt::red);
-    }
-    painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
-    e->accept();
-}
-
-void ImageArea::mousePressEvent(QMouseEvent *e){
-    Image * image = &images[curr];
-    if(e->button() == Qt::RightButton && !image->image.isNull() ){
-        rect = true;
-        image->crop[0].setX(e->x()/* + origin[1].x()*/);
-        image->crop[0].setY(e->y() /*+ origin[1].y()*/);
-        repaint();
-    }
-    if(e->button() == Qt::LeftButton && !image->image.isNull()){
-        zoom_b = true;
-        zoom.setX(e->x()/*+ origin[1].x()*/);
-        zoom.setY(e->y()/*+ origin[1].y()*/);
-        repaint();
-    }
-    if(e->button() == Qt::MiddleButton && !image->image.isNull()){
-        origin[0].setX(origin[0].x() + e->x());
-        origin[0].setY(origin[0].y() + e->y());
-    }
-}
-
-void ImageArea::mouseMoveEvent(QMouseEvent *e){
-    Image * image = &images[curr];
-    if(!image->image.isNull()){
-        if(rect){
-            image->crop[1].setX(e->x());
-            image->crop[1].setY(e->y());
-
-        }else{
-            zoom.setX(e->x() /*+ origin[1].x()*/);
-            zoom.setY(e->y() /*+ origin[1].y()*/);
-        }
-    }if(e->buttons() & Qt::MiddleButton && !image->image.isNull()){
-        origin[1].setX(e->x() - origin[0].x());
-        origin[1].setY(e->y() - origin[0].y());
-    }
-    repaint();
-}
-
-void ImageArea::mouseReleaseEvent(QMouseEvent *e){
-    Image * image = &images[curr];
-    if(e->button() == Qt::RightButton && !image->image.isNull()){
-        if(image->crop[0].x() > image->crop[1].x()){
-            int tmp = image->crop[0].x();
-            image->crop[0].setX(image->crop[1].x());
-            image->crop[1].setX(tmp);
-        }
-        if(image->crop[0].y() > image->crop[1].y()){
-            int tmp = image->crop[0].y();
-            image->crop[0].setY(image->crop[1].y());
-            image->crop[1].setY(tmp);
-        }
-        image->image = image->image.copy(image->crop[0].x()- origin[1].x(),image->crop[0].y()-origin[1].y(),image->crop[1].x() - image->crop[0].x(),image->crop[1].y() - image->crop[0].y());
-        origin[0].setX(0);
-        origin[0].setY(0);
-        origin[1].setX(0);
-        origin[1].setY(0);
-        rect = false;
-    }
-    if(e->button() == Qt::LeftButton && !image->image.isNull()){
-        if(image->counter < 3){
-            image->square[image->counter].setX(e->x());
-            image->square[image->counter].setY(e->y());
-            image->counter++;
-        }else{
-            image->counter = 0;
-        }
-        zoom_b = false;
-    }
-    if(e->button() == Qt::MiddleButton && !image->image.isNull()){
-        origin[0].setX(origin[0].x()- e->x());
-        origin[0].setY(origin[0].y()- e->y());
-    }
-    repaint();
-    e->accept();
-}
-
-void ImageArea::wheelEvent(QWheelEvent *e){
-    Image * image = &images[curr];
-    qint32 a = image->threshold + e->delta()/80;
-    if( a > 255 ) a = 255;
-    if( a < 0 ) a = 0;
-    image->threshold = quint8(a);
-    if(!image->image.isNull()){
-        autorun();
-    }
-}
-
-void ImageArea::openImage()
+void ImageProcessor::openImage(const QStringList &names)
 {
     fileNameV.clear();
-    fileNames = QFileDialog::getOpenFileNames( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
+    fileNames = names;//QFileDialog::getOpenFileNames( this, tr("Open data file"), "", tr("Image files (*.bmp)"));
     if(images){
         delete[] images;
     }
@@ -177,17 +18,16 @@ void ImageArea::openImage()
             loadImage();
         }
         curr = 0;
-        repaint();
+        emit needRepaint();
     }
 }
 
-int ImageArea::openVideo()
+int ImageProcessor::openVideo(const QString &name)
 {
     fileNames.clear();
     fileNameV.clear();
-    fileNameV = QFileDialog::getOpenFileName( this, tr("Open video file"), "", tr("Video files (*.avi)"));
+    fileNameV = name;//QFileDialog::getOpenFileName( this, tr("Open video file"), "", tr("Video files (*.avi)"));
     if(!fileNameV.isEmpty()){
-        this->setCursor(Qt::WaitCursor);
         fn = QtConcurrent::run(&conv, &Converter::processVideo, fileNameV);
         QTimer::singleShot(300, this, SLOT(checkVideoProcess()) );
         return 0;
@@ -196,7 +36,7 @@ int ImageArea::openVideo()
     }
 }
 
-void ImageArea::reset()
+void ImageProcessor::reset()
 {
     loadImage();
     origin[0] = {0, 0};
@@ -206,10 +46,10 @@ void ImageArea::reset()
         hull[i].clear();
     }
     images[curr].r = false;
-    repaint();
+    emit needRepaint();
 }
 
-void ImageArea::loadImage(){
+void ImageProcessor::loadImage(){
     QImage * image = &images[curr].image;
     if(image->load(fileNames[curr])){
         for(int i = 0; i < image->width(); ++i){
@@ -223,11 +63,11 @@ void ImageArea::loadImage(){
         images[curr].l = true;
         emit imageChanged(fileNames[curr]);
     }else{
-        QMessageBox::critical(this, tr("Error"), tr("Can not load an image(s)"));
+        emit somethingWentWrong("Error", "Can not load an image(s)");
     }
 }
 
-void ImageArea::run()
+void ImageProcessor::run()
 {
     Image * image = &images[curr];
     QImage timage = image->image;
@@ -237,7 +77,7 @@ void ImageArea::run()
     if(d3 && !image->image.isNull()){
         QFuture<QVector<Line> > tmp = QtConcurrent::run(&conv, &Converter::convert, image->image, mode);
         lines = tmp.result();
-        repaint();
+        emit needRepaint();
         return;
     }
     if( image->counter == 3 && !image->image.isNull()){
@@ -265,40 +105,40 @@ void ImageArea::run()
         y2 = image->image.height()-1;
         image->bound_counter[3] = searchTheLight(x1,y1,x2,y2);
     }else{
-        QMessageBox::critical(this,"No points or image","Put 3 points or open image");
+        emit somethingWentWrong("No points or image","Put 3 points or open image");
     }
-    if(!vid)repaint();
+    if(!vid)emit needRepaint();
     image->image = timage;
-
+    
 }
 
-void ImageArea::prev()
+void ImageProcessor::prev()
 {
     if(!curr){
         return;
     }else{
         curr--;
-        repaint();
+        emit needRepaint();
         emit imageUpdated(fileNames[curr]);
     }
 }
 
-void ImageArea::next()
+void ImageProcessor::next()
 {
     if(curr == (unsigned)fileNames.length()-1){
         return;
     }else{
         curr++;
-        repaint();
+        emit needRepaint();
         emit imageUpdated(fileNames[curr]);
     }
 }
 
-void ImageArea::checkVideoProcess()
+void ImageProcessor::checkVideoProcess()
 {
     if(fn.isFinished()){
-        QMessageBox::information(this,"It's done!","Video has been opened!");
-        this->setCursor(Qt::ArrowCursor);
+        emit somethingWentWrong("It's done!","Video has been opened!");
+        //this->setCursor(Qt::ArrowCursor);
         frame_num = fn.result();
         emit giveFramesNumber(frame_num);
     }
@@ -307,7 +147,7 @@ void ImageArea::checkVideoProcess()
     }
 }
 
-unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2/*, int k*/){
+unsigned ImageProcessor::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2/*, int k*/){
     QImage * image = &images[curr].image;
     unsigned counter=0;
     for (unsigned  i = x1 + 1; i != x2; x1 < x2 ? ++i : --i ) {
@@ -320,27 +160,27 @@ unsigned ImageArea::searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsign
     return counter;
 }
 
-void ImageArea::switchMode()
+void ImageProcessor::switchMode()
 {
     d3 = !d3;
     run();
 }
 
-void ImageArea::saveImage()
+void ImageProcessor::saveImage(const QString & name)
 {
     if(!images[curr].image.isNull()){
-        images[curr].image.save(QFileDialog::getSaveFileName(this,tr("Save image"), "", tr("Image files (*.bmp)")));
+        images[curr].image.save(name);
     }
 }
 
-void ImageArea::saveConf(bool def)
+void ImageProcessor::saveConf(const QString& name, bool def)
 {
     Image * image = &images[curr];
     static bool fp = true;
     static QString filename = QString("default.conf");
     if(!def){
         if(fp){
-            filename = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
+            filename = name;
             QFile file(filename);
             if(file.open(QFile::WriteOnly)){
                 QTextStream str(&file);
@@ -349,9 +189,9 @@ void ImageArea::saveConf(bool def)
                 str << image->square[0].x() << " " << image->square[0].y() << "\n";
                 str << image->square[1].x() << " " << image->square[1].y() << "\n";
                 str << image->square[2].x() << " " << image->square[2].y() << "\n";
-                QMessageBox::information(this, tr("Next step"), tr("Put 3 points then press Save again"));
+                emit somethingWentWrong("Next step","Put 3 points then press Save again");
             }else{
-                QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+                emit somethingWentWrong("Error","Can not open a file");
             }
             fp = false;
         }else{
@@ -362,7 +202,7 @@ void ImageArea::saveConf(bool def)
                 str << image->square[1].x() << " " << image->square[1].y() << "\n";
                 str << image->square[2].x() << " " << image->square[2].y() << "\n";
             }else{
-                QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+                emit somethingWentWrong("Error","Can not open a file");
             }
             fp = true;
         }
@@ -379,19 +219,19 @@ void ImageArea::saveConf(bool def)
             str << conf.square0[1].x() << " " << conf.square0[1].y() << "\n";
             str << conf.square0[2].x() << " " << conf.square0[2].y() << "\n";
         }else{
-            QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
+            emit somethingWentWrong("Error","Can not open a file");
         }
     }
-
+    
 }
 
-void ImageArea::loadConf(bool def)
+void ImageProcessor::loadConf(const QString &name)
 {
     Image * image = &images[curr];
-    QString filename = "default.conf";
-    if(!def){
-        filename = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
-    }
+    QString filename = name;//"default.conf";
+   /* if(!def){
+        filename = name;//QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    }*/
     QFile file(filename);
     if(file.open(QFile::ReadOnly)){
         QTextStream str(&file);
@@ -404,29 +244,29 @@ void ImageArea::loadConf(bool def)
         str >> conf.square0[1].rx() >> conf.square0[1].ry();
         str >> conf.square0[2].rx() >> conf.square0[2].ry();
         if(str.status() & QTextStream::ReadCorruptData || str.status() & QTextStream::ReadPastEnd){
-            QMessageBox::warning(this, "Error", "Can not read config!");
+            emit somethingWentWrong("Error", "Can not read config!");
             return;
         }
     }else{
-        QMessageBox::warning(this, tr("Error"), tr("Can not open a file"));
-        repaint();
+        emit somethingWentWrong("Error","Can not open a file");
+        emit needRepaint();
     }
     image->conf = conf;
     image->counter = 3;
-
+    
 }
 
-void ImageArea::align()
+void ImageProcessor::align()
 {
     Image * image = &images[curr];
     QMatrix matrix;
     matrix.shear(4*(image->square[1].x() - image->square[2].x())/(double)image->image.width(), 4*(image->square[0].y() - image->square[1].y())/(double)image->image.height());
     image->image = image->image.transformed(matrix);
     image->counter = 0;
-    if(!vid)repaint();
+    if(!vid)emit needRepaint();
 }
 
-void ImageArea::autorun()
+void ImageProcessor::autorun()
 {
     if(!fileNameV.isEmpty()){
         vid = true;
@@ -484,17 +324,17 @@ void ImageArea::autorun()
             run();
             image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
             image->r = true;
-            repaint();
+            emit needRepaint();
         }else{
-            QMessageBox::information(this, "Fail", "Image already processed or not loaded");
+            emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
     }
 }
 
-void ImageArea::calibrate()
+void ImageProcessor::calibrate(const QString &name, const QStringList &names)
 {
-    loadConf(false);
-    QStringList names = QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
+    loadConf(name);
+    QStringList fnames = names;//QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
     delete[] images;
     images = new Image[1];
     res.clear();
@@ -503,8 +343,8 @@ void ImageArea::calibrate()
         res4[i].clear();
     }
     curr = 0;
-    fileNames.append(names[0]);
-    for(QStringList::iterator it = names.begin(); it != names.end(); ++it){
+    fileNames.append(fnames[0]);
+    for(QStringList::iterator it = fnames.begin(); it != fnames.end(); ++it){
         fileNames[0] = *it;
         images[0].image.load(*it);
         images[0].l = true;
@@ -530,9 +370,9 @@ void ImageArea::calibrate()
     }
 }
 
-void ImageArea::saveResults()
+void ImageProcessor::saveResults(const QString &name)
 {
-    QFile file(QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)")));
+    QFile file(name);//QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)")));
     if(file.open(QFile::WriteOnly)){
         QTextStream str(&file);
         for(int i = 0; i < vres.size(); ++i){
@@ -541,7 +381,7 @@ void ImageArea::saveResults()
     }
 }
 
-void ImageArea::getFrame(int n)
+void ImageProcessor::getFrame(int n)
 {
     fileNames.clear();
     fileNames.push_back(QString("frame_")+QString::number(n)+QString(".bmp"));
@@ -549,12 +389,12 @@ void ImageArea::getFrame(int n)
     images = new Image[1];
     curr = 0;
     loadImage();
-    repaint();
+    emit needRepaint();
 }
 
-void ImageArea::loadData()
+void ImageProcessor::loadData(const QString &name)
 {
-    QString filename = QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)"));
+    QString filename = name;//QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)"));
     QFile file(filename);
     QVector<double> r4;
     r4.resize(4);
@@ -576,13 +416,13 @@ void ImageArea::loadData()
             pres.push_back(p);
         }
     }else{
-        repaint();
+        emit needRepaint();
     }
 }
 
-void ImageArea::saveData()
+void ImageProcessor::saveData(const QString &name)
 {
-    QString filename = QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QString filename = name;//QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
     QFile file(filename);
     if(file.open(QFile::WriteOnly)){
         QTextStream str(&file);
@@ -591,11 +431,11 @@ void ImageArea::saveData()
             str << res[i] << " " << pres[i] << " \n";
         }
     }else{
-        repaint();
+        emit needRepaint();
     }
 }
 
-void  ImageArea::sharpen(){
+void  ImageProcessor::sharpen(){
     QImage * image = &images[curr].image;
     QImage oldImage = images[curr].image;
     int kernel [3][3]= {{0,-1,0},
@@ -630,10 +470,6 @@ void  ImageArea::sharpen(){
             image->setPixel(x,y, qRgb(r,g,b));
         }
     }
-    repaint();
+    emit needRepaint();
 }
 
-ImageArea::~ImageArea()
-{
-    delete ui;
-}

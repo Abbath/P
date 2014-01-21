@@ -1,5 +1,5 @@
-#ifndef IMAGEAREA_HPP
-#define IMAGEAREA_HPP
+#ifndef IMAGEPROCESSOR_HPP
+#define IMAGEPROCESSOR_HPP
 
 #include <QWidget>
 #include <QtCore>
@@ -10,11 +10,8 @@
 #include <helpers.hpp>
 #include <converter.hpp>
 #include <QtMultimediaWidgets/QVideoWidget>
-namespace Ui {
-class ImageArea;
-}
 
-class ImageArea : public QWidget
+class ImageProcessor : QObject
 {
     Q_OBJECT
     Image* images;
@@ -22,13 +19,13 @@ class ImageArea : public QWidget
     QPoint origin[2] = {{0,0},{0,0}};
     QString fileName, fileNameV;
     QStringList fileNames;
-    double sum = 0,GY=25,YR=35;
-    QPoint zoom;
+    double sum = 0;
+   // QPoint zoom;
     QVector<Line> lines;
     QVector<QPoint> lasts[4], hull[4];
     QVector<int> dbs[4];
     Converter conv;
-    bool rect = false,zoom_b = false,d3 = false, vid = false;
+    bool /*rect = false,zoom_b = false*/d3 = false, vid = false;
     Modes mode = ISO;
     Config conf;
     QVector<double> vres;
@@ -39,22 +36,14 @@ class ImageArea : public QWidget
     volatile bool cont = true;
     QFuture<int> fn;
 public:
-    explicit ImageArea(QWidget *parent = 0);
-    void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void wheelEvent(QWheelEvent *e);
-    ~ImageArea();
-
     void loadImage();
-    void saveImage();
+    void saveImage(const QString &name);
 
-    void loadConf(bool def);
-    void saveConf(bool def);
+    void loadConf(const QString &name);
+    void saveConf(const QString &name, bool def);
 
-    void loadData();
-    void saveData();
+    void loadData(const QString &name);
+    void saveData(const QString &name);
 
     unsigned searchTheLight(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
@@ -62,17 +51,15 @@ public:
     void setMode(Modes m) {mode = m;}
 
     void autorun();
-    void calibrate();
+    void calibrate(const QString &name, const QStringList &names);
 
-    void saveResults();
+    void saveResults(const QString &name);
 
     void getFrame(int n);
     void processVideo();
 
-public slots:
-
-    void openImage();
-    int openVideo();
+    void openImage(const QStringList &names);
+    int openVideo(const QString &name);
 
     void align();
     void reset();
@@ -82,25 +69,24 @@ public slots:
     void next();
     void stop() { cont = false;}
 
-    void setGY(double val){GY = val;}
-    void setYR(double val){YR = val;}
     void setThreshold(int val){ images[curr].threshold = val;}
 
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
     const QString getVName() const { return fileNameV;}
-private slots:
+    ImageProcessor(QObject * parent = 0);
+private: 
     void checkVideoProcess();
 private:
     void sharpen();
-    Ui::ImageArea *ui;
     int tre() const { return images[curr].threshold; }
 signals:
     void needRepaint();
+    void somethingWentWrong(QString, QString);
     void imageUpdated(QString filename);
     void giveFramesNumber(int n);
     void giveImage(Image im);
     void imageChanged(QString filename);
 };
 
-#endif // IMAGEAREA_HPP
+#endif // IMAGEPROCESSOR_HPP

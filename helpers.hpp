@@ -49,6 +49,10 @@ struct Image{
 
 };
 
+struct Display{
+    Image im;
+    QPoint origin[2];
+};
 
 
 #endif // HELPERS_HPP
