@@ -122,6 +122,10 @@ void MainWindow::on_actionAutorun_triggered()
 void MainWindow::on_actionOpen_Video_triggered()
 {
     ui->widget->openVideo();
+    ui->mainToolBar->setDisabled(true);
+    ui->splitter->setDisabled(true);
+    ui->menuBar->setDisabled(true);
+    this->setCursor(Qt::WaitCursor);
     /*if(n){
         ui->horizontalSlider->show();
         ui->horizontalSlider->setMaximum(n-1);
@@ -259,6 +263,10 @@ void MainWindow::on_actionSave_3_triggered()
 
 void MainWindow::sliderAnalManipulation(int n)
 {
+    ui->splitter->setEnabled(true);
+    ui->menuBar->setEnabled(true);
+    ui->mainToolBar->setEnabled(true);
+    this->setCursor(Qt::ArrowCursor);
     ui->horizontalSlider->show();
     ui->horizontalSlider->setMaximum(n-1);
     ui->horizontalSlider->setValue(0);

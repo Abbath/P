@@ -28,7 +28,7 @@ class ImageArea : public QWidget
     QVector<QPoint> lasts[4], hull[4];
     QVector<int> dbs[4];
     Converter conv;
-    bool rect = false,zoom_b = false,d3 = false;
+    bool rect = false,zoom_b = false,d3 = false, vid = false;
     Modes mode = ISO;
     Config conf;
     QVector<double> vres;

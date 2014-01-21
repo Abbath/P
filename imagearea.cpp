@@ -269,7 +269,7 @@ void ImageArea::run()
     }else{
         QMessageBox::critical(this,"No points or image","Put 3 points or open image");
     }
-    repaint();
+    if(!vid)repaint();
     image->image = timage;
 
 }
@@ -299,7 +299,7 @@ void ImageArea::next()
 void ImageArea::checkVideoProcess()
 {
     if(fn.isFinished()){
-        QMessageBox::information(this,"Video Processing Has Finished","Yes it has!");
+        QMessageBox::information(this,"It's done!","Video has been opened!");
         this->setCursor(Qt::ArrowCursor);
         frame_num = fn.result();
         emit giveFramesNumber(frame_num);
@@ -425,15 +425,17 @@ void ImageArea::align()
     matrix.shear(4*(image->square[1].x() - image->square[2].x())/(double)image->image.width(), 4*(image->square[0].y() - image->square[1].y())/(double)image->image.height());
     image->image = image->image.transformed(matrix);
     image->counter = 0;
-    repaint();
+    if(!vid)repaint();
 }
 
 void ImageArea::autorun()
 {
     if(!fileNameV.isEmpty()){
+        vid = true;
         fileNames.clear();
         delete[] images;
         images = new Image[frame_num];
+        QList<QFuture<double>> sums;
         for(unsigned i = 0 ; i < frame_num; ++i){
             fileNames.push_back(QString("frame_")+QString::number(i)+QString(".bmp"));
             curr = i;
@@ -452,10 +454,11 @@ void ImageArea::autorun()
             image->square[1] = conf.square0[1];
             image->square[2] = conf.square0[2];
             run();
-            image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
+            //image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
+            image->sum = conv.calculate(res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.);
             vres.push_back(images[curr].sum);
             vres0.push_back(std::accumulate(&image->bound_counter[0], image->bound_counter+4,0));
-            image->image.save(QString::number(image->sum) + QString(".bmp"));
+            //image->image.save(QString::number(image->sum) + QString(".bmp"));
             if(!cont){
                 cont = true;
                 delete[] images;
@@ -464,6 +467,7 @@ void ImageArea::autorun()
                 break;
             }
         }
+        vid = false;
     }else{
         Image * image = &images[curr];
         if(!image->r && image->l){
