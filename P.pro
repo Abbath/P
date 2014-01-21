@@ -15,18 +15,12 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     imagearea.cpp \
-    converter.cpp \
-    modalwaitdialog.cpp \
-    imageprocessor.cpp \
-    dispatcher.cpp
+    converter.cpp
 
 HEADERS  += mainwindow.hpp \
     imagearea.hpp \
     converter.hpp \
-    helpers.hpp \
-    modalwaitdialog.h \
-    imageprocessor.hpp \
-    dispatcher.hpp
+    helpers.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui
