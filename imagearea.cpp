@@ -1,6 +1,13 @@
 #include "imagearea.hpp"
 #include "ui_imagearea.h"
 
+ImageArea::ImageArea(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::ImageArea)
+{
+    ui->setupUi(this);
+}
+
 void ImageArea::update()
 {
     Display dis;
@@ -8,13 +15,6 @@ void ImageArea::update()
     dis.origin[0] = origin[0];
     dis.origin[1] = origin[1];
     emit viewUpdated(dis);
-}
-
-ImageArea::ImageArea(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ImageArea)
-{
-    ui->setupUi(this);
 }
 
 void ImageArea::paintEvent(QPaintEvent *e)
