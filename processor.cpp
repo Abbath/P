@@ -29,7 +29,7 @@ void Processor::openImage(const QVector<std::string> &names)
     qDebug() << "I'm in Processor::openImage\n";
     fileNameV.clear();
     fileNames.clear();
-    fileNames.resize(names.size());
+    fileNames.reserve(names.size());
     for(int i = 0; i< names.size(); ++i){
         fileNames.push_back(names[i]);
     }

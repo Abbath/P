@@ -9,9 +9,13 @@ int main(int argc, char *argv[])
     
     MainWindow w;
     Processor p;
-    p.moveToThread(new QThread);
+    QThread tfd;
+    QThread tfp;
+    p.moveToThread(&tfp);
     Dispatcher d(0, &w, &p);
-    d.moveToThread(new QThread);
+    d.moveToThread(&tfd);
+    tfp.start();
+    tfd.start();
     w.show();
     return a.exec();
 }
