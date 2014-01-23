@@ -21,9 +21,5 @@ void MainWindow::Update(Display dis)
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
-    QVector<std::string> namess;
-    for(auto x : names){
-        namess.push_back(x.toStdString());
-    }
-    emit openImage(namess);
+    emit openImage(names);
 }

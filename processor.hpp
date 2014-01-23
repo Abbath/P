@@ -7,26 +7,10 @@
 class Processor : public QObject
 {
     Q_OBJECT
-    QVector<Image> images;
-    unsigned curr = 0, frame_num = 0;
-    QPoint origin[2] = {{0,0},{0,0}};
-    QString fileName, fileNameV;
-    std::vector<std::string> fileNames = {""};
-    double sum = 0;
-    //QVector<Line> lines;
-    Config conf;
-    
-    QVector<double> vres;
-    QVector<double> vres0;
-    
-    QVector<double> pres;
-    QVector<double> res;
-    
-    QVector<double> res4[4];
     
 public:
     explicit Processor(QObject *parent = 0);
-    QImage loadImage(const std::string &name);
+    QImage loadImage(const QString &name);
     void saveImage(const QString &name);
 
     void loadConf(const QString &name);
@@ -58,19 +42,40 @@ public:
     void next();
     //void stop() { cont = false;}
 
-
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
     const QString getVName() const { return fileNameV;}    
+
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);
+
 public slots:
     void setDisplay(Display dis);
-    void openImage(const QVector<std::string> &names);
+    void openImage(const QStringList names);
+
 private:
     QImage sharpen(const QImage& im );
     void repaint();
+
+private:
+    QVector<Image> images;
+    unsigned curr = 0, frame_num = 0;
+    QPoint origin[2] = {{0,0},{0,0}};
+    QString fileName, fileNameV;
+    QStringList fileNames;
+    double sum = 0;
+    //QVector<Line> lines;
+    Config conf;
+
+    QVector<double> vres;
+    QVector<double> vres0;
+
+    QVector<double> pres;
+    QVector<double> res;
+
+    QVector<double> res4[4];
+
 };
 
 #endif // PROCESSOR_HPP

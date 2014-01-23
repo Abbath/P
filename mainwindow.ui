@@ -85,7 +85,7 @@
            <enum>QTabWidget::West</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -277,7 +277,7 @@
      <x>0</x>
      <y>0</y>
      <width>622</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -491,7 +491,7 @@
   <customwidget>
    <class>QwtPlot</class>
    <extends>QWidget</extends>
-   <header>qwt_plot.h</header>
+   <header>qwt/qwt_plot.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

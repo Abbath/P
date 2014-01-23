@@ -16,13 +16,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
 private:
     Ui::MainWindow *ui;
 public slots:
     void Update(Display dis);
 signals:
-    void openImage(QVector<std::string> v);
+    void openImage(QStringList v);
 private slots:
     void on_actionOpen_Image_s_triggered();
 };

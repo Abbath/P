@@ -2,23 +2,21 @@
 #define DISPATCHER_HPP
 
 #include <QObject>
-#include <QtCore>
-#include <QtGui>
-#include <QtWidgets>
-#include <processor.hpp>
-#include <mainwindow.hpp>
+
+QT_BEGIN_NAMESPACE
+class MainWindow;
+class Processor;
+QT_END_NAMESPACE
 
 class Dispatcher : public QObject
 {
-    Q_OBJECT
-    MainWindow * w;
-    Processor * p;
+  Q_OBJECT
 public:
-    explicit Dispatcher(QObject *parent = 0, MainWindow* w = nullptr, Processor * p = nullptr);
-signals:
-    
-public slots:
-    
+  explicit Dispatcher(QObject *parent = 0, MainWindow* w = nullptr, Processor * p = nullptr);
+
+private:
+  MainWindow * w;
+  Processor * p;
 };
 
 #endif // DISPATCHER_HPP
