@@ -419,6 +419,9 @@
    <property name="text">
     <string>Run</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="action3D">
    <property name="checkable">

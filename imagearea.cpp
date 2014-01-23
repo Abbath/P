@@ -144,6 +144,8 @@ void ImageArea::wheelEvent(QWheelEvent *e)
 void ImageArea::setDisplay(Display dis)
 {
     im = dis.im;
+    origin[0] = dis.origin[0];
+    origin[1] = dis.origin[1];
     repaint();
 }
 
