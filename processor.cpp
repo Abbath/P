@@ -5,7 +5,7 @@ Processor::Processor(QObject *parent) :
 {
 }
 
-<<<<<<< HEAD
+
 std::pair<long double, long double> Processor::leastsquares(const QVector<double> &x, const QVector<double> &yy)const
 {
     QVector<double> y = yy;
@@ -156,10 +156,7 @@ double Processor::calculate(const QVector<double> &res, const QVector<double> &p
 
 }
 
-QImage Processor::loadImage(const std::string &name)
-=======
-QImage Processor::loadImage(const QString& name)
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
+QImage Processor::loadImage(const QString &name)
 {
   QImage image;
   if ( image.load(name) ) {
@@ -178,7 +175,7 @@ QImage Processor::loadImage(const QString& name)
   }
 }
 
-<<<<<<< HEAD
+
 void Processor::prev()
 {
     if(!curr){
@@ -199,7 +196,7 @@ void Processor::next()
     }
 }
 
-void Processor::openImage(const QVector<std::string> &names)
+void Processor::openImage(const QStringList &names)
 {
     qDebug() << "I'm in Processor::openImage\n";
     fileNameV.clear();
@@ -218,23 +215,6 @@ void Processor::openImage(const QVector<std::string> &names)
         }
         curr = 0;
         repaint();
-=======
-void Processor::openImage(const QStringList names)
-{
-  qDebug() << "I'm in Processor::openImage\n";
-  fileNameV.clear();
-  fileNames = names;
-  images.clear();
-  if(!fileNames.empty()){
-    images.resize(fileNames.size());
-    for(curr = 0; curr < static_cast<unsigned>(fileNames.size()); ++curr){
-      images[curr].image = loadImage(fileNames[curr]);
-      images[curr].counter = 0;
-      images[curr].l = true;
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
-    }
-    curr = 0;
-    repaint();
   }
 }
 
@@ -286,17 +266,13 @@ QImage Processor::sharpen(const QImage &im)
 
 void Processor::repaint()
 {
-<<<<<<< HEAD
+
     Display dis;
     dis.im = images[curr];
     dis.origin[0] = origin[0];
     dis.origin[1] = origin[1];
     emit Update(dis);
-=======
-  Display dis;
-  dis.im = images[curr];
-  emit Update(dis);
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
+
 }
 
 unsigned Processor::searchTheLight(const QImage& image, unsigned tre, unsigned x1, unsigned y1, unsigned x2, unsigned y2){
@@ -498,7 +474,7 @@ void Processor::autorun()
         images.resize(frame_num);
         QList<QFuture<double>> sums;
         for(unsigned i = 0 ; i < frame_num; ++i){
-            fileNames.push_back((QString("frame_")+QString::number(i)+QString(".bmp")).toStdString());
+            fileNames.push_back((QString("frame_")+QString::number(i)+QString(".bmp")));
             curr = i;
             images[curr].image = loadImage(fileNames[curr]);
             Image& image = images[curr];

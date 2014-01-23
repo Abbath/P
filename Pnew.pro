@@ -29,7 +29,7 @@ FORMS    += mainwindow.ui \
 QMAKE_CXXFLAGS += -std=c++11
 
 unix{
-#LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
 INCLUDEPATH += "/usr/local/qwt-6.1.0/include"
 LIBS += -lqwt
 }

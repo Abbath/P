@@ -23,8 +23,7 @@ public slots:
     void Update(Display dis);
     void Error(QString a, QString b);
 signals:
-<<<<<<< HEAD
-    void openImage(QVector<std::string> v);
+    void openImage(QStringList v);
     void align();
     void reset();
     void autorun();
@@ -35,9 +34,6 @@ signals:
     void saveConf(QString name, bool def);
     void loadData(QString name);
     void saveData(QString name);
-=======
-    void openImage(QStringList v);
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
 private slots:
     void on_actionOpen_Image_s_triggered();
     void on_actionAlign_triggered();

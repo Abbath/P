@@ -7,26 +7,6 @@
 class Processor : public QObject
 {
     Q_OBJECT
-<<<<<<< HEAD
-    QVector<Image> images;
-    unsigned curr = 0, frame_num = 0;
-    QPoint origin[2] = {{0,0},{0,0}};
-    QString fileName, fileNameV;
-    std::vector<std::string> fileNames = {""};
-    bool vid = false;
-    double sum = 0;
-    //QVector<Line> lines;
-    Config conf;
-    
-    QVector<double> vres;
-    QVector<double> vres0;
-    
-    QVector<double> pres;
-    QVector<double> res;
-    
-    QVector<double> res4[4];
-=======
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
     
 public:
     explicit Processor(QObject *parent = 0);
@@ -41,10 +21,7 @@ public:
     void processVideo();
     int openVideo(const QString &name);
     //void stop() { cont = false;}
-<<<<<<< HEAD
-=======
 
->>>>>>> b1ab59f05675701a3fd54cf8420a16f90efe4b53
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
     const QString getVName() const { return fileNameV;}    
@@ -65,7 +42,7 @@ public slots:
     void loadData(const QString &name);
     void saveData(const QString &name);
     void setDisplay(Display dis);
-    void openImage(const QStringList names);
+    void openImage(const QStringList &names);
 
 private:
     std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
@@ -90,7 +67,7 @@ private:
     QVector<double> res;
 
     QVector<double> res4[4];
-
+    bool vid = false;
 };
 
 #endif // PROCESSOR_HPP
