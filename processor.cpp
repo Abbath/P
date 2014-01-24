@@ -293,13 +293,13 @@ void Processor::loadData(const QString &name)
     QFile file(filename);
     QVector<double> r4;
     r4.resize(4);
-    double r = 0;
-    double p = 0;
     res.clear();
     pres.clear();
     if(file.open(QFile::ReadOnly)){
         QTextStream str(&file);
         while(1){
+            double r = 0;
+            double p = 0;
             str >> r4[0] >> r4[1] >> r4[2] >> r4[3];
             str >> r >> p;
             if(str.atEnd()) break;
@@ -461,7 +461,7 @@ void Processor::reset()
     image.image = loadImage(fileNames[curr]);
     origin[0] = {0, 0};
     origin[1] = {0, 0};
-    image.r = true;
+    image.r = false;
     repaint();
 }
 
