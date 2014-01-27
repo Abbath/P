@@ -34,6 +34,7 @@ signals:
     void saveConf(QString name, bool def);
     void loadData(QString name);
     void saveData(QString name);
+    void hesDeadJim();
 private slots:
     void on_actionOpen_Image_s_triggered();
     void on_actionAlign_triggered();

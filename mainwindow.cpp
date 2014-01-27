@@ -15,6 +15,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::Update(Display dis)
 {
+    qDebug() << "Why i'm not hawk? Why i'm not flying?\n";
     ui->imageArea->setDisplay(dis);
 }
 

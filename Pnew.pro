@@ -15,12 +15,10 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     processor.cpp \
     imagearea.cpp \
-    dispatcher.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
-    dispatcher.hpp \
     helpers.hpp
 
 FORMS    += mainwindow.ui \
