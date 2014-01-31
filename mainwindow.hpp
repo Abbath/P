@@ -24,6 +24,7 @@ private:
     QGraphicsScene *scene;
     Ui::MainWindow *ui;
     Processor *p;
+    void disableUi(bool b = true);
 public slots:
     void Update(Display dis);
     void imageAreaUpdated(Display dis);

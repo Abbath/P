@@ -18,8 +18,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::disableUi(bool b)
+{
+    if(b){
+        ui->splitter->setDisabled(b);
+        ui->mainToolBar->setDisabled(b);
+        ui->menuBar->setDisabled(b);
+    }else{
+        ui->splitter->setEnabled(!b);
+        ui->mainToolBar->setEnabled(!b);
+        ui->menuBar->setEnabled(!b);      
+    }
+}
+
 void MainWindow::Update(Display dis)
 {
+    disableUi(false);
     ui->imageArea->setDisplay(dis);
     ui->pressureLabel->setText(QString::number(dis.im.sum));
     ui->sumLabel->setText(QString::number(std::accumulate(&dis.im.bound_counter[0],dis.im.bound_counter+4,0)));
@@ -43,37 +57,44 @@ void MainWindow::Error(QString a, QString b)
 
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
+    disableUi();
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
     QtConcurrent::run(p, &Processor::openImage, names);
 }
 
 void MainWindow::on_actionAlign_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::align);
 }
 
 void MainWindow::on_actionRun_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::run);
 }
 
 void MainWindow::on_actionReset_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::run);
 }
 
 void MainWindow::on_actionAutorun_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::autorun);
 }
 
 void MainWindow::on_actionPrev_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::prev);
 }
 
 void MainWindow::on_actionNext_triggered()
 {
+    disableUi();
     QtConcurrent::run(p, &Processor::next);
 }
 
