@@ -129,7 +129,7 @@ void MainWidget::reset()
 {
   rotation = QQuaternion();
   lengthToTarget = -5.0;
-  // TODO test it
+  updateGL();
 }
 
 /*!
@@ -207,40 +207,42 @@ void MainWidget::resizeGL(int w, int h)
  */
 void MainWidget::paintGL()
 {
-  if ( (image.size().width() <= 0) || (image.size().height() <= 0) ) { return; }
-
-  assert(image.size().width() <= 1024);
-  assert(image.size().height() <= 1024);
-
-  // Clear color and depth buffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // Calculate model view transformation
-  QMatrix4x4 matrix;
-  matrix.translate(0.0, 0.0, lengthToTarget);
-  matrix.rotate(rotation);
-
-  // Set modelview-projection matrix
-  program.setUniformValue("mvp_matrix", projection * matrix);
-
-  // Coloring options
-  program.setUniformValue("colorOffset", colorOffset);
-  program.setUniformValue("step", step);
-  program.setUniformValue("selectColor", selectColor);
-  // End coloring options
-
-  glBegin(GL_LINES);
-  for ( auto i = 0; i < image.size().width(); ++ i ) {
-    for ( auto j = 0; j < image.size().height(); ++ j ) {
-      const float zVal = float( qGray( image.pixel( i, j ) ) )/255;
-      glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, 0.0f);
-      if ( zVal > step ) {
-        glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, step - 0.001f);
-        glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, step);
-      }
-      glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, zVal);
-    }
-  }
-  glEnd();
+    // Clear color and depth buffer
+     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   
+     if ( (image.size().width() <= 0) || (image.size().height() <= 0) ) { return; }
+   
+     assert(image.size().width() <= 1024);
+     assert(image.size().height() <= 1024);
+   
+     // Calculate model view transformation
+     QMatrix4x4 matrix;
+     matrix.translate(0.0, 0.0, lengthToTarget);
+     matrix.rotate(rotation);
+   
+     // Set modelview-projection matrix
+     program.setUniformValue("mvp_matrix", projection * matrix);
+   
+     // Coloring options
+     program.setUniformValue("colorOffset", colorOffset);
+     program.setUniformValue("step", step);
+     program.setUniformValue("selectColor", selectColor);
+     // End coloring options
+   
+     glBegin(GL_LINES);
+     for ( auto i = 0; i < image.size().width(); ++ i ) {
+       for ( auto j = 0; j < image.size().height(); ++ j ) {
+         const float zVal = float( qGray( image.pixel( i, j ) ) )/255;
+         glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, 0.0f);
+         if ( zVal > step ) {
+           glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, step - 0.001f);
+           glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, step);
+         }
+         glVertex3f(-widthOffset + i*coordinateCoefficient, -heightOffset + j*coordinateCoefficient, zVal);
+       }
+     }
+     glEnd();
+   
+  
 
 }

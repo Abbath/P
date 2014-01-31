@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->showMaximized();
     scene = new QGraphicsScene(this);
-    ui->widget->hide();
     ui->graphicsView->setScene(scene);
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
@@ -113,8 +112,9 @@ void MainWindow::on_action3D_triggered(bool checked)
     if(checked){
         ui->widget->setStep((float)ui->imageArea->getThreshold()/255.0);
         ui->widget->setImage(ui->imageArea->getImage());
-        ui->widget->show();
     }else{
-        ui->widget->hide();
+        QImage empty;
+        ui->widget->setStep(1.0f);
+        ui->widget->setImage(empty);
     }
 }
