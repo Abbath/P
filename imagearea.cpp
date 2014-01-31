@@ -41,7 +41,7 @@ void ImageArea::paintEvent(QPaintEvent *e)
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
     }
-    update();
+    Update();
     if(im.sum <= GY){
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);

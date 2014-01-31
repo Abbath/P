@@ -129,11 +129,7 @@
            </attribute>
            <layout class="QGridLayout" name="gridLayout_9">
             <item row="0" column="0">
-             <widget class="MainWidget" name="widget" native="true">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <widget class="MainWidget" name="widget" native="true"/>
             </item>
            </layout>
           </widget>
