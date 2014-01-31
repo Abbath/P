@@ -274,7 +274,9 @@ void Processor::repaint()
     
     Display dis;
     dis.im = images[curr];
-    dis.im.fileName = fileNames[curr];
+    if(!fileNames.isEmpty()){
+        dis.im.fileName = fileNames[curr];
+    }
     dis.origin[0] = origin[0];
     dis.origin[1] = origin[1];
     emit Update(dis);
