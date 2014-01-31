@@ -8,7 +8,7 @@ ImageArea::ImageArea(QWidget *parent) :
     ui->setupUi(this);
 }
 
-void ImageArea::update()
+void ImageArea::Update()
 {
     Display dis;
     dis.im = im;
@@ -62,18 +62,18 @@ void ImageArea::mousePressEvent(QMouseEvent *e)
         rect = true;
         im.crop[0].setX(e->x());
         im.crop[0].setY(e->y());
-        repaint();
+        update();
     }
     if(e->button() == Qt::LeftButton && !im.image.isNull()){
         zoom_b = true;
         zoom.setX(e->x());
         zoom.setY(e->y());
-        repaint();
+        update();
     }
     if(e->button() == Qt::MiddleButton && !im.image.isNull()){
         origin[0].setX(origin[0].x() + e->x());
         origin[0].setY(origin[0].y() + e->y());
-       update();
+       Update();
     }
 }
 
@@ -92,7 +92,7 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e)
         origin[1].setX(e->x() - origin[0].x());
         origin[1].setY(e->y() - origin[0].y());
     }
-    repaint();
+    update();
 }
 
 void ImageArea::mouseReleaseEvent(QMouseEvent *e)
@@ -129,7 +129,7 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e)
         origin[0].setX(origin[0].x()- e->x());
         origin[0].setY(origin[0].y()- e->y());
     }
-    repaint();
+    update();
 }
 
 void ImageArea::wheelEvent(QWheelEvent *e)
@@ -138,7 +138,7 @@ void ImageArea::wheelEvent(QWheelEvent *e)
     if( a > 255 ) a = 255;
     if( a < 0 ) a = 0;
     im.threshold = quint8(a);
-    update();
+    Update();
 }
 
 void ImageArea::setDisplay(Display dis)
@@ -146,7 +146,7 @@ void ImageArea::setDisplay(Display dis)
     im = dis.im;
     origin[0] = dis.origin[0];
     origin[1] = dis.origin[1];
-    repaint();
+    update();
 }
 
 ImageArea::~ImageArea()

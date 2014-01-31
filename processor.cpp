@@ -1,18 +1,18 @@
 #include "processor.hpp"
 
 Processor::Processor(QObject *parent) :
-  QObject(parent)
+    QObject(parent)
 {
+    images.resize(1);
 }
-
 
 std::pair<long double, long double> Processor::leastsquares(const QVector<double> &x, const QVector<double> &yy)const
 {
     QVector<double> y = yy;
     for (int i = 0; i < y.size(); ++i) {
-       /* if(qFuzzyCompare(y[i],0.0)){
+        /* if(qFuzzyCompare(y[i],0.0)){
             y[i]+= std::numeric_limits<double>::epsilon();
-
+            
         }*/
         y[i]+=1.0;
     }
@@ -20,100 +20,100 @@ std::pair<long double, long double> Processor::leastsquares(const QVector<double
     for(int i = 0; i < x.size(); ++i){
         tmp += x[i]*x[i]*y[i];
     }
-
+    
     a = tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i]*log(y[i]);
     }
-
+    
     a *= tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i]*x[i];
     }
-
+    
     at = tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i]*x[i]*log(y[i]);
     }
-
+    
     at *= tmp;
     tmp = 0;
-
+    
     a -= at;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i];
     }
-
+    
     at = tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += x[i]*x[i]*y[i];
     }
-
+    
     tt = at*tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += x[i]*y[i];
     }
-
+    
     tt -= tmp*tmp;
     tmp = 0;
-
+    
     a /= tt;
-
+    
     A = exp(a);
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i];
     }
-
+    
     b = tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += x[i]*y[i]*log(y[i]);
     }
-
+    
     b *= tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i]*x[i];
     }
-
+    
     bt = tmp;
     tmp = 0;
-
+    
     for(int i = 0; i < x.size(); ++i){
         tmp += y[i]*log(y[i]);
     }
-
+    
     bt *= tmp;
     tmp = 0;
-
+    
     b -= bt;
-
+    
     b /= tt;
-
+    
     B = b;
-
+    
     return std::make_pair(A,B);
 }
 
 double Processor::calculate(const QVector<double> &res, const QVector<double> &pres, double val) const 
 {
-
+    
     /*double sum = 0.0,x1 = 0.0,y1 = 0.0,y0=0.0,x0=0.0;
-
+      
     for(auto it = res.begin(); it != res.end(); ++it){
         if(*it > val){
             if(it == res.begin()){
@@ -137,9 +137,9 @@ double Processor::calculate(const QVector<double> &res, const QVector<double> &p
         }
     }
     sum = y0 + (y1 - y0) * (val - x0) / ( x1 - x0);*/
-
+    
     /*double sum=0,l=1;
-
+      
     for(int j = 0;j < res.size(); ++j){
         for(int i = 0; i < res.size(); ++i){
             if( j != i){
@@ -153,26 +153,26 @@ double Processor::calculate(const QVector<double> &res, const QVector<double> &p
     auto p = leastsquares(res,pres);
     double sum = p.first * exp(p.second*val)-1.0;
     return sum;
-
+    
 }
 
 QImage Processor::loadImage(const QString &name)
 {
-  QImage image;
-  if ( image.load(name) ) {
-    for(int i = 0; i < image.width(); ++i){
-      for(int j = 0; j < image.height(); ++j){
-        int gray = qGray(image.pixel(i,j));
-        image.setPixel(i,j,qRgb(gray,gray,gray));
-      }
+    QImage image;
+    if ( image.load(name) ) {
+        for(int i = 0; i < image.width(); ++i){
+            for(int j = 0; j < image.height(); ++j){
+                int gray = qGray(image.pixel(i,j));
+                image.setPixel(i,j,qRgb(gray,gray,gray));
+            }
+        }
+        image = sharpen(image);
+        repaint();
+        return image;
+    }else{
+        emit somethingWentWrong("Error", "Can not load an image(s)");
+        return image;
     }
-    image = sharpen(image);
-    repaint();
-    return image;
-  }else{
-    emit somethingWentWrong("Error", "Can not load an image(s)");
-    return image;
-  }
 }
 
 
@@ -215,64 +215,70 @@ void Processor::openImage(const QStringList &names)
         }
         curr = 0;
         repaint();
-  }
+    }
 }
 
-void Processor::setDisplay(Display dis)
+void Processor::die()
 {
-  images[curr] = dis.im;
-  origin[0] = dis.origin[0];
-  origin[1] = dis.origin[1];
+    this->deleteLater();
+}
+
+void Processor::setDisplay(const Display &dis)
+{
+    images[curr] = dis.im;
+    origin[0] = dis.origin[0];
+    origin[1] = dis.origin[1];
 }
 
 QImage Processor::sharpen(const QImage &im)
 {
-  QImage image = im;
-  QImage oldImage = im;
-  int kernel [3][3]= {{0,-1,0},
-                      {-1,5,-1},
-                      {0,-1,0}};
-  /* int kernel  [5][5] ={
+    QImage image = im;
+    QImage oldImage = im;
+    int kernel [3][3]= {{0,-1,0},
+                        {-1,5,-1},
+                        {0,-1,0}};
+    /* int kernel  [5][5] ={
                         {0,0,-1,0,0},
                         {0,-1,-2,-1,0},
                         {-1,-2,20,-2,-1},
                         {0,-1,-2,-1,0},
                         {0,0,-1,0,0}};*/
-  int kernelSize = 3;
-  int sumKernel = 1;
-  int r,g,b;
-  QColor color;
-  for(int x=kernelSize/2; x<image.width()-(kernelSize/2); x++){
-    for(int y=kernelSize/2; y<image.height()-(kernelSize/2); y++){
-      r = 0;
-      g = 0;
-      b = 0;
-      for(int i = -kernelSize/2; i<= kernelSize/2; i++){
-        for(int j = -kernelSize/2; j<= kernelSize/2; j++){
-          color = QColor(oldImage.pixel(x+i, y+j));
-          r += color.red()*kernel[kernelSize/2+i][kernelSize/2+j];
-          g += color.green()*kernel[kernelSize/2+i][kernelSize/2+j];
-          b += color.blue()*kernel[kernelSize/2+i][kernelSize/2+j];
+    int kernelSize = 3;
+    int sumKernel = 1;
+    int r,g,b;
+    QColor color;
+    for(int x=kernelSize/2; x<image.width()-(kernelSize/2); x++){
+        for(int y=kernelSize/2; y<image.height()-(kernelSize/2); y++){
+            r = 0;
+            g = 0;
+            b = 0;
+            for(int i = -kernelSize/2; i<= kernelSize/2; i++){
+                for(int j = -kernelSize/2; j<= kernelSize/2; j++){
+                    color = QColor(oldImage.pixel(x+i, y+j));
+                    r += color.red()*kernel[kernelSize/2+i][kernelSize/2+j];
+                    g += color.green()*kernel[kernelSize/2+i][kernelSize/2+j];
+                    b += color.blue()*kernel[kernelSize/2+i][kernelSize/2+j];
+                }
+            }
+            r = qBound(0, r/sumKernel, 255);
+            g = qBound(0, g/sumKernel, 255);
+            b = qBound(0, b/sumKernel, 255);
+            image.setPixel(x,y, qRgb(r,g,b));
         }
-      }
-      r = qBound(0, r/sumKernel, 255);
-      g = qBound(0, g/sumKernel, 255);
-      b = qBound(0, b/sumKernel, 255);
-      image.setPixel(x,y, qRgb(r,g,b));
     }
-  }
-  return image;
+    return image;
 }
 
 void Processor::repaint()
 {
-
+    
     Display dis;
     dis.im = images[curr];
+    dis.im.fileName = fileNames[curr];
     dis.origin[0] = origin[0];
     dis.origin[1] = origin[1];
     emit Update(dis);
-
+    
 }
 
 unsigned Processor::searchTheLight(const QImage& image, unsigned tre, unsigned x1, unsigned y1, unsigned x2, unsigned y2){
@@ -480,16 +486,21 @@ void Processor::autorun()
             Image& image = images[curr];
             image.crop[0] = conf.crop[0];
             image.crop[1] = conf.crop[1];
-            image.square[0] = conf.square[0];
-            image.square[1] = conf.square[1];
-            image.square[2] = conf.square[2];
-            image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
+            for(int i = 0; i < 3; ++i){
+                image.square[i] = conf.square[i];
+            }
+//            if(image.crop[0].x() > 0 && image.crop[0].x() < image.image.width() &&
+//                    image.crop[0].y() > 0 && image.crop[0].y() < image.image.height() && 
+//                    abs(image.crop[1].x() - image.crop[0].x()) < image.crop[0].x() &&
+//                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
+                image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
+//            }
             image.counter = 3;
             align();
             image.counter = 3;
-            image.square[0] = conf.square0[0];
-            image.square[1] = conf.square0[1];
-            image.square[2] = conf.square0[2];
+            for(int i = 0; i < 3; ++i){
+                image.square[i] = conf.square0[i];
+            }
             run();
             //image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
             image.sum = calculate(res, pres, std::accumulate(&image.bound_counter[0], image.bound_counter+4,0)/1000.);
@@ -503,16 +514,21 @@ void Processor::autorun()
         if(!image.r && image.l){
             image.crop[0] = conf.crop[0];
             image.crop[1] = conf.crop[1];
-            image.square[0] = conf.square[0];
-            image.square[1] = conf.square[1];
-            image.square[2] = conf.square[2];
-            image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
+            for(int i = 0; i < 3; ++i){
+                image.square[i] = conf.square[i];
+            }
+//            if(image.crop[0].x() > 0 && image.crop[0].x() < image.image.width() &&
+//                    image.crop[0].y() > 0 && image.crop[0].y() < image.image.height() && 
+//                    abs(image.crop[1].x() - image.crop[0].x()) < image.crop[0].x() &&
+//                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
+                image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
+//            }
             image.counter = 3;
             align();
             image.counter = 3;
-            image.square[0] = conf.square0[0];
-            image.square[1] = conf.square0[1];
-            image.square[2] = conf.square0[2];
+            for(int i = 0; i < 3; ++i){
+                image.square[i] = conf.square0[i];
+            }
             run();
             image.sum = calculate(res, pres, std::accumulate(&image.bound_counter[0], image.bound_counter+4,0)/1000.);
             image.r = true;

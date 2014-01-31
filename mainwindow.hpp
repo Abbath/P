@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QGraphicsScene>
 #include <helpers.hpp>
+#include <processor.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -16,24 +18,16 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void setProcessor(Processor * _p) { p = _p;}
     ~MainWindow();
 private:
+    QGraphicsScene *scene;
     Ui::MainWindow *ui;
+    Processor *p;
 public slots:
     void Update(Display dis);
+    void imageAreaUpdated(Display dis);
     void Error(QString a, QString b);
-signals:
-    void openImage(QStringList v);
-    void align();
-    void reset();
-    void autorun();
-    void run();
-    void prev();
-    void next();
-    void loadConf(QString name);
-    void saveConf(QString name, bool def);
-    void loadData(QString name);
-    void saveData(QString name);
 private slots:
     void on_actionOpen_Image_s_triggered();
     void on_actionAlign_triggered();
@@ -48,6 +42,7 @@ private slots:
     void on_actionLoad_2_triggered();
     void on_actionSave_2_triggered();
     void on_actionSave_as_Default_triggered();
+    void on_action3D_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_HPP

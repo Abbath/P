@@ -21,7 +21,7 @@ public:
     void processVideo();
     int openVideo(const QString &name);
     //void stop() { cont = false;}
-
+    void setDisplay(const Display& dis);
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
     const QString getVName() const { return fileNameV;}    
@@ -41,8 +41,9 @@ public slots:
     void saveConf(const QString &name, bool def);
     void loadData(const QString &name);
     void saveData(const QString &name);
-    void setDisplay(Display dis);
+    //void setDisplay(Display dis);
     void openImage(const QStringList &names);
+    void die();
 
 private:
     std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
@@ -54,7 +55,7 @@ private:
     QVector<Image> images;
     unsigned curr = 0, frame_num = 0;
     QPoint origin[2] = {{0,0},{0,0}};
-    QString fileName, fileNameV;
+    QString fileNameV;
     QStringList fileNames;
     double sum = 0;
     //QVector<Line> lines;

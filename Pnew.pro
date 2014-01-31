@@ -6,7 +6,9 @@
 
 QT       += core gui multimedia multimediawidgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
+qtHaveModule(opengl) {
+    QT += opengl
+}
 TARGET = Pnew
 TEMPLATE = app
 
@@ -15,11 +17,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     processor.cpp \
     imagearea.cpp \
+    mainwidget.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
-    helpers.hpp
+    helpers.hpp \
+    mainwidget.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui
@@ -40,3 +44,8 @@ INCLUDEPATH += "C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0"
 LIBS += -L"C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\lib"
 RESOURCES +=
 }
+
+RESOURCES += \
+    shaders.qrc
+
+OTHER_FILES +=

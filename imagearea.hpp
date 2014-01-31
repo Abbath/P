@@ -14,7 +14,6 @@ class ImageArea : public QWidget
   Q_OBJECT
 public:
   explicit ImageArea(QWidget *parent = 0);
-
   void paintEvent(QPaintEvent *e);
   void mousePressEvent(QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *e);
@@ -22,13 +21,15 @@ public:
   void wheelEvent(QWheelEvent *e);
 
   void setDisplay(Display dis);
+  QImage getImage(){return im.image;}
+  unsigned getThreshold(){return im.threshold;}
   ~ImageArea();
 
 signals:
   void viewUpdated(Display d);
 
 private:
-  void update();
+  void Update();
 
 private:
   Ui::ImageArea *ui;
