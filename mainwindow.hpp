@@ -67,6 +67,8 @@ private slots:
     void on_pushButton_clicked(bool checked);
     void on_horizontalSlider_valueChanged(int value);
     void on_actionStop_triggered();
+    void on_actionAbout_triggered();
+    void on_actionHelp_triggered();
 };
 
 #endif // MAINWINDOW_HPP

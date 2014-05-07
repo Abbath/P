@@ -121,7 +121,11 @@ void MainWindow::plot(QVector<double> res)
     auto pointsIt = points.begin();
     
     for ( auto ri = res.constBegin(); ri != res.constEnd(); ++ ri, ++ pointsIt, ++ counter ) {
-        (*pointsIt) = QPointF( counter, (*ri) );
+        if(ri!=res.constBegin()){
+            (*pointsIt) = QPointF( counter, (*ri+*(ri-1))/2.0 );
+        }else{
+            (*pointsIt) = QPointF( counter, (*ri));
+        }
     }
     
     QwtPointSeriesData * data = new QwtPointSeriesData(points);
@@ -381,4 +385,15 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 void MainWindow::on_actionStop_triggered()
 {
     emit stop();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this,"About","Radiation sensor toolkit :)\nDanylo Lizanets © 2013-2014.");
+}
+
+
+void MainWindow::on_actionHelp_triggered()
+{
+     QDesktopServices::openUrl(QUrl("manual.pdf"));
 }
