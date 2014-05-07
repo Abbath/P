@@ -5,8 +5,15 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QGraphicsScene>
+#include <QtMultimedia/QMediaPlayer>
+#include <QVideoWidget>
 #include <helpers.hpp>
 #include <processor.hpp>
+#include <vprocessor.hpp>
+#include <qwt_plot.h>
+#include <qwt.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
 
 namespace Ui {
 class MainWindow;
@@ -22,13 +29,22 @@ public:
     ~MainWindow();
 private:
     QGraphicsScene *scene;
+    QwtPlotZoomer *zoom;
+    QwtPlotCurve curve;
+    QwtPlotZoomer *zoom0;
+    QwtPlotCurve curve0;
+    QVideoWidget * w;
+    QMediaPlayer * player;
     Ui::MainWindow *ui;
     Processor *p;
+    Vprocessor *vp;
     void disableUi(bool b = true);
 public slots:
     void Update(Display dis);
     void imageAreaUpdated(Display dis);
     void Error(QString a, QString b);
+    void plot(DataType t, QVector<double> res);
+    void plot(QVector<double> res0, QVector<double> res);
 private slots:
     void on_actionOpen_Image_s_triggered();
     void on_actionAlign_triggered();
@@ -44,6 +60,8 @@ private slots:
     void on_actionSave_2_triggered();
     void on_actionSave_as_Default_triggered();
     void on_action3D_triggered(bool checked);
+    void on_actionCalibrate_triggered();
+    void on_actionOpen_Video_triggered();
 };
 
 #endif // MAINWINDOW_HPP

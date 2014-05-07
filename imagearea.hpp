@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QtGui>
 #include <helpers.hpp>
+#include <processor.hpp>
 
 namespace Ui {
   class ImageArea;
@@ -20,6 +21,7 @@ public:
   void mouseReleaseEvent(QMouseEvent *e);
   void wheelEvent(QWheelEvent *e);
 
+  void setProcessor(Processor * p){ proc = p; }
   void setDisplay(Display dis);
   QImage getImage(){return im.image;}
   unsigned getThreshold(){return im.threshold;}
@@ -33,6 +35,7 @@ private:
 
 private:
   Ui::ImageArea *ui;
+  Processor * proc;
   Image im;
   QPoint origin[2] = { {0,0}, {0,0} };
   double sum = 0;

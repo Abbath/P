@@ -32,7 +32,7 @@ void ImageArea::paintEvent(QPaintEvent *e)
     }
     if(rect){
         painter.setPen(Qt::green);
-        painter.drawRect(im.crop[0].x(), im.crop[0].y(), im.crop[1].x() - im.crop[0].x(), im.crop[1].y() - im.crop[0].y());
+        painter.drawRect(im.crop);//im.crop[0].x(), im.crop[0].y(), im.crop[1].x() - im.crop[0].x(), im.crop[1].y() - im.crop[0].y());
         painter.setPen(Qt::white);
     }else{
         if(zoom_b){
@@ -60,8 +60,9 @@ void ImageArea::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton && !im.image.isNull() ){
         rect = true;
-        im.crop[0].setX(e->x());
-        im.crop[0].setY(e->y());
+        //im.crop[0].setX(e->x());
+        //im.crop[0].setY(e->y());
+        im.crop.setTopLeft(QPoint(e->x(),e->y()));
         update();
     }
     if(e->button() == Qt::LeftButton && !im.image.isNull()){
@@ -81,9 +82,9 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e)
 {
     if(!im.image.isNull()){
         if(rect){
-            im.crop[1].setX(e->x());
-            im.crop[1].setY(e->y());
-
+          //  im.crop[1].setX(e->x());
+          //  im.crop[1].setY(e->y());
+            im.crop.setBottomRight(QPoint(e->x(),e->y()));
         }else{
             zoom.setX(e->x());
             zoom.setY(e->y());
@@ -98,17 +99,20 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e)
 void ImageArea::mouseReleaseEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton && !im.image.isNull()){
-        if(im.crop[0].x() > im.crop[1].x()){
-            int tmp = im.crop[0].x();
-            im.crop[0].setX(im.crop[1].x());
-            im.crop[1].setX(tmp);
+        im.crop.setBottomRight(QPoint(e->x(),e->y()));
+       if(im.crop.top() > im.crop.bottom()){
+            int tmp = im.crop.top();
+            im.crop.setTop(im.crop.bottom());
+            im.crop.setBottom(tmp);
         }
-        if(im.crop[0].y() > im.crop[1].y()){
-            int tmp = im.crop[0].y();
-            im.crop[0].setY(im.crop[1].y());
-            im.crop[1].setY(tmp);
+        if(im.crop.left() > im.crop.right()){
+            int tmp = im.crop.left();
+            im.crop.setLeft(im.crop.right());
+            im.crop.setRight(tmp);
         }
-        im.image = im.image.copy(im.crop[0].x()- origin[1].x(),im.crop[0].y()-origin[1].y(),im.crop[1].x() - im.crop[0].x(),im.crop[1].y() - im.crop[0].y());
+        //im.image = im.image.copy(im.crop[0].x()- origin[1].x(),im.crop[0].y()-origin[1].y(),im.crop[1].x() - im.crop[0].x(),im.crop[1].y() - im.crop[0].y());
+        
+        im.image = im.image.copy(im.crop);        
         origin[0].setX(0);
         origin[0].setY(0);
         origin[1].setX(0);

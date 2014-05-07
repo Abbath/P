@@ -6,6 +6,9 @@
 #include <opencv/cv.h>
 #include <QPointF>
 
+enum class DataType{PIXELS, PRESSURE}; 
+
+
 class Comparator
 {
 public:
@@ -49,7 +52,7 @@ struct Line
 
 struct Config
 {
-  QPoint crop[2];
+  QRect crop;
   QPoint square[3];
   QPoint square0[3];
 };
@@ -57,7 +60,8 @@ struct Config
 struct Image
 {
   QImage image;
-  QPoint crop[2];
+  //QPoint crop[2];
+  QRect crop;
   QPoint square[3];
   Config conf;
   QString fileName;

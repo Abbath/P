@@ -1,6 +1,8 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 #include <QtConcurrent/QtConcurrent>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,8 +10,36 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->showMaximized();
+    ui->widget_3->setTitle("Pressure");
+    ui->widget_3->setAxisTitle(ui->widget_3->xBottom, "Frame");
+    ui->widget_3->setAxisTitle(ui->widget_3->yLeft,"Pressure [kPa]");
+    ui->widget_3->setAxisAutoScale( ui->widget_3->xBottom, true );
+    ui->widget_3->setAxisAutoScale( ui->widget_3->yLeft, true );
+    zoom = new QwtPlotZoomer(ui->widget_3->canvas());
+    zoom->setRubberBandPen(QPen(Qt::white));
+    QPen pen = QPen( Qt::red );
+    curve.setRenderHint( QwtPlotItem::RenderAntialiased );
+    curve.setPen( pen );
+    curve.attach( ui->widget_3 );
+    
+    ui->widget_4->setTitle("Pressure");
+    ui->widget_4->setAxisTitle(ui->widget_4->xBottom, "Pressure [kPa]");
+    ui->widget_4->setAxisTitle(ui->widget_4->yLeft,"Pixels");
+    ui->widget_4->setAxisAutoScale( ui->widget_4->xBottom, true );
+    ui->widget_4->setAxisAutoScale( ui->widget_4->yLeft, true );
+    zoom0 = new QwtPlotZoomer(ui->widget_4->canvas());
+    zoom0->setRubberBandPen(QPen(Qt::white));
+    QPen pen0 = QPen( Qt::red );
+    curve0.setRenderHint( QwtPlotItem::RenderAntialiased );
+    curve0.setPen( pen0 );
+    curve0.attach( ui->widget_4 );
+    
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
+    ui->tab_6->setDisabled(true);
+    
+    player = new QMediaPlayer;
+    player->setVideoOutput(ui->widget_2);
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
 
@@ -55,6 +85,45 @@ void MainWindow::Error(QString a, QString b)
     QMessageBox::warning(this,a,b);
 }
 
+void MainWindow::plot(DataType t, QVector<double> res)
+{
+    QVector < QPointF > points( res.size() );
+    quint32 counter = 0;
+    auto pointsIt = points.begin();
+    
+    for ( auto ri = res.constBegin(); ri != res.constEnd(); ++ ri, ++ pointsIt, ++ counter ) {
+        (*pointsIt) = QPointF( counter, (*ri) );
+    }
+    
+    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+ 
+        ui->widget_3->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+        ui->widget_3->replot();
+        curve.setData(data);
+        curve.attach( ui->widget_3 );
+        ui->widget_3->replot();
+       
+  
+    QMessageBox::information(this, "Done", "Done");
+}
+
+void MainWindow::plot(QVector<double> res0, QVector<double> res){
+    ui->widget_4->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+    ui->widget_4->replot();
+    
+    QVector < QPointF > points( res.size() );
+    auto pointsIt = points.begin();
+    
+    for ( int i = 0; i < res.size(); ++i) {
+        (*(pointsIt+i)) = QPointF( res[i], res0[i] );
+    }
+    
+    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+    curve0.setData(data);
+    curve0.attach( ui->widget_4 );
+    ui->widget_4->replot();
+}
+
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
     disableUi();
@@ -65,25 +134,25 @@ void MainWindow::on_actionOpen_Image_s_triggered()
 void MainWindow::on_actionAlign_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::align);
+    QtConcurrent::run(p, &Processor::align, true);
 }
 
 void MainWindow::on_actionRun_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::run);
+    QtConcurrent::run(p, &Processor::run, true);
 }
 
 void MainWindow::on_actionReset_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::run);
+    QtConcurrent::run(p, &Processor::reset);
 }
 
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::autorun);
+    QtConcurrent::run(p, &Processor::autorun,true);
 }
 
 void MainWindow::on_actionPrev_triggered()
@@ -137,5 +206,25 @@ void MainWindow::on_action3D_triggered(bool checked)
         QImage empty;
         ui->widget->setStep(1.0f);
         ui->widget->setImage(empty);
+    }
+}
+
+void MainWindow::on_actionCalibrate_triggered()
+{
+    //QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")) );
+    
+    QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
+    QString named = QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    disableUi();
+    QtConcurrent::run(p, &Processor::calibrate, name, named, names);
+}
+
+void MainWindow::on_actionOpen_Video_triggered()
+{
+    QString fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
+    if(!fileNameV.isNull()){
+        p->setFileNameV(fileNameV);
+        QtConcurrent::run(p,&Processor::run);
     }
 }

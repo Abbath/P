@@ -17,16 +17,22 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     processor.cpp \
     imagearea.cpp \
-    mainwidget.cpp
+    mainwidget.cpp \
+    dialog.cpp \
+    vprocessor.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
     helpers.hpp \
-    mainwidget.hpp
+    mainwidget.hpp \
+    dialog.hpp \
+    vprocessor.hpp
 
 FORMS    += mainwindow.ui \
-    imagearea.ui
+    imagearea.ui \
+    setup.ui \
+    dialog.ui
 
 QMAKE_CXXFLAGS += -std=c++11
 
