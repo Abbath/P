@@ -96,15 +96,15 @@ void MainWindow::plot(DataType t, QVector<double> res)
     }
     
     QwtPointSeriesData * data = new QwtPointSeriesData(points);
- 
-        ui->widget_3->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
-        ui->widget_3->replot();
-        curve.setData(data);
-        curve.attach( ui->widget_3 );
-        ui->widget_3->replot();
-       
-  
-    QMessageBox::information(this, "Done", "Done");
+    
+    ui->widget_3->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+    ui->widget_3->replot();
+    curve.setData(data);
+    curve.attach( ui->widget_3 );
+    ui->widget_3->replot();
+    
+    
+    // QMessageBox::information(this, "Done", "Done");
 }
 
 void MainWindow::plot(QVector<double> res0, QVector<double> res){
@@ -225,6 +225,63 @@ void MainWindow::on_actionOpen_Video_triggered()
     QString fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
     if(!fileNameV.isNull()){
         p->setFileNameV(fileNameV);
+        player->setMedia(QUrl::fromLocalFile(p->getVName()));
         QtConcurrent::run(p,&Processor::run);
     }
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    auto res = p->getRes();
+    auto pol = p->getPol();
+    if(!res.isEmpty()){
+        QString name = QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)"));
+        QFile file(name);
+        if(file.open(QFile::WriteOnly)){
+            QTextStream s(&file);
+            s << p->getImage().threshold << "\n";
+            s << res.size() << "\n";
+            for(int i=0; i< res.size(); ++i){
+                s << res[i] << " " << pol[i] << "\n";
+            }
+        }
+        QString name1 = QFileDialog::getSaveFileName(this,tr("Save plot image"), "", tr("Images (*.png)"));
+        if(!name1.isEmpty()){
+            ui->widget_3->grab().save(name1);
+        }
+    }
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    auto res = p->getARes();
+    auto pol = p->getAPres();
+    if(!res.isEmpty()){
+        QString name = QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)"));
+        QFile file(name);
+        if(file.open(QFile::WriteOnly)){
+            QTextStream s(&file);
+            for(int i=0; i< res.size(); ++i){
+                s << res[i] << " " << pol[i] << "\n";
+            }
+        }
+        QString name1 = QFileDialog::getSaveFileName(this,tr("Save plot image"), "", tr("Images (*.png)"));
+        if(!name1.isEmpty()){
+            ui->widget_4->grab().save(name1);
+        }
+    }
+}
+
+void MainWindow::on_pushButton_clicked(bool checked)
+{
+    if(checked){
+        player->play();
+    }else{
+        player->pause();
+    }
+}
+
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    player->setPosition(player->duration() / 100 * value);
 }

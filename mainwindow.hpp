@@ -62,6 +62,10 @@ private slots:
     void on_action3D_triggered(bool checked);
     void on_actionCalibrate_triggered();
     void on_actionOpen_Video_triggered();
+    void on_pushButton_2_clicked();
+    void on_pushButton_3_clicked();
+    void on_pushButton_clicked(bool checked);
+    void on_horizontalSlider_valueChanged(int value);
 };
 
 #endif // MAINWINDOW_HPP

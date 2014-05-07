@@ -366,6 +366,7 @@ void Processor::run()
         QThread::currentThread()->usleep(500);
         
         //image->image.save(QString::number(image->sum) + QString(".bmp"));
+        emit plot(DataType::PIXELS, vres);
         
     }
     vid = false;
@@ -380,7 +381,7 @@ void Processor::run()
     //QMessageBox::information(0,"Info","Done");
     //emit graphL(res);
     //emit graphM(resm);
-    emit plot(DataType::PIXELS, vres);
+    //emit plot(DataType::PIXELS, vres);
     emit plot(res, pres);
 }
 

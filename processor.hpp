@@ -34,6 +34,8 @@ public:
     Image& getImage(){ return images[curr];}
     const QVector<double>& getRes() const {return vres;}
     const QVector<double>& getPol() const {return vres0;}
+    const QVector<double>& getARes() const { return res;}
+    const QVector<double>& getAPres() const { return pres;}
     const QString getVName() const { return fileNameV;}    
 
 signals:
