@@ -1,6 +1,10 @@
 #include "imagearea.hpp"
 #include "ui_imagearea.h"
 
+/*!
+ * \brief ImageArea::ImageArea
+ * \param parent
+ */
 ImageArea::ImageArea(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageArea)
@@ -8,6 +12,9 @@ ImageArea::ImageArea(QWidget *parent) :
     ui->setupUi(this);
 }
 
+/*!
+ * \brief ImageArea::Update
+ */
 void ImageArea::Update()
 {
     Display dis;
@@ -17,6 +24,10 @@ void ImageArea::Update()
     emit viewUpdated(dis);
 }
 
+/*!
+ * \brief ImageArea::paintEvent
+ * \param e
+ */
 void ImageArea::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
@@ -56,6 +67,10 @@ void ImageArea::paintEvent(QPaintEvent *e)
     e->accept();
 }
 
+/*!
+ * \brief ImageArea::mousePressEvent
+ * \param e
+ */
 void ImageArea::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton && !im.image.isNull() ){
@@ -78,6 +93,10 @@ void ImageArea::mousePressEvent(QMouseEvent *e)
     }
 }
 
+/*!
+ * \brief ImageArea::mouseMoveEvent
+ * \param e
+ */
 void ImageArea::mouseMoveEvent(QMouseEvent *e)
 {
     if(!im.image.isNull()){
@@ -96,6 +115,10 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e)
     update();
 }
 
+/*!
+ * \brief ImageArea::mouseReleaseEvent
+ * \param e
+ */
 void ImageArea::mouseReleaseEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton && !im.image.isNull()){
@@ -125,6 +148,10 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e)
     update();
 }
 
+/*!
+ * \brief ImageArea::wheelEvent
+ * \param e
+ */
 void ImageArea::wheelEvent(QWheelEvent *e)
 {
     qint32 a = im.threshold + e->delta()/80;
@@ -134,6 +161,10 @@ void ImageArea::wheelEvent(QWheelEvent *e)
     Update();
 }
 
+/*!
+ * \brief ImageArea::setDisplay
+ * \param dis
+ */
 void ImageArea::setDisplay(Display dis)
 {
     im = dis.im;
@@ -142,6 +173,9 @@ void ImageArea::setDisplay(Display dis)
     update();
 }
 
+/*!
+ * \brief ImageArea::~ImageArea
+ */
 ImageArea::~ImageArea()
 {
     delete ui;

@@ -1,11 +1,21 @@
 #include "processor.hpp"
 
+/*!
+ * \brief Processor::Processor
+ * \param parent
+ */
 Processor::Processor(QObject *parent) :
     QObject(parent)
 {
     images.resize(1);
 }
 
+/*!
+ * \brief Processor::leastsquares
+ * \param x
+ * \param yy
+ * \return 
+ */
 std::pair<long double, long double> Processor::leastsquares(const QVector<double> &x, const QVector<double> &yy)const
 {
     QVector<double> y = yy;
@@ -109,6 +119,13 @@ std::pair<long double, long double> Processor::leastsquares(const QVector<double
     return std::make_pair(A,B);
 }
 
+/*!
+ * \brief Processor::calculate
+ * \param res
+ * \param pres
+ * \param val
+ * \return 
+ */
 double Processor::calculate(const QVector<double> &res, const QVector<double> &pres, double val) const 
 {
     
@@ -156,6 +173,11 @@ double Processor::calculate(const QVector<double> &res, const QVector<double> &p
     
 }
 
+/*!
+ * \brief Processor::loadImage
+ * \param name
+ * \return 
+ */
 QImage Processor::loadImage(const QString &name)
 {
     QImage image;
@@ -175,7 +197,9 @@ QImage Processor::loadImage(const QString &name)
     }
 }
 
-
+/*!
+ * \brief Processor::prev
+ */
 void Processor::prev()
 {
     if(!curr){
@@ -186,6 +210,9 @@ void Processor::prev()
     }
 }
 
+/*!
+ * \brief Processor::next
+ */
 void Processor::next()
 {
     if(curr == (unsigned)fileNames.size()-1){
@@ -196,6 +223,10 @@ void Processor::next()
     }
 }
 
+/*!
+ * \brief Processor::openImage
+ * \param names
+ */
 void Processor::openImage(const QStringList &names)
 {
     qDebug() << "I'm in Processor::openImage\n";
@@ -218,11 +249,18 @@ void Processor::openImage(const QStringList &names)
     }
 }
 
+/*!
+ * \brief Processor::die
+ */
 void Processor::die()
 {
     this->deleteLater();
 }
 
+/*!
+ * \brief Processor::setDisplay
+ * \param dis
+ */
 void Processor::setDisplay(const Display &dis)
 {
     images[curr] = dis.im;
@@ -230,6 +268,10 @@ void Processor::setDisplay(const Display &dis)
     origin[1] = dis.origin[1];
 }
 
+/*!
+ * \brief Processor::getDisplay
+ * \return 
+ */
 Display Processor::getDisplay()
 {
     Display dis;
@@ -239,6 +281,11 @@ Display Processor::getDisplay()
     return dis;
 }
 
+/*!
+ * \brief Processor::sharpen
+ * \param im
+ * \return 
+ */
 QImage Processor::sharpen(const QImage &im)
 {
     QImage image = im;
@@ -278,6 +325,9 @@ QImage Processor::sharpen(const QImage &im)
     return image;
 }
 
+/*!
+ * \brief Processor::repaint
+ */
 void Processor::repaint()
 {
     
@@ -292,6 +342,15 @@ void Processor::repaint()
     
 }
 
+/*!
+ * \brief Processor::searchTheLight
+ * \param image
+ * \param tre
+ * \param x1
+ * \param y1
+ * \param x2
+ * \param y2
+ */
 unsigned Processor::searchTheLight(const QImage& image, unsigned tre, unsigned x1, unsigned y1, unsigned x2, unsigned y2){
     unsigned counter=0;
     for (unsigned  i = x1 + 1; i != x2; x1 < x2 ? ++i : --i ) {
@@ -304,6 +363,9 @@ unsigned Processor::searchTheLight(const QImage& image, unsigned tre, unsigned x
     return counter;
 }
 
+/*!
+ * \brief Processor::run
+ */
 void Processor::run()
 {
     CvCapture * capture = cvCaptureFromAVI(fileNameV.toStdString().c_str());
@@ -355,7 +417,7 @@ void Processor::run()
         vres0.push_back(std::accumulate(&image.bound_counter[0], image.bound_counter+4,0));
         QThread::currentThread()->usleep(500);
         
-        emit plot(DataType::PIXELS, vres);
+        emit plot(vres);
         
     }
     vid = false;
@@ -363,6 +425,12 @@ void Processor::run()
     emit plot(res, pres);
 }
 
+/*!
+ * \brief Processor::calibrate
+ * \param name
+ * \param named
+ * \param names
+ */
 void Processor::calibrate(const QString &name, const QString &named, const QStringList &names)
 {
     loadConf(name);
@@ -396,6 +464,10 @@ void Processor::calibrate(const QString &name, const QString &named, const QStri
     saveData(named);
 }
 
+/*!
+ * \brief Processor::loadData
+ * \param name
+ */
 void Processor::loadData(const QString &name)
 {
     QString filename = name;
@@ -424,6 +496,10 @@ void Processor::loadData(const QString &name)
     }
 }
 
+/*!
+ * \brief Processor::saveData
+ * \param name
+ */
 void Processor::saveData(const QString &name)
 {
     QString filename = name;
@@ -439,6 +515,16 @@ void Processor::saveData(const QString &name)
     }
 }
 
+void Processor::stopThis()
+{
+    stop = true;
+}
+
+/*!
+ * \brief Processor::saveConf
+ * \param name
+ * \param def
+ */
 void Processor::saveConf(const QString& name, bool def)
 {
     Image& image = images[curr];
@@ -492,6 +578,10 @@ void Processor::saveConf(const QString& name, bool def)
     
 }
 
+/*!
+ * \brief Processor::loadConf
+ * \param name
+ */
 void Processor::loadConf(const QString &name)
 {
     Image& image = images[curr];
@@ -524,7 +614,11 @@ void Processor::loadConf(const QString &name)
     image.counter = 3;
 }
 
-void Processor::align(bool vu_flag)
+/*!
+ * \brief Processor::align
+ * \param vu_flag
+ */
+void Processor::align()
 {
     Image& image = images[curr];
     QMatrix matrix;
@@ -534,6 +628,10 @@ void Processor::align(bool vu_flag)
     if(!vid)repaint();
 }
 
+/*!
+ * \brief Processor::run
+ * \param vu_flag
+ */
 void Processor::run(bool vu_flag)
 {
     Image& image = images[curr];
@@ -567,6 +665,9 @@ void Processor::run(bool vu_flag)
     if(!vid && vu_flag)repaint();
 }
 
+/*!
+ * \brief Processor::reset
+ */
 void Processor::reset()
 {
     Image& image = images[curr];
@@ -578,6 +679,10 @@ void Processor::reset()
     repaint();
 }
 
+/*!
+ * \brief Processor::autorun
+ * \param vu_flag
+ */
 void Processor::autorun(bool vu_flag)
 {
     if(!fileNameV.isEmpty()){
@@ -615,11 +720,6 @@ void Processor::autorun(bool vu_flag)
             for(int i = 0; i < 3; ++i){
                 image.square[i] = conf.square[i];
             }
-            //            if(image.crop[0].x() > 0 && image.crop[0].x() < image.image.width() &&
-            //                    image.crop[0].y() > 0 && image.crop[0].y() < image.image.height() && 
-            //                    abs(image.crop[1].x() - image.crop[0].x()) < image.crop[0].x() &&
-            //                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
-            //image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
             image.image = image.image.copy(image.crop);
             image.counter = 3;
             repaint();
@@ -640,6 +740,11 @@ void Processor::autorun(bool vu_flag)
     }
 }
 
+/*!
+ * \brief Processor::IplImage2QImage
+ * \param iplImage
+ * \return 
+ */
 QImage Processor::IplImage2QImage(const IplImage *iplImage)
 {
     int height = iplImage->height;

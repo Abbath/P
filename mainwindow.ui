@@ -372,6 +372,7 @@
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionAutorun"/>
+   <addaction name="actionStop"/>
    <addaction name="actionPrev"/>
    <addaction name="actionNext"/>
   </widget>
@@ -502,6 +503,17 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop video processing</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

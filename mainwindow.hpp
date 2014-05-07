@@ -9,7 +9,6 @@
 #include <QVideoWidget>
 #include <helpers.hpp>
 #include <processor.hpp>
-#include <vprocessor.hpp>
 #include <qwt_plot.h>
 #include <qwt.h>
 #include <qwt_plot_curve.h>
@@ -37,13 +36,14 @@ private:
     QMediaPlayer * player;
     Ui::MainWindow *ui;
     Processor *p;
-    Vprocessor *vp;
     void disableUi(bool b = true);
+signals:
+    void stop();
 public slots:
     void Update(Display dis);
     void imageAreaUpdated(Display dis);
     void Error(QString a, QString b);
-    void plot(DataType t, QVector<double> res);
+    void plot(QVector<double> res);
     void plot(QVector<double> res0, QVector<double> res);
 private slots:
     void on_actionOpen_Image_s_triggered();
@@ -66,6 +66,7 @@ private slots:
     void on_pushButton_3_clicked();
     void on_pushButton_clicked(bool checked);
     void on_horizontalSlider_valueChanged(int value);
+    void on_actionStop_triggered();
 };
 
 #endif // MAINWINDOW_HPP

@@ -4,6 +4,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+/*!
+ * \brief MainWindow::MainWindow
+ * \param parent
+ */
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -43,11 +47,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
 
+/*!
+ * \brief MainWindow::~MainWindow
+ */
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+/*!
+ * \brief MainWindow::disableUi
+ * \param b
+ */
 void MainWindow::disableUi(bool b)
 {
     if(b){
@@ -61,6 +72,10 @@ void MainWindow::disableUi(bool b)
     }
 }
 
+/*!
+ * \brief MainWindow::Update
+ * \param dis
+ */
 void MainWindow::Update(Display dis)
 {
     disableUi(false);
@@ -75,17 +90,31 @@ void MainWindow::Update(Display dis)
     scene->addPixmap(QPixmap(dis.im.fileName));
 }
 
+/*!
+ * \brief MainWindow::imageAreaUpdated
+ * \param dis
+ */
 void MainWindow::imageAreaUpdated(Display dis)
 {
     p->setDisplay(dis);
 }
 
+/*!
+ * \brief MainWindow::Error
+ * \param a
+ * \param b
+ */
 void MainWindow::Error(QString a, QString b)
 {
     QMessageBox::warning(this,a,b);
 }
 
-void MainWindow::plot(DataType t, QVector<double> res)
+/*!
+ * \brief MainWindow::plot
+ * \param t
+ * \param res
+ */
+void MainWindow::plot(QVector<double> res)
 {
     QVector < QPointF > points( res.size() );
     quint32 counter = 0;
@@ -104,6 +133,11 @@ void MainWindow::plot(DataType t, QVector<double> res)
     ui->widget_3->replot();
 }
 
+/*!
+ * \brief MainWindow::plot
+ * \param res0
+ * \param res
+ */
 void MainWindow::plot(QVector<double> res0, QVector<double> res){
     ui->widget_4->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
     ui->widget_4->replot();
@@ -121,6 +155,9 @@ void MainWindow::plot(QVector<double> res0, QVector<double> res){
     ui->widget_4->replot();
 }
 
+/*!
+ * \brief MainWindow::on_actionOpen_Image_s_triggered
+ */
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
     disableUi();
@@ -128,72 +165,112 @@ void MainWindow::on_actionOpen_Image_s_triggered()
     QtConcurrent::run(p, &Processor::openImage, names);
 }
 
+/*!
+ * \brief MainWindow::on_actionAlign_triggered
+ */
 void MainWindow::on_actionAlign_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::align, true);
+    QtConcurrent::run(p, &Processor::align);
 }
 
+/*!
+ * \brief MainWindow::on_actionRun_triggered
+ */
 void MainWindow::on_actionRun_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::run, true);
 }
 
+/*!
+ * \brief MainWindow::on_actionReset_triggered
+ */
 void MainWindow::on_actionReset_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::reset);
 }
 
+/*!
+ * \brief MainWindow::on_actionAutorun_triggered
+ */
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::autorun,true);
 }
 
+/*!
+ * \brief MainWindow::on_actionPrev_triggered
+ */
 void MainWindow::on_actionPrev_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::prev);
 }
 
+/*!
+ * \brief MainWindow::on_actionNext_triggered
+ */
 void MainWindow::on_actionNext_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::next);
 }
 
+/*!
+ * \brief MainWindow::on_actionExit_triggered
+ */
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
 }
 
+/*!
+ * \brief MainWindow::on_actionLoad_triggered
+ */
 void MainWindow::on_actionLoad_triggered()
 {
     QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")) );
 }
 
+/*!
+ * \brief MainWindow::on_actionSave_triggered
+ */
 void MainWindow::on_actionSave_triggered()
 {
     QtConcurrent::run(p, &Processor::saveConf, QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)")), false);
 }
 
+/*!
+ * \brief MainWindow::on_actionLoad_2_triggered
+ */
 void MainWindow::on_actionLoad_2_triggered()
 {
     QtConcurrent::run(p, &Processor::loadData, QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)")));
 }
 
+/*!
+ * \brief MainWindow::on_actionSave_2_triggered
+ */
 void MainWindow::on_actionSave_2_triggered()
 {
     QtConcurrent::run(p, &Processor::saveData, QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)")));
 }
 
+/*!
+ * \brief MainWindow::on_actionSave_as_Default_triggered
+ */
 void MainWindow::on_actionSave_as_Default_triggered()
 {
     QtConcurrent::run(p, &Processor::saveConf, QString("default.conf"),true);
 }
 
+/*!
+ * \brief MainWindow::on_action3D_triggered
+ * \param checked
+ */
 void MainWindow::on_action3D_triggered(bool checked)
 {
     if(checked){
@@ -206,6 +283,9 @@ void MainWindow::on_action3D_triggered(bool checked)
     }
 }
 
+/*!
+ * \brief MainWindow::on_actionCalibrate_triggered
+ */
 void MainWindow::on_actionCalibrate_triggered()
 {    
     QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
@@ -215,6 +295,9 @@ void MainWindow::on_actionCalibrate_triggered()
     QtConcurrent::run(p, &Processor::calibrate, name, named, names);
 }
 
+/*!
+ * \brief MainWindow::on_actionOpen_Video_triggered
+ */
 void MainWindow::on_actionOpen_Video_triggered()
 {
     QString fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
@@ -225,6 +308,9 @@ void MainWindow::on_actionOpen_Video_triggered()
     }
 }
 
+/*!
+ * \brief MainWindow::on_pushButton_2_clicked
+ */
 void MainWindow::on_pushButton_2_clicked()
 {
     auto res = p->getRes();
@@ -247,6 +333,9 @@ void MainWindow::on_pushButton_2_clicked()
     }
 }
 
+/*!
+ * \brief MainWindow::on_pushButton_3_clicked
+ */
 void MainWindow::on_pushButton_3_clicked()
 {
     auto res = p->getARes();
@@ -267,6 +356,10 @@ void MainWindow::on_pushButton_3_clicked()
     }
 }
 
+/*!
+ * \brief MainWindow::on_pushButton_clicked
+ * \param checked
+ */
 void MainWindow::on_pushButton_clicked(bool checked)
 {
     if(checked){
@@ -276,7 +369,16 @@ void MainWindow::on_pushButton_clicked(bool checked)
     }
 }
 
+/*!
+ * \brief MainWindow::on_horizontalSlider_valueChanged
+ * \param value
+ */
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
     player->setPosition(player->duration() / 100 * value);
+}
+
+void MainWindow::on_actionStop_triggered()
+{
+    emit stop();
 }

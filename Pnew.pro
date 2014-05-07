@@ -18,16 +18,14 @@ SOURCES += main.cpp\
     processor.cpp \
     imagearea.cpp \
     mainwidget.cpp \
-    dialog.cpp \
-    vprocessor.cpp
+    dialog.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
     helpers.hpp \
     mainwidget.hpp \
-    dialog.hpp \
-    vprocessor.hpp
+    dialog.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \

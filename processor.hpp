@@ -20,14 +20,11 @@ public:
     void saveImage(const QString &name);
     unsigned searchTheLight(const QImage& image, unsigned tre, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
     void run(bool vu_flag);
-    //void switchMode();
-    //void setMode(Modes m) {mode = m;}
     void calibrate(const QString &name, const QString &named, const QStringList &names);
     void saveResults(const QString &name);
     void getFrame(int n);
     void processVideo();
     int openVideo(const QString &name);
-    //void stop() { cont = false;}
     void setDisplay(const Display& dis);
     void setFileNameV(QString _f){fileNameV = _f;}
     Display getDisplay();
@@ -41,10 +38,10 @@ public:
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);
-    void plot(DataType t, QVector<double> res);
+    void plot( QVector<double> res);
     void plot(QVector<double>, QVector<double>);
 public slots:
-    void align(bool vu_flag = true);
+    void align();
     void reset();
     void autorun(bool vu_flag = true);
     void run();
@@ -54,7 +51,7 @@ public slots:
     void saveConf(const QString &name, bool def);
     void loadData(const QString &name);
     void saveData(const QString &name);
-    //void setDisplay(Display dis);
+    void stopThis();
     void openImage(const QStringList &names);
     void die();
 
@@ -70,7 +67,6 @@ private:
     QString fileNameV;
     QStringList fileNames;
     double sum = 0;
-    //QVector<Line> lines;
     Config conf;
 
     QVector<double> vres;
