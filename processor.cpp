@@ -306,7 +306,6 @@ unsigned Processor::searchTheLight(const QImage& image, unsigned tre, unsigned x
 
 void Processor::run()
 {
-    //std::ofstream f("log1.txt");
     CvCapture * capture = cvCaptureFromAVI(fileNameV.toStdString().c_str());
     if(!capture)
     {
@@ -338,19 +337,11 @@ void Processor::run()
         
         images[curr].image = timage; 
         Image& image = images[curr];
-        //image.crop[0] = conf.crop[0];
-        //image.crop[1] = conf.crop[1];
         image.crop = conf.crop;
         for(int i = 0; i < 3; ++i){
             image.square[i] = conf.square[i];
         }
-        //            if(image.crop[0].x() > 0 && image.crop[0].x() < image.image.width() &&
-        //                    image.crop[0].y() > 0 && image.crop[0].y() < image.image.height() && 
-        //                    abs(image.crop[1].x() - image.crop[0].x()) < image.crop[0].x() &&
-        //                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
-        //image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
         image.image = image.image.copy(image.crop);
-        //            }
         image.counter = 3;
         align();
         image.counter = 3;
@@ -358,37 +349,23 @@ void Processor::run()
             image.square[i] = conf.square0[i];
         }
         run(true);
-        //image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
         image.sum = calculate(res, pres, std::accumulate(&image.bound_counter[0], image.bound_counter+4,0)/1000.);
         qDebug() << image.sum;
         vres.push_back(image.sum);
         vres0.push_back(std::accumulate(&image.bound_counter[0], image.bound_counter+4,0));
         QThread::currentThread()->usleep(500);
         
-        //image->image.save(QString::number(image->sum) + QString(".bmp"));
         emit plot(DataType::PIXELS, vres);
         
     }
     vid = false;
-    
-    
-    
-    //QImage image = IplImage2QImage(frame).mirrored(false, true);
-    //QPair<int,double> pr = processImage(image);
-    //res.push_back(pr.first);
-    //resm.push_back(pr.second);
     cvReleaseCapture(&capture);
-    //QMessageBox::information(0,"Info","Done");
-    //emit graphL(res);
-    //emit graphM(resm);
-    //emit plot(DataType::PIXELS, vres);
     emit plot(res, pres);
 }
 
 void Processor::calibrate(const QString &name, const QString &named, const QStringList &names)
 {
     loadConf(name);
-    //QStringList names = QFileDialog::getOpenFileNames(this,tr("Open images"), "", tr("Images (*.bmp)"));
     images.clear();
     images.resize(1);
     res.clear();
@@ -399,7 +376,6 @@ void Processor::calibrate(const QString &name, const QString &named, const QStri
     curr = 0;
     fileNames.append(names[0]);
     for(auto it = names.begin(); it != names.end(); ++it){
-        //fileNames[0] = *it;
         images[0].image = loadImage(*it);
         images[0].l = true;
         images[0].r = false;
@@ -422,7 +398,7 @@ void Processor::calibrate(const QString &name, const QString &named, const QStri
 
 void Processor::loadData(const QString &name)
 {
-    QString filename = name;//QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)"));
+    QString filename = name;
     QFile file(filename);
     QVector<double> r4;
     r4.resize(4);
@@ -445,13 +421,12 @@ void Processor::loadData(const QString &name)
         }
     }else{
         emit somethingWentWrong("Error", "Can not open data file");
-        //repaint();
     }
 }
 
 void Processor::saveData(const QString &name)
 {
-    QString filename = name;//QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QString filename = name;
     QFile file(filename);
     if(file.open(QFile::WriteOnly)){
         QTextStream str(&file);
@@ -461,7 +436,6 @@ void Processor::saveData(const QString &name)
         }
     }else{
         emit somethingWentWrong("Error", "Can not open data file");
-        //repaint();
     }
 }
 
@@ -617,19 +591,11 @@ void Processor::autorun(bool vu_flag)
             curr = i;
             images[curr].image = loadImage(fileNames[curr]);
             Image& image = images[curr];
-            //image.crop[0] = conf.crop[0];
-            //image.crop[1] = conf.crop[1];
             image.crop = conf.crop;
             for(int i = 0; i < 3; ++i){
                 image.square[i] = conf.square[i];
             }
-            //            if(image.crop[0].x() > 0 && image.crop[0].x() < image.image.width() &&
-            //                    image.crop[0].y() > 0 && image.crop[0].y() < image.image.height() && 
-            //                    abs(image.crop[1].x() - image.crop[0].x()) < image.crop[0].x() &&
-            //                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
-            //image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
             image.image = image.image.copy(image.crop);
-            //            }
             image.counter = 3;
             align();
             image.counter = 3;
@@ -637,18 +603,14 @@ void Processor::autorun(bool vu_flag)
                 image.square[i] = conf.square0[i];
             }
             run(true);
-            //image->sum = QtConcurrent::run(&conv, &Converter::calculate, res, pres, std::accumulate(&image->bound_counter[0], image->bound_counter+4,0)/1000.).result();
             image.sum = calculate(res, pres, std::accumulate(&image.bound_counter[0], image.bound_counter+4,0)/1000.);
             vres.push_back(image.sum);
             vres0.push_back(std::accumulate(&image.bound_counter[0], image.bound_counter+4,0));
-            //image->image.save(QString::number(image->sum) + QString(".bmp"));
         }
         vid = false;
     }else{
         Image& image = images[curr];
         if(!image.r && image.l){
-            //image.crop[0] = conf.crop[0];
-            //image.crop[1] = conf.crop[1];
             image.crop = conf.crop;
             for(int i = 0; i < 3; ++i){
                 image.square[i] = conf.square[i];
@@ -659,7 +621,6 @@ void Processor::autorun(bool vu_flag)
             //                    abs(image.crop[1].y() - image.crop[0].y()) < image.crop[0].y() ){
             //image.image = image.image.copy(image.crop[0].x(), image.crop[0].y(), image.crop[1].x() - image.crop[0].x(), image.crop[1].y() - image.crop[0].y());
             image.image = image.image.copy(image.crop);
-            //            }
             image.counter = 3;
             repaint();
             align();  

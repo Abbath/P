@@ -102,9 +102,6 @@ void MainWindow::plot(DataType t, QVector<double> res)
     curve.setData(data);
     curve.attach( ui->widget_3 );
     ui->widget_3->replot();
-    
-    
-    // QMessageBox::information(this, "Done", "Done");
 }
 
 void MainWindow::plot(QVector<double> res0, QVector<double> res){
@@ -210,9 +207,7 @@ void MainWindow::on_action3D_triggered(bool checked)
 }
 
 void MainWindow::on_actionCalibrate_triggered()
-{
-    //QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")) );
-    
+{    
     QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
     QString named = QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));

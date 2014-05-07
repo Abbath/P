@@ -24,9 +24,9 @@ void ImageArea::paintEvent(QPaintEvent *e)
     if(im.counter > 0){
         for(unsigned i = 0; i < im.counter; ++i){
             painter.setPen(Qt::red);
-            painter.drawLine(im.square[i].x() - 4, im.square[i].y(), im.square[i].x() + 4, im.square[i].y());
-            painter.drawLine(im.square[i].x(), im.square[i].y() - 4, im.square[i].x(), im.square[i].y() + 4);
-            painter.drawText(im.square[i].x() + 3, im.square[i].y() - 3, QString::number(i+1));
+            painter.drawLine(im.square[i].x()-origin[0].x() - 4, im.square[i].y()-origin[0].y(), im.square[i].x()-origin[0].x() + 4, im.square[i].y()-origin[0].y());
+            painter.drawLine(im.square[i].x()-origin[0].x(), im.square[i].y()-origin[0].y() - 4, im.square[i].x()-origin[0].x(), im.square[i].y()-origin[0].y() + 4);
+            painter.drawText(im.square[i].x()-origin[0].x() + 3, im.square[i].y()-origin[0].y() - 3, QString::number(i+1));
             painter.setPen(Qt::white);
         }
     }
@@ -100,18 +100,7 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton && !im.image.isNull()){
         im.crop.setBottomRight(QPoint(e->x(),e->y()));
-       if(im.crop.top() > im.crop.bottom()){
-            int tmp = im.crop.top();
-            im.crop.setTop(im.crop.bottom());
-            im.crop.setBottom(tmp);
-        }
-        if(im.crop.left() > im.crop.right()){
-            int tmp = im.crop.left();
-            im.crop.setLeft(im.crop.right());
-            im.crop.setRight(tmp);
-        }
-        //im.image = im.image.copy(im.crop[0].x()- origin[1].x(),im.crop[0].y()-origin[1].y(),im.crop[1].x() - im.crop[0].x(),im.crop[1].y() - im.crop[0].y());
-        
+        im.crop = im.crop.normalized().translated(origin[0].x(),origin[0].y());        
         im.image = im.image.copy(im.crop);        
         origin[0].setX(0);
         origin[0].setY(0);
@@ -121,8 +110,8 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e)
     }
     if(e->button() == Qt::LeftButton && !im.image.isNull()){
         if(im.counter < 3){
-            im.square[im.counter].setX(e->x());
-            im.square[im.counter].setY(e->y());
+            im.square[im.counter].setX(e->x()+origin[0].x());
+            im.square[im.counter].setY(e->y()+origin[0].y());
             im.counter++;
         }else{
             im.counter = 0;
