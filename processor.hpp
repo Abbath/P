@@ -10,6 +10,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <helpers.hpp>
 
+/*!
+ * \brief The Processor class
+ */
 class Processor : public QObject
 {
     Q_OBJECT

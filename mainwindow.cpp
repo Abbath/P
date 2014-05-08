@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->showMaximized();
     ui->widget_3->setTitle("Pressure");
     ui->widget_3->setAxisTitle(ui->widget_3->xBottom, "Frame");
     ui->widget_3->setAxisTitle(ui->widget_3->yLeft,"Pressure [kPa]");
@@ -46,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     
     player = new QMediaPlayer;
     player->setVideoOutput(ui->widget_2);
+    this->showMaximized();
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
 
@@ -380,17 +380,25 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     player->setPosition(player->duration() / 100 * value);
 }
 
+/*!
+ * \brief MainWindow::on_actionStop_triggered
+ */
 void MainWindow::on_actionStop_triggered()
 {
     emit stop();
 }
 
+/*!
+ * \brief MainWindow::on_actionAbout_triggered
+ */
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this,"About","Radiation sensor toolkit :)\nDanylo Lizanets © 2013-2014.");
 }
 
-
+/*!
+ * \brief MainWindow::on_actionHelp_triggered
+ */
 void MainWindow::on_actionHelp_triggered()
 {
      QDesktopServices::openUrl(QUrl("manual.pdf"));

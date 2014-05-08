@@ -515,6 +515,9 @@ void Processor::saveData(const QString &name)
     }
 }
 
+/*!
+ * \brief Processor::stopThis
+ */
 void Processor::stopThis()
 {
     stop = true;
