@@ -44,7 +44,7 @@ win32{
 LIBS += -lopencv_core246 -lopencv_highgui246 -lopencv_imgproc246 -lqwt 
 LIBS += -L"C:\opencv-build\bin"
 INCLUDEPATH += "C:\opencv\build\include"
-INCLUDEPATH += "C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0"
+INCLUDEPATH += "C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\src"
 LIBS += -L"C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\lib"
 RESOURCES +=
 }

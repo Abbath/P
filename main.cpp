@@ -8,7 +8,6 @@
 
 int main(int argc, char *argv[])
 {
-    
     QApplication a(argc, argv);
     MainWindow w;
     Processor p;
@@ -23,9 +22,9 @@ int main(int argc, char *argv[])
     
     p.loadConf("default.conf");  
     w.show();
-    Dialog d;
+    /*Dialog d;
     d.setModal(true);
     d.show();
-    QObject::connect(&d,SIGNAL(rejected()), &w, SLOT(close()));
+    QObject::connect(&d,SIGNAL(rejected()), &w, SLOT(close()));*/
     return a.exec();
 }

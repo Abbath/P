@@ -27,15 +27,15 @@ public:
     void setProcessor(Processor * _p) { p = _p;}
     ~MainWindow();
 private:
-    QGraphicsScene *scene;
-    QwtPlotZoomer *zoom;
-    QwtPlotCurve curve;
-    QwtPlotZoomer *zoom0;
-    QwtPlotCurve curve0;
-    QVideoWidget * w;
-    QMediaPlayer * player;
-    Ui::MainWindow *ui;
-    Processor *p;
+    QGraphicsScene *scene = nullptr;
+    QwtPlotZoomer *zoom = nullptr;
+    QwtPlotCurve *curve = nullptr;
+    QwtPlotZoomer *zoom0 = nullptr;
+    QwtPlotCurve *curve0 = nullptr;
+    QVideoWidget * w = nullptr;
+    QMediaPlayer * player = nullptr;
+    Ui::MainWindow *ui = nullptr;
+    Processor *p = nullptr;
     void disableUi(bool b = true);
 signals:
     void stop();
