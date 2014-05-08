@@ -203,7 +203,7 @@ QImage Processor::loadImage(const QString &name)
 void Processor::prev()
 {
     if(!curr){
-        return;
+        repaint();
     }else{
         curr--;
         repaint();
@@ -216,7 +216,7 @@ void Processor::prev()
 void Processor::next()
 {
     if(curr == (unsigned)fileNames.size()-1){
-        return;
+        repaint();
     }else{
         curr++;
         repaint();
@@ -735,6 +735,7 @@ void Processor::autorun(bool vu_flag)
                 repaint();
             }
         }else{
+            repaint();
             emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
     }
