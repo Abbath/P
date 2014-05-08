@@ -243,6 +243,7 @@ void Processor::openImage(const QStringList &names)
             images[curr].image = loadImage(fileNames[curr]);
             images[curr].counter = 0;
             images[curr].l = true;
+            images[curr].r = false;
         }
         curr = 0;
         repaint();
