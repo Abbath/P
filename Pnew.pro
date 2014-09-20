@@ -18,21 +18,25 @@ SOURCES += main.cpp\
     processor.cpp \
     imagearea.cpp \
     mainwidget.cpp \
-    dialog.cpp
+    dialog.cpp \
+    capturewrapper.cpp \
+    imageconverter.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
     helpers.hpp \
     mainwidget.hpp \
-    dialog.hpp
+    dialog.hpp \
+    capturewrapper.hpp \
+    imageconverter.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \
     setup.ui \
     dialog.ui
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra
 
 unix{
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt

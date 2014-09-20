@@ -8,35 +8,35 @@
  * \brief MainWindow::MainWindow
  * \param parent
  */
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->showMaximized();
     ui->widget_3->setTitle("Pressure");
     ui->widget_3->setAxisTitle(ui->widget_3->xBottom, "Frame");
-    ui->widget_3->setAxisTitle(ui->widget_3->yLeft,"Pressure [kPa]");
-    ui->widget_3->setAxisAutoScale( ui->widget_3->xBottom, true );
-    ui->widget_3->setAxisAutoScale( ui->widget_3->yLeft, true );
+    ui->widget_3->setAxisTitle(ui->widget_3->yLeft, "Pressure [kPa]");
+    ui->widget_3->setAxisAutoScale(ui->widget_3->xBottom, true);
+    ui->widget_3->setAxisAutoScale(ui->widget_3->yLeft, true);
     zoom = new QwtPlotZoomer(ui->widget_3->canvas());
     zoom->setRubberBandPen(QPen(Qt::white));
-    QPen pen = QPen( Qt::red );
-    curve.setRenderHint( QwtPlotItem::RenderAntialiased );
-    curve.setPen( pen );
-    curve.attach( ui->widget_3 );
+    QPen pen = QPen(Qt::red);
+    curve.setRenderHint(QwtPlotItem::RenderAntialiased);
+    curve.setPen(pen);
+    curve.attach(ui->widget_3);
     
     ui->widget_4->setTitle("Pressure");
     ui->widget_4->setAxisTitle(ui->widget_4->xBottom, "Pressure [kPa]");
-    ui->widget_4->setAxisTitle(ui->widget_4->yLeft,"Pixels");
-    ui->widget_4->setAxisAutoScale( ui->widget_4->xBottom, true );
-    ui->widget_4->setAxisAutoScale( ui->widget_4->yLeft, true );
+    ui->widget_4->setAxisTitle(ui->widget_4->yLeft, "Pixels");
+    ui->widget_4->setAxisAutoScale(ui->widget_4->xBottom, true);
+    ui->widget_4->setAxisAutoScale(ui->widget_4->yLeft, true);
     zoom0 = new QwtPlotZoomer(ui->widget_4->canvas());
     zoom0->setRubberBandPen(QPen(Qt::white));
-    QPen pen0 = QPen( Qt::red );
-    curve0.setRenderHint( QwtPlotItem::RenderAntialiased );
-    curve0.setPen( pen0 );
-    curve0.attach( ui->widget_4 );
+    QPen pen0 = QPen(Qt::red);
+    curve0.setRenderHint(QwtPlotItem::RenderAntialiased);
+    curve0.setPen(pen0);
+    curve0.attach(ui->widget_4);
     
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
@@ -61,14 +61,14 @@ MainWindow::~MainWindow()
  */
 void MainWindow::disableUi(bool b)
 {
-    if(b){
+    if (b) {
         ui->splitter->setDisabled(b);
         ui->mainToolBar->setDisabled(b);
         ui->menuBar->setDisabled(b);
-    }else{
+    } else {
         ui->splitter->setEnabled(!b);
         ui->mainToolBar->setEnabled(!b);
-        ui->menuBar->setEnabled(!b);      
+        ui->menuBar->setEnabled(!b);
     }
 }
 
@@ -80,14 +80,14 @@ void MainWindow::Update(Display dis)
 {
     disableUi(false);
     ui->imageArea->setDisplay(dis);
-    ui->pressureLabel->setText(QString::number(dis.im.sum));
-    ui->sumLabel->setText(QString::number(std::accumulate(&dis.im.bound_counter[0],dis.im.bound_counter+4,0)));
-    ui->averageLabel->setText(QString::number(std::accumulate(&dis.im.bound_counter[0],dis.im.bound_counter+4,0)/4.0));
-    ui->rightLabel->setText(QString::number(dis.im.bound_counter[0]));
-    ui->leftLabel->setText(QString::number(dis.im.bound_counter[1]));
-    ui->topLabel->setText(QString::number(dis.im.bound_counter[2]));
-    ui->bottomLabel->setText(QString::number(dis.im.bound_counter[3]));
-    scene->addPixmap(QPixmap(dis.im.fileName));
+    ui->pressureLabel->setText(QString::number(dis.im.pressure));
+    ui->sumLabel->setText(QString::number(dis.im.getSum()));
+    ui->averageLabel->setText(QString::number(dis.im.getSum() / 4.0));
+    ui->rightLabel->setText(QString::number(dis.im.getBoundCounter()[0]));
+    ui->leftLabel->setText(QString::number(dis.im.getBoundCounter()[1]));
+    ui->topLabel->setText(QString::number(dis.im.getBoundCounter()[2]));
+    ui->bottomLabel->setText(QString::number(dis.im.getBoundCounter()[3]));
+    scene->addPixmap(QPixmap(dis.im.getFileName()));
 }
 
 /*!
@@ -106,7 +106,7 @@ void MainWindow::imageAreaUpdated(Display dis)
  */
 void MainWindow::Error(QString a, QString b)
 {
-    QMessageBox::warning(this,a,b);
+    QMessageBox::warning(this, a, b);
 }
 
 /*!
@@ -116,24 +116,24 @@ void MainWindow::Error(QString a, QString b)
  */
 void MainWindow::plot(QVector<double> res)
 {
-    QVector < QPointF > points( res.size() );
+    QVector<QPointF> points(res.size());
     quint32 counter = 0;
     auto pointsIt = points.begin();
     
-    for ( auto ri = res.constBegin(); ri != res.constEnd(); ++ ri, ++ pointsIt, ++ counter ) {
-        if(ri!=res.constBegin()){
-            (*pointsIt) = QPointF( counter, (*ri+*(ri-1))/2.0 );
-        }else{
-            (*pointsIt) = QPointF( counter, (*ri));
+    for (auto ri = res.constBegin(); ri != res.constEnd(); ++ri, ++pointsIt, ++counter) {
+        if (ri != res.constBegin()) {
+            (*pointsIt) = QPointF(counter, (*ri + *(ri - 1)) / 2.0);
+        } else {
+            (*pointsIt) = QPointF(counter, (*ri));
         }
     }
     
-    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+    QwtPointSeriesData* data = new QwtPointSeriesData(points);
     
-    ui->widget_3->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+    ui->widget_3->detachItems(QwtPlotItem::Rtti_PlotCurve, false);
     ui->widget_3->replot();
     curve.setData(data);
-    curve.attach( ui->widget_3 );
+    curve.attach(ui->widget_3);
     ui->widget_3->replot();
 }
 
@@ -142,20 +142,21 @@ void MainWindow::plot(QVector<double> res)
  * \param res0
  * \param res
  */
-void MainWindow::plot(QVector<double> res0, QVector<double> res){
-    ui->widget_4->detachItems( QwtPlotItem::Rtti_PlotCurve, false );
+void MainWindow::plot(QVector<double> res0, QVector<double> res)
+{
+    ui->widget_4->detachItems(QwtPlotItem::Rtti_PlotCurve, false);
     ui->widget_4->replot();
     
-    QVector < QPointF > points( res.size() );
+    QVector<QPointF> points(res.size());
     auto pointsIt = points.begin();
     
-    for ( int i = 0; i < res.size(); ++i) {
-        (*(pointsIt+i)) = QPointF( res[i], res0[i] );
+    for (int i = 0; i < res.size(); ++i) {
+        (*(pointsIt + i)) = QPointF(res[i], res0[i]);
     }
     
-    QwtPointSeriesData * data = new QwtPointSeriesData(points);
+    QwtPointSeriesData* data = new QwtPointSeriesData(points);
     curve0.setData(data);
-    curve0.attach( ui->widget_4 );
+    curve0.attach(ui->widget_4);
     ui->widget_4->replot();
 }
 
@@ -165,7 +166,7 @@ void MainWindow::plot(QVector<double> res0, QVector<double> res){
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
     disableUi();
-    QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
+    QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
     QtConcurrent::run(p, &Processor::openImage, names);
 }
 
@@ -202,7 +203,7 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::autorun,true);
+    QtConcurrent::run(p, &Processor::autorun, true);
 }
 
 /*!
@@ -236,7 +237,7 @@ void MainWindow::on_actionExit_triggered()
  */
 void MainWindow::on_actionLoad_triggered()
 {
-    QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")) );
+    QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")));
 }
 
 /*!
@@ -252,7 +253,7 @@ void MainWindow::on_actionSave_triggered()
  */
 void MainWindow::on_actionLoad_2_triggered()
 {
-    QtConcurrent::run(p, &Processor::loadData, QFileDialog::getOpenFileName(this,tr("Load data"), "", tr("Data (*.dat)")));
+    QtConcurrent::run(p, &Processor::loadData, QFileDialog::getOpenFileName(this, tr("Load data"), "", tr("Data (*.dat)")));
 }
 
 /*!
@@ -260,7 +261,7 @@ void MainWindow::on_actionLoad_2_triggered()
  */
 void MainWindow::on_actionSave_2_triggered()
 {
-    QtConcurrent::run(p, &Processor::saveData, QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)")));
+    QtConcurrent::run(p, &Processor::saveData, QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)")));
 }
 
 /*!
@@ -268,7 +269,7 @@ void MainWindow::on_actionSave_2_triggered()
  */
 void MainWindow::on_actionSave_as_Default_triggered()
 {
-    QtConcurrent::run(p, &Processor::saveConf, QString("default.conf"),true);
+    QtConcurrent::run(p, &Processor::saveConf, QString("default.conf"), true);
 }
 
 /*!
@@ -277,10 +278,10 @@ void MainWindow::on_actionSave_as_Default_triggered()
  */
 void MainWindow::on_action3D_triggered(bool checked)
 {
-    if(checked){
-        ui->widget->setStep((float)ui->imageArea->getThreshold()/255.0);
+    if (checked) {
+        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
         ui->widget->setImage(ui->imageArea->getImage());
-    }else{
+    } else {
         QImage empty;
         ui->widget->setStep(1.0f);
         ui->widget->setImage(empty);
@@ -291,10 +292,10 @@ void MainWindow::on_action3D_triggered(bool checked)
  * \brief MainWindow::on_actionCalibrate_triggered
  */
 void MainWindow::on_actionCalibrate_triggered()
-{    
+{
     QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
-    QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)",".","Images (*.bmp)");
-    QString named = QFileDialog::getSaveFileName(this,tr("Save data"), "", tr("Data (*.dat)"));
+    QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
+    QString named = QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)"));
     disableUi();
     QtConcurrent::run(p, &Processor::calibrate, name, named, names);
 }
@@ -304,12 +305,39 @@ void MainWindow::on_actionCalibrate_triggered()
  */
 void MainWindow::on_actionOpen_Video_triggered()
 {
-    QString fileNameV = QFileDialog::getOpenFileName( this, tr("Open data file"), "", tr("Video files (*.avi)"));
-    if(!fileNameV.isNull()){
-        p->setFileNameV(fileNameV);
+    QString videoFileName = QFileDialog::getOpenFileName(this, tr("Open data file"), "", tr("Video files (*.avi)"));
+    if (!videoFileName.isNull()) {
+        p->setVideoFileName(videoFileName);
         player->setMedia(QUrl::fromLocalFile(p->getVName()));
-        QtConcurrent::run(p,&Processor::run);
+        QtConcurrent::run(p, &Processor::run);
     }
+}
+
+/*!
+ * \brief MainWindow::saveResults
+ * \param pol
+ * \param res
+ */
+void MainWindow::saveResults( const QVector<double>& pol,  const QVector<double>& res, QwtPlot* widget)
+{
+    if (!res.isEmpty()) {
+        QString dataFileName = QFileDialog::getSaveFileName(this, tr("Save results"), "", tr("Data (*.dat)"));
+        QFile file(dataFileName);
+        if (file.open(QFile::WriteOnly)) {
+            QTextStream s(&file);
+            if(widget == ui->widget_3){
+                s << p->getImage().getThreshold() << "\n";
+                s << res.size() << "\n";
+            }
+            for (int i = 0; i < res.size(); ++i) {
+                s << res[i] << " " << pol[i] << "\n";
+            }
+        }
+        QString plotImageFileName = QFileDialog::getSaveFileName(this, tr("Save plot image"), "", tr("Images (*.png)"));
+        if (!plotImageFileName.isEmpty()) {
+            widget->grab().save(plotImageFileName);
+        }
+    }    
 }
 
 /*!
@@ -317,24 +345,9 @@ void MainWindow::on_actionOpen_Video_triggered()
  */
 void MainWindow::on_pushButton_2_clicked()
 {
-    auto res = p->getRes();
-    auto pol = p->getPol();
-    if(!res.isEmpty()){
-        QString name = QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)"));
-        QFile file(name);
-        if(file.open(QFile::WriteOnly)){
-            QTextStream s(&file);
-            s << p->getImage().threshold << "\n";
-            s << res.size() << "\n";
-            for(int i=0; i< res.size(); ++i){
-                s << res[i] << " " << pol[i] << "\n";
-            }
-        }
-        QString name1 = QFileDialog::getSaveFileName(this,tr("Save plot image"), "", tr("Images (*.png)"));
-        if(!name1.isEmpty()){
-            ui->widget_3->grab().save(name1);
-        }
-    }
+    auto res = p->getPressureValues();
+    auto pol = p->getPixelValues();
+    saveResults(pol, res, ui->widget_3);
 }
 
 /*!
@@ -342,22 +355,9 @@ void MainWindow::on_pushButton_2_clicked()
  */
 void MainWindow::on_pushButton_3_clicked()
 {
-    auto res = p->getARes();
-    auto pol = p->getAPres();
-    if(!res.isEmpty()){
-        QString name = QFileDialog::getSaveFileName(this,tr("Save results"), "", tr("Data (*.dat)"));
-        QFile file(name);
-        if(file.open(QFile::WriteOnly)){
-            QTextStream s(&file);
-            for(int i=0; i< res.size(); ++i){
-                s << res[i] << " " << pol[i] << "\n";
-            }
-        }
-        QString name1 = QFileDialog::getSaveFileName(this,tr("Save plot image"), "", tr("Images (*.png)"));
-        if(!name1.isEmpty()){
-            ui->widget_4->grab().save(name1);
-        }
-    }
+    auto res = p->getPreparedPixels();
+    auto pol = p->getPreparedPressures();
+    saveResults(pol, res, ui->widget_4);
 }
 
 /*!
@@ -366,9 +366,9 @@ void MainWindow::on_pushButton_3_clicked()
  */
 void MainWindow::on_pushButton_clicked(bool checked)
 {
-    if(checked){
+    if (checked) {
         player->play();
-    }else{
+    } else {
         player->pause();
     }
 }
@@ -389,11 +389,16 @@ void MainWindow::on_actionStop_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this,"About","Radiation sensor toolkit :)\nDanylo Lizanets © 2013-2014.");
+    QString cv;
+#if defined(__GNUC__) || defined(__GNUG__)
+    cv = "GCC " + QString::number(__GNUC__) + "." + QString::number(__GNUC_MINOR__) + "."+QString::number(__GNUC_PATCHLEVEL__);
+#elif defined(_MSC_VER)
+    cv = "MSVC " + QString::number(_MSC_FULL_VER);
+#endif
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.6\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
-
 
 void MainWindow::on_actionHelp_triggered()
 {
-     QDesktopServices::openUrl(QUrl("manual.pdf"));
+    QDesktopServices::openUrl(QUrl("manual.pdf"));
 }

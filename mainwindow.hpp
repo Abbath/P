@@ -26,6 +26,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void setProcessor(Processor * _p) { p = _p;}
     ~MainWindow();
+    void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
 private:
     QGraphicsScene *scene;
     QwtPlotZoomer *zoom;

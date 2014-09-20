@@ -3,11 +3,12 @@
 
 #include <QtCore>
 #include <QtGui>
-#include <opencv/cv.h>
 #include <QPointF>
+#include <array>
 
 enum class DataType{PIXELS, PRESSURE}; 
 
+typedef std::array<QPoint, 3> Square;
 
 class Comparator
 {
@@ -53,32 +54,59 @@ struct Line
 struct Config
 {
   QRect crop;
-  QPoint square[3];
-  QPoint square0[3];
+  //QPoint square[3];
+  Square square;
+  Square square0;
+  //QPoint square0[3];
 };
 
-struct Image
+class Image
 {
+
+public:
+  double pressure = 0.0l;
+  bool isProcessed = false;
+  bool isLoaded = false;
+  void resetCounter(){ counter = 0u; }
+  void setFullCounter(){ counter = 3u; }
+  bool isCounterFull(){ return counter == 3u; }
+  unsigned getSum() const { return std::accumulate(bound_counter.begin(), bound_counter.end(), 0); }
+  const QImage& getImageRef() const { return image; }
+  QRect& getCropRef(){ return crop; }
+  std::array<unsigned, 4>& getBoundCounterRef(){ return bound_counter; }
+  QImage getImage() {return image; }
+  unsigned getThreshold() const { return threshold; }
+  std::array<unsigned, 4> getBoundCounter() const { return bound_counter; }
+  QString getFileName() const { return fileName; }
+  QRect getCrop() const { return crop; }
+  Square getSquare() const { return square; }
+  unsigned getCounter() const { return counter; }
+  void incrementCounter(){ counter++; }
+  void setImage(const QImage& _image){ image = _image; }
+  void setFileName(const QString& filename){ fileName = filename; }
+  void setCrop(const QRect& rect){ crop = rect; }
+  void setSquare(const Square& sq){ square = sq; }
+  void setConfig(const Config& conf){ config = conf; }
+  void setThreshold(unsigned th){ threshold = th; }
+  bool isImageNull(){ return image.isNull(); }
+  void cropImage(){ image = image.copy(crop); }
+private:
   QImage image;
-  //QPoint crop[2];
   QRect crop;
-  QPoint square[3];
-  Config conf;
+  //QPoint square[3];
+  Square square;
+  Config config;
   QString fileName;
-  unsigned int threshold = 128;
-  unsigned int counter = 0;
-  unsigned int bound_counter[4] = {0,0,0,0};
-  double sums[4] = {0.0};
-  double sum = 0.0;
-  bool r = false;
-  bool l = false;
-  bool cl = false;
+  unsigned int threshold = 128u;
+  unsigned int counter = 0u;
+  //unsigned int bound_counter[4] = {0, 0, 0, 0};
+  std::array<unsigned, 4> bound_counter;
 };
 
 struct Display
 {
   Image im;
-  QPoint origin[2];
+  QPair<QPoint, QPoint> origin;
 };
 
 

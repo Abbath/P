@@ -9,6 +9,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <helpers.hpp>
+#include "capturewrapper.hpp"
+#include "imageconverter.hpp"
 
 class Processor : public QObject
 {
@@ -18,7 +20,7 @@ public:
     explicit Processor(QObject *parent = 0);
     QImage loadImage(const QString &name);
     void saveImage(const QString &name);
-    unsigned searchTheLight(const QImage& image, unsigned tre, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
+    unsigned searchTheLight(const Image &im, QRect rect);
     void run(bool vu_flag);
     void calibrate(const QString &name, const QString &named, const QStringList &names);
     void saveResults(const QString &name);
@@ -26,19 +28,19 @@ public:
     void processVideo();
     int openVideo(const QString &name);
     void setDisplay(const Display& dis);
-    void setFileNameV(QString _f){fileNameV = _f;}
+    void setVideoFileName(QString _f){videoFileName = _f;}
     Display getDisplay();
-    Image& getImage(){ return images[curr];}
-    const QVector<double>& getRes() const {return vres;}
-    const QVector<double>& getPol() const {return vres0;}
-    const QVector<double>& getARes() const { return res;}
-    const QVector<double>& getAPres() const { return pres;}
-    const QString getVName() const { return fileNameV;}    
+    Image& getImage(){ return images[currentImageNumber];}
+    const QVector<double>& getPressureValues() const {return pressureValues;}
+    const QVector<double>& getPixelValues() const {return pixelValues;}
+    const QVector<double>& getPreparedPixels() const { return preparedPixels;}
+    const QVector<double>& getPreparedPressures() const { return preparedPressures;}
+    const QString getVName() const { return videoFileName;}    
 
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);
-    void plot( QVector<double> res);
+    void plot( QVector<double> preparedPixels);
     void plot(QVector<double>, QVector<double>);
 public slots:
     void align();
@@ -57,30 +59,27 @@ public slots:
 
 private:
     std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
-    double calculate(const QVector<double> &res, const QVector<double> &pres, double val) const;
+    double calculate(const QVector<double> &preparedPixels, const QVector<double> &preparedPressures, double val) const;
     QImage sharpen(const QImage& im );
     void repaint();
 private:
     QVector<Image> images;
-    unsigned curr = 0, frame_num = 0;
-    QPoint origin[2] = {{0,0},{0,0}};
-    QString fileNameV;
+    unsigned currentImageNumber = 0, frame_num = 0;
+    QPair<QPoint, QPoint> origin = {{0,0},{0,0}};
+    QString videoFileName;
     QStringList fileNames;
-    double sum = 0;
-    Config conf;
+    Config config;
 
-    QVector<double> vres;
-    QVector<double> vres0;
+    QVector<double> pressureValues;
+    QVector<double> pixelValues;
 
-    QVector<double> pres;
-    QVector<double> res;
+    QVector<double> preparedPressures;
+    QVector<double> preparedPixels;
 
     QVector<double> res4[4];
     bool vid = false;
-    bool proc = false;
     unsigned int threshold = 255;    
     volatile bool stop = false;
-    QImage IplImage2QImage(const IplImage *iplImage);
 };
 
 #endif // PROCESSOR_HPP

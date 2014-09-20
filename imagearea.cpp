@@ -5,9 +5,9 @@
  * \brief ImageArea::ImageArea
  * \param parent
  */
-ImageArea::ImageArea(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ImageArea)
+ImageArea::ImageArea(QWidget* parent)
+    : QWidget(parent)
+    , ui(new Ui::ImageArea)
 {
     ui->setupUi(this);
 }
@@ -19,8 +19,7 @@ void ImageArea::Update()
 {
     Display dis;
     dis.im = im;
-    dis.origin[0] = origin[0];
-    dis.origin[1] = origin[1];
+    dis.origin = origin;
     emit viewUpdated(dis);
 }
 
@@ -28,41 +27,43 @@ void ImageArea::Update()
  * \brief ImageArea::paintEvent
  * \param e
  */
-void ImageArea::paintEvent(QPaintEvent *e)
+void ImageArea::paintEvent(QPaintEvent* e)
 {
     QPainter painter(this);
-    painter.drawImage(origin[1].x(), origin[1].y(), im.image);
-    if(im.counter > 0){
-        for(unsigned i = 0; i < im.counter; ++i){
+    painter.drawImage(origin.second.x(), origin.second.y(), im.getImage());
+    if (im.getCounter() > 0) {
+        for (unsigned i = 0; i < im.getCounter(); ++i) {
             painter.setPen(Qt::red);
-            painter.drawLine(im.square[i].x()-origin[0].x() - 4, im.square[i].y()-origin[0].y(), im.square[i].x()-origin[0].x() + 4, im.square[i].y()-origin[0].y());
-            painter.drawLine(im.square[i].x()-origin[0].x(), im.square[i].y()-origin[0].y() - 4, im.square[i].x()-origin[0].x(), im.square[i].y()-origin[0].y() + 4);
-            painter.drawText(im.square[i].x()-origin[0].x() + 3, im.square[i].y()-origin[0].y() - 3, QString::number(i+1));
+            painter.drawLine(im.getSquare()[i].x() - origin.first.x() - 4, im.getSquare()[i].y() - origin.first.y(), im.getSquare()[i].x() - origin.first.x() + 4, im.getSquare()[i].y() - origin.first.y());
+            painter.drawLine(im.getSquare()[i].x() - origin.first.x(), im.getSquare()[i].y() - origin.first.y() - 4, im.getSquare()[i].x() - origin.first.x(), im.getSquare()[i].y() - origin.first.y() + 4);
+            painter.drawText(im.getSquare()[i].x() - origin.first.x() + 3, im.getSquare()[i].y() - origin.first.y() - 3, QString::number(i + 1));
             painter.setPen(Qt::white);
         }
     }
-    if(rect){
+    if (isRectangleDrawn) {
         painter.setPen(Qt::green);
-        painter.drawRect(im.crop);//im.crop[0].x(), im.crop[0].y(), im.crop[1].x() - im.crop[0].x(), im.crop[1].y() - im.crop[0].y());
+        painter.drawRect(im.getCrop()); //im.crop[0].x(), im.crop[0].y(), im.crop[1].x() - im.crop[0].x(), im.crop[1].y() - im.crop[0].y());
         painter.setPen(Qt::white);
-    }else{
-        if(zoom_b){
-            QImage zoomed = im.image.copy(zoom.x() - origin[1].x() - 10, zoom.y() - origin[1].y() - 10, 20, 20).scaled(41, 41);
+    } else {
+        if (isZoomed) {
+            QImage zoomed = im.getImage().copy(zoom.x() - origin.second.x() - 10, zoom.y() - origin.second.y() - 10, 20, 20).scaled(41, 41);
             zoomed.setPixel(20, 20, qRgb(0, 255, 0));
             painter.drawImage(zoom.x(), zoom.y(), zoomed);
         }
     }
     Update();
-    if(im.sum <= GY){
+    if (im.pressure <= fromGreenToYellow) {
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);
-    }else if(im.sum > GY && im.sum < YR){
+    } else if (im.pressure > fromGreenToYellow && im.pressure < fromYellowToRed) {
         painter.setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
         painter.setPen(Qt::yellow);
-    }else if(im.sum >= YR){
+    } else if (im.pressure >= fromYellowToRed) {
         painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
         painter.setPen(Qt::red);
     }
+    painter.setFont(QFont("Ubuntu", 50));
+    painter.drawText(30, this->height() - 10, QString::number(im.pressure) + " kPa");
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
     e->accept();
 }
@@ -71,25 +72,25 @@ void ImageArea::paintEvent(QPaintEvent *e)
  * \brief ImageArea::mousePressEvent
  * \param e
  */
-void ImageArea::mousePressEvent(QMouseEvent *e)
+void ImageArea::mousePressEvent(QMouseEvent* e)
 {
-    if(e->button() == Qt::RightButton && !im.image.isNull() ){
-        rect = true;
+    if (e->button() == Qt::RightButton && !im.isImageNull()) {
+        isRectangleDrawn = true;
         //im.crop[0].setX(e->x());
         //im.crop[0].setY(e->y());
-        im.crop.setTopLeft(QPoint(e->x(),e->y()));
+        im.getCropRef().setTopLeft(QPoint(e->x(), e->y()));
         update();
     }
-    if(e->button() == Qt::LeftButton && !im.image.isNull()){
-        zoom_b = true;
+    if (e->button() == Qt::LeftButton && !im.isImageNull()) {
+        isZoomed = true;
         zoom.setX(e->x());
         zoom.setY(e->y());
         update();
     }
-    if(e->button() == Qt::MiddleButton && !im.image.isNull()){
-        origin[0].setX(origin[0].x() + e->x());
-        origin[0].setY(origin[0].y() + e->y());
-       Update();
+    if (e->button() == Qt::MiddleButton && !im.isImageNull()) {
+        origin.first.setX(origin.first.x() + e->x());
+        origin.first.setY(origin.first.y() + e->y());
+        Update();
     }
 }
 
@@ -97,20 +98,21 @@ void ImageArea::mousePressEvent(QMouseEvent *e)
  * \brief ImageArea::mouseMoveEvent
  * \param e
  */
-void ImageArea::mouseMoveEvent(QMouseEvent *e)
+void ImageArea::mouseMoveEvent(QMouseEvent* e)
 {
-    if(!im.image.isNull()){
-        if(rect){
-          //  im.crop[1].setX(e->x());
-          //  im.crop[1].setY(e->y());
-            im.crop.setBottomRight(QPoint(e->x(),e->y()));
-        }else{
+    if (!im.isImageNull()) {
+        if (isRectangleDrawn) {
+            //  im.crop[1].setX(e->x());
+            //  im.crop[1].setY(e->y());
+            im.getCropRef().setBottomRight(QPoint(e->x(), e->y()));
+        } else {
             zoom.setX(e->x());
             zoom.setY(e->y());
         }
-    }if(e->buttons() & Qt::MiddleButton && !im.image.isNull()){
-        origin[1].setX(e->x() - origin[0].x());
-        origin[1].setY(e->y() - origin[0].y());
+    }
+    if (e->buttons() & Qt::MiddleButton && !im.isImageNull()) {
+        origin.second.setX(e->x() - origin.first.x());
+        origin.second.setY(e->y() - origin.first.y());
     }
     update();
 }
@@ -119,31 +121,31 @@ void ImageArea::mouseMoveEvent(QMouseEvent *e)
  * \brief ImageArea::mouseReleaseEvent
  * \param e
  */
-void ImageArea::mouseReleaseEvent(QMouseEvent *e)
+void ImageArea::mouseReleaseEvent(QMouseEvent* e)
 {
-    if(e->button() == Qt::RightButton && !im.image.isNull()){
-        im.crop.setBottomRight(QPoint(e->x(),e->y()));
-        im.crop = im.crop.normalized().translated(origin[0].x(),origin[0].y());        
-        im.image = im.image.copy(im.crop);        
-        origin[0].setX(0);
-        origin[0].setY(0);
-        origin[1].setX(0);
-        origin[1].setY(0);
-        rect = false;
+    if (e->button() == Qt::RightButton && !im.isImageNull()) {
+        im.getCropRef().setBottomRight(QPoint(e->x(), e->y()));
+        im.setCrop(im.getCrop().normalized().translated(origin.first.x(), origin.first.y()));
+        im.cropImage();
+        origin.first.setX(0);
+        origin.first.setY(0);
+        origin.second.setX(0);
+        origin.second.setY(0);
+        isRectangleDrawn = false;
     }
-    if(e->button() == Qt::LeftButton && !im.image.isNull()){
-        if(im.counter < 3){
-            im.square[im.counter].setX(e->x()+origin[0].x());
-            im.square[im.counter].setY(e->y()+origin[0].y());
-            im.counter++;
-        }else{
-            im.counter = 0;
+    if (e->button() == Qt::LeftButton && !im.isImageNull()) {
+        if (im.getCounter() < 3) {
+            im.getSquare()[im.getCounter()].setX(e->x() + origin.first.x());
+            im.getSquare()[im.getCounter()].setY(e->y() + origin.first.y());
+            im.incrementCounter();
+        } else {
+            im.resetCounter();
         }
-        zoom_b = false;
+        isZoomed = false;
     }
-    if(e->button() == Qt::MiddleButton && !im.image.isNull()){
-        origin[0].setX(origin[0].x()- e->x());
-        origin[0].setY(origin[0].y()- e->y());
+    if (e->button() == Qt::MiddleButton && !im.isImageNull()) {
+        origin.first.setX(origin.first.x() - e->x());
+        origin.first.setY(origin.first.y() - e->y());
     }
     update();
 }
@@ -152,12 +154,14 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e)
  * \brief ImageArea::wheelEvent
  * \param e
  */
-void ImageArea::wheelEvent(QWheelEvent *e)
+void ImageArea::wheelEvent(QWheelEvent* e)
 {
-    qint32 a = im.threshold + e->delta()/80;
-    if( a > 255 ) a = 255;
-    if( a < 0 ) a = 0;
-    im.threshold = quint8(a);
+    qint32 a = im.getThreshold() + e->delta() / 80;
+    if (a > 255)
+        a = 255;
+    if (a < 0)
+        a = 0;
+    im.setThreshold(quint8(a));
     Update();
 }
 
@@ -168,8 +172,7 @@ void ImageArea::wheelEvent(QWheelEvent *e)
 void ImageArea::setDisplay(Display dis)
 {
     im = dis.im;
-    origin[0] = dis.origin[0];
-    origin[1] = dis.origin[1];
+    origin = dis.origin;
     update();
 }
 

@@ -21,10 +21,10 @@ public:
   void mouseReleaseEvent(QMouseEvent *e);
   void wheelEvent(QWheelEvent *e);
 
-  void setProcessor(Processor * p){ proc = p; }
+  void setProcessor(Processor * p){ processor = p; }
   void setDisplay(Display dis);
-  QImage getImage(){return im.image;}
-  unsigned getThreshold(){return im.threshold;}
+  QImage getImage(){return im.getImage();}
+  unsigned getThreshold(){return im.getThreshold();}
   ~ImageArea();
 
 signals:
@@ -35,17 +35,15 @@ private:
 
 private:
   Ui::ImageArea *ui;
-  Processor * proc;
+  Processor * processor;
   Image im;
-  QPoint origin[2] = { {0,0}, {0,0} };
-  double sum = 0;
-  double GY = 25;
-  double YR = 35;
+  QPair<QPoint, QPoint> origin = { {0,0}, {0,0} };
+  double fromGreenToYellow = 25;
+  double fromYellowToRed = 35;
   QPoint zoom;
-  bool rect = false;
-  bool zoom_b = false;
+  bool isRectangleDrawn = false;
+  bool isZoomed = false;
   bool d3 = false;
-  bool vid = false;
 };
 
 #endif // IMAGEAREA_HPP
