@@ -14,6 +14,9 @@
 #include "capturewrapper.hpp"
 #include "imageconverter.hpp"
 
+/*!
+ * \brief The Processor class
+ */
 class Processor : public QObject
 {
     Q_OBJECT

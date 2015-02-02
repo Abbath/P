@@ -199,6 +199,7 @@ void Processor::openImage(const QStringList& names)
             images[currentImageNumber].setImage(loadImage(fileNames[currentImageNumber]));
             images[currentImageNumber].resetCounter();
             images[currentImageNumber].isLoaded = true;
+            images[currentImageNumber].isProcessed = false;
         }
         currentImageNumber = 0;
         repaint();

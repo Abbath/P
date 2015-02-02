@@ -23,9 +23,10 @@ MainWindow::MainWindow(QWidget* parent)
     zoom = new QwtPlotZoomer(ui->widget_3->canvas());
     zoom->setRubberBandPen(QPen(Qt::white));
     QPen pen = QPen(Qt::red);
-    curve.setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve.setPen(pen);
-    curve.attach(ui->widget_3);
+    curve = new QwtPlotCurve;
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased);
+    curve->setPen(pen);
+    curve->attach(ui->widget_3);
     
     ui->widget_4->setTitle("Pressure");
     ui->widget_4->setAxisTitle(ui->widget_4->xBottom, "Pressure [kPa]");
@@ -35,9 +36,10 @@ MainWindow::MainWindow(QWidget* parent)
     zoom0 = new QwtPlotZoomer(ui->widget_4->canvas());
     zoom0->setRubberBandPen(QPen(Qt::white));
     QPen pen0 = QPen(Qt::red);
-    curve0.setRenderHint(QwtPlotItem::RenderAntialiased);
-    curve0.setPen(pen0);
-    curve0.attach(ui->widget_4);
+    curve0 = new QwtPlotCurve();
+    curve0->setRenderHint(QwtPlotItem::RenderAntialiased);
+    curve0->setPen(pen0);
+    curve0->attach(ui->widget_4);
     
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
@@ -134,8 +136,8 @@ void MainWindow::plot(QVector<double> res)
     
     ui->widget_3->detachItems(QwtPlotItem::Rtti_PlotCurve, false);
     ui->widget_3->replot();
-    curve.setData(data);
-    curve.attach(ui->widget_3);
+    curve->setData(data);
+    curve->attach(ui->widget_3);
     ui->widget_3->replot();
 }
 
@@ -157,8 +159,8 @@ void MainWindow::plot(QVector<double> res0, QVector<double> res)
     }
     
     QwtPointSeriesData* data = new QwtPointSeriesData(points);
-    curve0.setData(data);
-    curve0.attach(ui->widget_4);
+    curve0->setData(data);
+    curve0->attach(ui->widget_4);
     ui->widget_4->replot();
 }
 
