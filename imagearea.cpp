@@ -156,12 +156,12 @@ void ImageArea::mouseReleaseEvent(QMouseEvent* e)
  */
 void ImageArea::wheelEvent(QWheelEvent* e)
 {
-    qint32 a = im.getThreshold() + e->delta() / 80;
-    if (a > 255)
-        a = 255;
-    if (a < 0)
-        a = 0;
-    im.setThreshold(quint8(a));
+    qint32 newThreshold = im.getThreshold() + e->delta() / 80;
+    if (newThreshold > 255)
+        newThreshold = 255;
+    if (newThreshold < 0)
+        newThreshold = 0;
+    im.setThreshold(quint8(newThreshold));
     Update();
 }
 

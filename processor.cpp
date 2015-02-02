@@ -144,7 +144,7 @@ QImage Processor::loadImage(const QString& name)
                 image.setPixel(i, j, qRgb(gray, gray, gray));
             }
         }
-        image = sharpen(image);
+        //image = sharpen(image);
         repaint();
         return image;
     } else {
@@ -307,7 +307,7 @@ unsigned Processor::searchTheLight(const Image& im, QRect rect)
 {
     rect = rect.normalized();
     unsigned tre = im.getThreshold();
-    const QImage& image = im.getImageRef();
+    QImage image = sharpen(im.getImage());
     unsigned counter = 0;
     for (auto i = rect.left() + 1; i != rect.right(); ++i) {
         for (auto j = rect.top() + 1; j != rect.bottom(); ++j) {
@@ -350,7 +350,7 @@ void Processor::run()
                     timage.setPixel(i, j, qRgb(gray, gray, gray));
                 }
             }
-            timage = sharpen(timage).mirrored();
+            timage = timage.mirrored();
             
             images[currentImageNumber].setImage(timage);
             Image& image = images[currentImageNumber];
@@ -472,6 +472,9 @@ void Processor::saveData(const QString& name)
     }
 }
 
+/*!
+ * \brief Processor::stopThis
+ */
 void Processor::stopThis()
 {
     stop = true;

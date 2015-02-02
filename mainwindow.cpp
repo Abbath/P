@@ -1,5 +1,6 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
+#include "modelingwindow.hpp"
 #include <QtConcurrent/QtConcurrent>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -41,6 +42,7 @@ MainWindow::MainWindow(QWidget* parent)
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
     ui->tab_6->setDisabled(true);
+    ui->tab_6->hide();
     
     player = new QMediaPlayer;
     player->setVideoOutput(ui->widget_2);
@@ -395,10 +397,16 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.6\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.7\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 void MainWindow::on_actionHelp_triggered()
 {
     QDesktopServices::openUrl(QUrl("manual.pdf"));
+}
+
+void MainWindow::on_actionModeling_triggered()
+{
+    ModelingWindow * window = new ModelingWindow(this);
+    window->show();
 }

@@ -20,7 +20,10 @@ SOURCES += main.cpp\
     mainwidget.cpp \
     dialog.cpp \
     capturewrapper.cpp \
-    imageconverter.cpp
+    imageconverter.cpp \
+    modelingwindow.cpp \
+    modelingcore.cpp \
+    modelingdisplay.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
@@ -29,15 +32,19 @@ HEADERS  += mainwindow.hpp \
     mainwidget.hpp \
     dialog.hpp \
     capturewrapper.hpp \
-    imageconverter.hpp
+    imageconverter.hpp \
+    modelingwindow.hpp \
+    modelingcore.hpp \
+    modelingdisplay.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \
     setup.ui \
-    dialog.ui
+    dialog.ui \
+    modelingwindow.ui
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra
-
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -fopenmp
+QMAKE_LFLAGS += -fopenmp
 unix{
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
 INCLUDEPATH += "/usr/local/qwt-6.1.0/include"

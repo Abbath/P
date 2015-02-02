@@ -6,6 +6,8 @@
 #include <QRunnable>
 #include <QMessageBox>
 #include <QThread>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <helpers.hpp>

@@ -37,7 +37,7 @@ enum Modes
 
 };
 
-typedef QVector3D Point;
+//typedef QVector3D Point;
 
 struct Line
 {
@@ -74,12 +74,12 @@ public:
   const QImage& getImageRef() const { return image; }
   QRect& getCropRef(){ return crop; }
   std::array<unsigned, 4>& getBoundCounterRef(){ return bound_counter; }
-  QImage getImage() {return image; }
+  QImage getImage() const {return image; }
   unsigned getThreshold() const { return threshold; }
   std::array<unsigned, 4> getBoundCounter() const { return bound_counter; }
   QString getFileName() const { return fileName; }
   QRect getCrop() const { return crop; }
-  Square getSquare() const { return square; }
+  Square& getSquare() { return square; }
   unsigned getCounter() const { return counter; }
   void incrementCounter(){ counter++; }
   void setImage(const QImage& _image){ image = _image; }

@@ -5,6 +5,7 @@
 #include <QThreadPool>
 #include <QSplashScreen>
 #include <dialog.hpp>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -22,9 +23,14 @@ int main(int argc, char* argv[])
 
     p.loadConf("default.conf");
     w.show();
-    Dialog d;
-    d.setModal(true);
-    d.show();
-    QObject::connect(&d, SIGNAL(rejected()), &w, SLOT(close()));
+    
+    
+    //Dialog d;
+    //d.setModal(true);
+    // d.show();
+    //d.exec();
+    //std::cout << "After dialog" << std::endl;
+    //QObject::connect(&d, SIGNAL(rejected()), &w, SLOT(close()));
+    //QObject::connect(&d, SIGNAL(accepted()), &w, SLOT(show()));
     return a.exec();
 }

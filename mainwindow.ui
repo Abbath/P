@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Radsensor 0.5</string>
+   <string>Radsensor 0.7</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -375,6 +375,7 @@
    <addaction name="actionStop"/>
    <addaction name="actionPrev"/>
    <addaction name="actionNext"/>
+   <addaction name="actionModeling"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -550,6 +551,14 @@
    </property>
    <property name="shortcut">
     <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionModeling">
+   <property name="text">
+    <string>Modeling</string>
+   </property>
+   <property name="toolTip">
+    <string>Modeling toolkit</string>
    </property>
   </action>
  </widget>
