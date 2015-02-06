@@ -43,8 +43,10 @@ MainWindow::MainWindow(QWidget* parent)
     
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
-    ui->tab_6->setDisabled(true);
-    ui->tab_6->hide();
+    ui->widget_3->hide();
+    ui->pushButton_2->hide();
+    //ui->tab_6->setDisabled(true);
+    //ui->tab_6->hide();
     
     player = new QMediaPlayer;
     player->setVideoOutput(ui->widget_2);
@@ -169,6 +171,9 @@ void MainWindow::plot(QVector<double> res0, QVector<double> res)
  */
 void MainWindow::on_actionOpen_Image_s_triggered()
 {
+    ui->pushButton_2->hide();
+    ui->widget_3->hide();
+    ui->tabWidget_2->show();
     disableUi();
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
     QtConcurrent::run(p, &Processor::openImage, names);
@@ -282,14 +287,14 @@ void MainWindow::on_actionSave_as_Default_triggered()
  */
 void MainWindow::on_action3D_triggered(bool checked)
 {
-    if (checked) {
-        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
-        ui->widget->setImage(ui->imageArea->getImage());
-    } else {
-        QImage empty;
-        ui->widget->setStep(1.0f);
-        ui->widget->setImage(empty);
-    }
+//    if (checked) {
+//        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
+//        ui->widget->setImage(ui->imageArea->getImage());
+//    } else {
+//        QImage empty;
+//        ui->widget->setStep(1.0f);
+//        ui->widget->setImage(empty);
+//    }
 }
 
 /*!
@@ -311,6 +316,9 @@ void MainWindow::on_actionOpen_Video_triggered()
 {
     QString videoFileName = QFileDialog::getOpenFileName(this, tr("Open data file"), "", tr("Video files (*.avi)"));
     if (!videoFileName.isNull()) {
+        ui->widget_3->show();
+        ui->pushButton_2->show();
+        ui->tabWidget_2->hide();
         p->setVideoFileName(videoFileName);
         player->setMedia(QUrl::fromLocalFile(p->getVName()));
         QtConcurrent::run(p, &Processor::run);

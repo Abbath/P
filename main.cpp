@@ -1,15 +1,21 @@
 #include "mainwindow.hpp"
+#include "modelingwizard.hpp"
 #include <processor.hpp>
 #include <QApplication>
 #include <QtGui>
 #include <QThreadPool>
 #include <QSplashScreen>
+#include <QWizard>
 #include <dialog.hpp>
 #include <iostream>
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
+    QPixmap splash("splash.png");
+    QSplashScreen ss(splash);
+    ss.show();
+    a.processEvents();
     MainWindow w;
     Processor p;
     w.setProcessor(&p);
@@ -24,7 +30,9 @@ int main(int argc, char* argv[])
     p.loadConf("default.conf");
     w.show();
     
-    
+    ModelingWizard wizard;
+    wizard.setWindowTitle("Modeling Wizard");
+    wizard.show();
     //Dialog d;
     //d.setModal(true);
     // d.show();
@@ -32,5 +40,6 @@ int main(int argc, char* argv[])
     //std::cout << "After dialog" << std::endl;
     //QObject::connect(&d, SIGNAL(rejected()), &w, SLOT(close()));
     //QObject::connect(&d, SIGNAL(accepted()), &w, SLOT(show()));
+    ss.finish(&w);
     return a.exec();
 }

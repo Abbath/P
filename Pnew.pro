@@ -23,7 +23,14 @@ SOURCES += main.cpp\
     imageconverter.cpp \
     modelingwindow.cpp \
     modelingcore.cpp \
-    modelingdisplay.cpp
+    modelingdisplay.cpp \
+    modelingwizard.cpp \
+    pages/startpage.cpp \
+    pages/sizespage.cpp \
+    pages/matpage.cpp \
+    pages/miscpage.cpp \
+    pages/holespage.cpp \
+    pages/campage.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
@@ -35,13 +42,26 @@ HEADERS  += mainwindow.hpp \
     imageconverter.hpp \
     modelingwindow.hpp \
     modelingcore.hpp \
-    modelingdisplay.hpp
+    modelingdisplay.hpp \
+    modelingwizard.hpp \
+    pages/startpage.hpp \
+    pages/sizespage.hpp \
+    pages/matpage.hpp \
+    pages/miscpage.hpp \
+    pages/holespage.hpp \
+    pages/campage.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \
     setup.ui \
     dialog.ui \
-    modelingwindow.ui
+    modelingwindow.ui \
+    pages/startpage.ui \
+    pages/sizespage.ui \
+    pages/matpage.ui \
+    pages/miscpage.ui \
+    pages/holespage.ui \
+    pages/campage.ui
 
 QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -fopenmp
 QMAKE_LFLAGS += -fopenmp
