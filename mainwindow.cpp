@@ -1,6 +1,7 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 #include "modelingwindow.hpp"
+#include "modelingwizard.hpp"
 #include <QtConcurrent/QtConcurrent>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -417,6 +418,10 @@ void MainWindow::on_actionHelp_triggered()
 
 void MainWindow::on_actionModeling_triggered()
 {
+    ModelingWizard mw;
+    mw.exec();
+    ModelingData data = mw.getDataRef();
     ModelingWindow * window = new ModelingWindow(this);
+    window->setData(data);
     window->show();
 }

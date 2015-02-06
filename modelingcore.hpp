@@ -18,6 +18,7 @@
 #include <random>
 #include <numeric>
 #include <omp.h>
+#include "helpers.hpp"
 
 struct Point{
     double x;
@@ -106,6 +107,8 @@ public:
     
     int getHole_size() const;
     void setHole_size(int value);
+    
+    void setData(const ModelingData& data);
     
 private:
     double w(double x, double y);

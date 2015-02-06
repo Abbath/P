@@ -15,8 +15,11 @@ class StartPage : public QWizardPage
 public:
     explicit StartPage(QWidget *parent = 0);
     ~StartPage();
-    bool isExt();
+    bool isExt() const;
     int nextId() const;
+private slots:
+    void on_pushButton_clicked();
+    
 private:
     Ui::StartPage *ui;
     

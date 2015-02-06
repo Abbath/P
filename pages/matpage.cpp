@@ -17,5 +17,8 @@ MatPage::~MatPage()
 
 int MatPage::nextId() const
 {
+    ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());
+    mw->getDataRef().setYm(ui->Ym->value()*1e9);
+    mw->getDataRef().setPr(ui->Pr->value());
     return ModelingWizard::MISC_PAGE;
 }

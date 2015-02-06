@@ -516,6 +516,28 @@ void ModelingCore::setHole_size(int value)
     hole_size = value;
 }
 
+void ModelingCore::setData(const ModelingData &data)
+{
+    pressure = data.getPressure();
+    is_data_external = data.getIs_ext();
+    die_size = data.getDie_size();
+    mem_size = data.getMem_size();
+    thickness = data.getMem_thickness();
+    holes_rows_number = data.getRows();
+    hole_size = data.getHole_size();
+    hole_space_size = data.getSpace_size();
+    spacer_height = data.getSpacer_height();
+    ray_number = data.getRay_number();
+    filename = data.getFilename();
+    ym = data.getYm();
+    pr = data.getPr();
+    wavelength = data.getWavelength();
+    cam_angle_x = data.getCamx();
+    cam_angle_y = data.getCamy();
+    x_angle = data.getX_angle();
+    y_angle = data.getY_angle();
+}
+
 int ModelingCore::getHoles_rows_number() const
 {
     return holes_rows_number;

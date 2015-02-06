@@ -17,16 +17,28 @@ StartPage::~StartPage()
     delete ui;
 }
 
-bool StartPage::isExt()
+bool StartPage::isExt() const
 {
     return ui->radioButton_2->isChecked();
 }
 
 int StartPage::nextId() const
 {
-    if(ui->radioButton_2->isChecked()){
+    ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());
+    if(isExt()){
+        mw->getDataRef().setIs_ext(true);
+        mw->getDataRef().setFilename(ui->lineEdit->text());
         return ModelingWizard::HOLES_PAGE;
     }else{
+        mw->getDataRef().setIs_ext(false);
         return ModelingWizard::SIZE_PAGE;
+    }
+}
+
+void StartPage::on_pushButton_clicked()
+{
+    QString name = QFileDialog::getOpenFileName(this, "Open data file", ".", "Text files (*.txt)");
+    if(!name.isEmpty()){
+        ui->lineEdit->setText(name);
     }
 }

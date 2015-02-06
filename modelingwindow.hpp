@@ -5,6 +5,7 @@
 #include <QLabel>
 #include "modelingcore.hpp"
 #include "modelingdisplay.hpp"
+#include "helpers.hpp"
 
 namespace Ui {
 class ModelingWindow;
@@ -18,6 +19,7 @@ public:
     explicit ModelingWindow(QWidget *parent = 0);
     ~ModelingWindow();
     void setCore(ModelingCore *_p){p = _p;}
+    void setData(ModelingData data);
 public slots:
     void setImage(QImage image);
 private slots:

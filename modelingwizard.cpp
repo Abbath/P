@@ -1,10 +1,4 @@
 #include "modelingwizard.hpp"
-#include "pages/startpage.hpp"
-#include "pages/sizespage.hpp"
-#include "pages/matpage.hpp"
-#include "pages/miscpage.hpp"
-#include "pages/holespage.hpp"
-#include "pages/campage.hpp"
 
 ModelingWizard::ModelingWizard(QWidget* parent)
 {
@@ -21,6 +15,16 @@ ModelingWizard::~ModelingWizard()
 {
     
 }
+ModelingData &ModelingWizard::getDataRef()
+{
+    return data;
+}
+
+void ModelingWizard::setData(const ModelingData &value)
+{
+    data = value;
+}
+
 
 QWizardPage *ModelingWizard::createPage()
 {

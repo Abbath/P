@@ -4,6 +4,13 @@
 #include <QWizard>
 #include <QtWidgets>
 #include <iostream>
+#include "pages/startpage.hpp"
+#include "pages/sizespage.hpp"
+#include "pages/matpage.hpp"
+#include "pages/miscpage.hpp"
+#include "pages/holespage.hpp"
+#include "pages/campage.hpp"
+#include "helpers.hpp"
 
 class ModelingWizard : public QWizard
 {
@@ -12,8 +19,11 @@ public:
     enum {START_PAGE, SIZE_PAGE, MATERIAL_PAGE, MISC_PAGE, HOLES_PAGE, CAM_PAGE};
     ModelingWizard(QWidget* parent = 0);
     ~ModelingWizard();
+    ModelingData& getDataRef();
+    void setData(const ModelingData &value);
+    
 private:
-    bool is_ext = false;
+    ModelingData data;
     QWizardPage* createPage();
 };
 

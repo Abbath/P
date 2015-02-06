@@ -318,3 +318,24 @@ void ModelingWindow::on_actionSave_image_triggered()
 {
     on_pushButton_3_clicked();
 }
+
+void ModelingWindow::setData(ModelingData data)
+{
+    ui->doubleSpinBox->setValue(data.getDie_size()*1e3);
+    ui->doubleSpinBox_2->setValue(data.getMem_size()*1e3);
+    ui->doubleSpinBox_6->setValue(data.getPressure()*ui->doubleSpinBox_10->value()/1000.0);
+    ui->doubleSpinBox_4->setValue(data.getMem_thickness()*1e6);
+    ui->doubleSpinBox_5->setValue(data.getSpacer_height()*1e3);
+    ui->spinBox->setValue(data.getRay_number());
+    ui->doubleSpinBox_7->setValue(data.getWavelength());
+    ui->doubleSpinBox_8->setValue(data.getX_angle()*57.3);
+    ui->doubleSpinBox_9->setValue(data.getY_angle()*57.3);
+    ui->doubleSpinBox_11->setValue(data.getCamx()*57.3);
+    ui->doubleSpinBox_12->setValue(data.getCamy()*57.3);
+    ui->doubleSpinBox_14->setValue(data.getYm()/1e9);
+    ui->doubleSpinBox_15->setValue(data.getPr());
+    ui->spinBox_2->setValue(data.getRows());
+    ui->spinBox_3->setValue(data.getHole_size());
+    ui->spinBox_4->setValue(data.getSpace_size());
+    p->setData(data);
+}
