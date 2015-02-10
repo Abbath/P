@@ -24,17 +24,15 @@ void ModelingWizard::setData(const ModelingData &value)
 {
     data = value;
 }
-
-
-QWizardPage *ModelingWizard::createPage()
+bool ModelingWizard::getIs_integrated() const
 {
-    QWizardPage *page = new QWizardPage;
-    QLabel *label = new QLabel("Test", page);
-    QRadioButton *rb = new QRadioButton;
-    QVBoxLayout* vl = new QVBoxLayout(page);
-    vl->addWidget(label);
-    page->setLayout(vl);
-    //page->registerField("Label", label);
-    return page;
+    return is_integrated;
 }
 
+void ModelingWizard::setIs_integrated(bool value)
+{
+    is_integrated = value;
+    if(value){
+        setStartId(SIZE_PAGE);
+    }
+}

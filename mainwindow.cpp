@@ -86,6 +86,8 @@ void MainWindow::disableUi(bool b)
 void MainWindow::Update(Display dis)
 {
     disableUi(false);
+
+    
     ui->imageArea->setDisplay(dis);
     ui->pressureLabel->setText(QString::number(dis.im.pressure));
     ui->sumLabel->setText(QString::number(dis.im.getSum()));
@@ -175,6 +177,7 @@ void MainWindow::on_actionOpen_Image_s_triggered()
     ui->pushButton_2->hide();
     ui->widget_3->hide();
     ui->tabWidget_2->show();
+    ui->splitter->widget(2)->show();
     disableUi();
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
     QtConcurrent::run(p, &Processor::openImage, names);
@@ -320,6 +323,7 @@ void MainWindow::on_actionOpen_Video_triggered()
         ui->widget_3->show();
         ui->pushButton_2->show();
         ui->tabWidget_2->hide();
+        ui->splitter->widget(2)->hide();
         p->setVideoFileName(videoFileName);
         player->setMedia(QUrl::fromLocalFile(p->getVName()));
         QtConcurrent::run(p, &Processor::run);
@@ -424,4 +428,24 @@ void MainWindow::on_actionModeling_triggered()
     ModelingWindow * window = new ModelingWindow(this);
     window->setData(data);
     window->show();
+}
+
+void MainWindow::on_actionTest_triggered()
+{
+//        ModelingCore* core = new ModelingCore;
+        ModelingWizard* wizard = new ModelingWizard(this);
+        wizard->setIs_integrated(true);
+        wizard->exec();
+        auto res = wizard->getDataRef();
+        res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
+//        core->setData(res);
+//        QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100);
+//        connect(core, SIGNAL(lil(int)), pd, SLOT(done(int)));
+//        connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)));
+//        QtConcurrent::run(core,&ModelingCore::run);    
+//        pd->exec();
+    ModelingWindow* mw = new ModelingWindow;
+    mw->setData(res);
+    mw->start();
+    mw->show();
 }

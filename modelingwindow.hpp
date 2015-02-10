@@ -20,6 +20,7 @@ public:
     ~ModelingWindow();
     void setCore(ModelingCore *_p){p = _p;}
     void setData(ModelingData data);
+    void start() {on_actionStart_triggered();}
 public slots:
     void setImage(QImage image);
 private slots:

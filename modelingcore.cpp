@@ -39,7 +39,7 @@ void ModelingCore::run()
         some_strange_size = some_strange_size / 2;
     }
     int counter = 0;    
-#pragma omp parallel for shared(counter)
+//#pragma omp parallel for shared(counter)
     for(int i = 0; i < ray_number;  ++ i){ 
         if(!stop.load()){
             Point p;

@@ -74,6 +74,7 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();
     void on_actionModeling_triggered();
+    void on_actionTest_triggered();
 };
 
 #endif // MAINWINDOW_HPP

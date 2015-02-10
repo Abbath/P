@@ -22,9 +22,12 @@ public:
     ModelingData& getDataRef();
     void setData(const ModelingData &value);
     
+    bool getIs_integrated() const;
+    void setIs_integrated(bool value);
+    
 private:
     ModelingData data;
-    QWizardPage* createPage();
+    bool is_integrated = false;
 };
 
 #endif // MODELINGWIZARD_HPP
