@@ -1,6 +1,6 @@
 #include "matpage.hpp"
 #include "ui_matpage.h"
-#include "modelingwizard.hpp"
+#include "../modelingwizard.hpp"
 
 MatPage::MatPage(QWidget *parent) :
     QWizardPage(parent),

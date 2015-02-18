@@ -1,7 +1,7 @@
 #include "startpage.hpp"
 #include "ui_startpage.h"
-#include "modelingwizard.hpp"
-
+#include "../modelingwizard.hpp"
+namespace Pages{
 StartPage::StartPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::StartPage)
@@ -41,4 +41,5 @@ void StartPage::on_pushButton_clicked()
     if(!name.isEmpty()){
         ui->lineEdit->setText(name);
     }
+}
 }

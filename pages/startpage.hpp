@@ -7,7 +7,7 @@
 namespace Ui {
 class StartPage;
 }
-
+namespace Pages{
 class StartPage : public QWizardPage
 {
     Q_OBJECT
@@ -24,5 +24,5 @@ private:
     Ui::StartPage *ui;
     
 };
-
+}
 #endif // STARTPAGE_HPP

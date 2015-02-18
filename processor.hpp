@@ -2,7 +2,7 @@
 #define PROCESSOR_HPP
 
 #include <QObject>
-#include <helpers.hpp>
+#include "helpers.hpp"
 #include <QRunnable>
 #include <QMessageBox>
 #include <QThread>
@@ -10,7 +10,6 @@
 #include <QtSql/QSqlQuery>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <helpers.hpp>
 #include "capturewrapper.hpp"
 #include "imageconverter.hpp"
 
@@ -85,6 +84,7 @@ private:
     bool vid = false;
     unsigned int threshold = 255;    
     volatile bool stop = false;
+    double area();
 };
 
 #endif // PROCESSOR_HPP

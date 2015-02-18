@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <QPointF>
 #include <array>
+#include <numeric>
 
 enum class DataType{PIXELS, PRESSURE}; 
 
@@ -312,10 +313,6 @@ public:
     }
     
 };
-
-
-
-
 
 #endif // HELPERS_HPP
 

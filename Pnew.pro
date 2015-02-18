@@ -17,7 +17,6 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     processor.cpp \
     imagearea.cpp \
-    mainwidget.cpp \
     dialog.cpp \
     capturewrapper.cpp \
     imageconverter.cpp \
@@ -36,7 +35,6 @@ HEADERS  += mainwindow.hpp \
     processor.hpp \
     imagearea.hpp \
     helpers.hpp \
-    mainwidget.hpp \
     dialog.hpp \
     capturewrapper.hpp \
     imageconverter.hpp \
@@ -54,33 +52,48 @@ HEADERS  += mainwindow.hpp \
 FORMS    += mainwindow.ui \
     imagearea.ui \
     setup.ui \
-    dialog.ui \
     modelingwindow.ui \
     pages/startpage.ui \
     pages/sizespage.ui \
     pages/matpage.ui \
     pages/miscpage.ui \
     pages/holespage.ui \
-    pages/campage.ui
+    pages/campage.ui \
+    dialog.ui
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -fopenmp
-QMAKE_LFLAGS += -fopenmp
 unix{
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
 INCLUDEPATH += "/usr/local/qwt-6.1.0/include"
 LIBS += -lqwt
+QMAKE_CXXFLAGS += -Wall -Wextra -std=c++11   -fopenmp
+QMAKE_LFLAGS += -fopenmp
 }
 
 win32{
-LIBS += -lopencv_core246 -lopencv_highgui246 -lopencv_imgproc246 -lqwt 
+LIBS += -lopencv_core249 -lopencv_highgui249 -lopencv_imgproc249 -lqwt
 LIBS += -L"C:\opencv-build\bin"
-INCLUDEPATH += "C:\opencv\build\include"
-INCLUDEPATH += "C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\src"
+#INCLUDEPATH += "C:\opencv\build\include"
+#INCLUDEPATH += "C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\src"
+INCLUDEPATH += "E:\opencv\build\include"
+INCLUDEPATH += "E:\qwt-6.1.0\qwt-6.1.0\qwt"
 LIBS += -L"C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\lib"
 RESOURCES +=
 }
 
 RESOURCES += \
-    shaders.qrc
+    shaders.qrc \
+    images.qrc
 
 OTHER_FILES +=
+
+win32:CONFIG(release, debug|release): LIBS += -L"C:/Qwt-6.1.0/lib/" -lqwt
+else:win32:CONFIG(debug, debug|release): LIBS += -L"C:/Qwt-6.1.0/lib/" -lqwtd
+
+win32:CONFIG(release, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_core249
+else:win32:CONFIG(debug, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_core249
+
+win32:CONFIG(release, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_imgproc249
+else:win32:CONFIG(debug, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_imgproc249
+
+win32:CONFIG(release, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_highgui249
+else:win32:CONFIG(debug, debug|release): LIBS += -L"E:\opencv-2.4.9\opencv-2.4.9-build\lib" -lopencv_highgui249

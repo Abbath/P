@@ -1,6 +1,6 @@
 #include "holespage.hpp"
 #include "ui_holespage.h"
-#include "modelingwizard.hpp"
+#include "../modelingwizard.hpp"
 
 HolesPage::HolesPage(QWidget *parent) :
     QWizardPage(parent),

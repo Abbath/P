@@ -54,6 +54,15 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
 
+void MainWindow::runCalibration()
+{
+    ui->mainToolBar->hide();
+    ui->splitter->widget(0)->hide();
+    ui->splitter->widget(2)->hide();
+    ui->menuBar->hide();
+    on_actionCalibrate_triggered();
+}
+
 /*!
  * \brief MainWindow::~MainWindow
  */
@@ -86,7 +95,7 @@ void MainWindow::disableUi(bool b)
 void MainWindow::Update(Display dis)
 {
     disableUi(false);
-
+    
     
     ui->imageArea->setDisplay(dis);
     ui->pressureLabel->setText(QString::number(dis.im.pressure));
@@ -180,6 +189,7 @@ void MainWindow::on_actionOpen_Image_s_triggered()
     ui->splitter->widget(2)->show();
     disableUi();
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
+    if(names.isEmpty()) return;
     QtConcurrent::run(p, &Processor::openImage, names);
 }
 
@@ -250,7 +260,9 @@ void MainWindow::on_actionExit_triggered()
  */
 void MainWindow::on_actionLoad_triggered()
 {
-    QtConcurrent::run(p, &Processor::loadConf, QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)")));
+    QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    if(name.isEmpty()) return;
+    QtConcurrent::run(p, &Processor::loadConf, name);
 }
 
 /*!
@@ -258,7 +270,9 @@ void MainWindow::on_actionLoad_triggered()
  */
 void MainWindow::on_actionSave_triggered()
 {
-    QtConcurrent::run(p, &Processor::saveConf, QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)")), false);
+    QString name = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
+    if(name.isEmpty()) return;
+    QtConcurrent::run(p, &Processor::saveConf, name, false);
 }
 
 /*!
@@ -266,7 +280,9 @@ void MainWindow::on_actionSave_triggered()
  */
 void MainWindow::on_actionLoad_2_triggered()
 {
-    QtConcurrent::run(p, &Processor::loadData, QFileDialog::getOpenFileName(this, tr("Load data"), "", tr("Data (*.dat)")));
+    QString name = QFileDialog::getOpenFileName(this, tr("Load data"), "", tr("Data (*.dat)"));
+    if(name.isEmpty()) return;
+    QtConcurrent::run(p, &Processor::loadData, name);
 }
 
 /*!
@@ -274,7 +290,9 @@ void MainWindow::on_actionLoad_2_triggered()
  */
 void MainWindow::on_actionSave_2_triggered()
 {
-    QtConcurrent::run(p, &Processor::saveData, QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)")));
+    QString name = QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)"));
+    if(name.isEmpty()) return;
+    QtConcurrent::run(p, &Processor::saveData, name);
 }
 
 /*!
@@ -291,14 +309,14 @@ void MainWindow::on_actionSave_as_Default_triggered()
  */
 void MainWindow::on_action3D_triggered(bool checked)
 {
-//    if (checked) {
-//        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
-//        ui->widget->setImage(ui->imageArea->getImage());
-//    } else {
-//        QImage empty;
-//        ui->widget->setStep(1.0f);
-//        ui->widget->setImage(empty);
-//    }
+    //    if (checked) {
+    //        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
+    //        ui->widget->setImage(ui->imageArea->getImage());
+    //    } else {
+    //        QImage empty;
+    //        ui->widget->setStep(1.0f);
+    //        ui->widget->setImage(empty);
+    //    }
 }
 
 /*!
@@ -307,8 +325,11 @@ void MainWindow::on_action3D_triggered(bool checked)
 void MainWindow::on_actionCalibrate_triggered()
 {
     QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+    if(name.isEmpty()) return;
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
+    if(names.isEmpty()) return;
     QString named = QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)"));
+    if(named.isEmpty()) return;
     disableUi();
     QtConcurrent::run(p, &Processor::calibrate, name, named, names);
 }
@@ -319,7 +340,7 @@ void MainWindow::on_actionCalibrate_triggered()
 void MainWindow::on_actionOpen_Video_triggered()
 {
     QString videoFileName = QFileDialog::getOpenFileName(this, tr("Open data file"), "", tr("Video files (*.avi)"));
-    if (!videoFileName.isNull()) {
+    if (!videoFileName.isNull() && !videoFileName.isEmpty()) {
         ui->widget_3->show();
         ui->pushButton_2->show();
         ui->tabWidget_2->hide();
@@ -339,15 +360,17 @@ void MainWindow::saveResults( const QVector<double>& pol,  const QVector<double>
 {
     if (!res.isEmpty()) {
         QString dataFileName = QFileDialog::getSaveFileName(this, tr("Save results"), "", tr("Data (*.dat)"));
-        QFile file(dataFileName);
-        if (file.open(QFile::WriteOnly)) {
-            QTextStream s(&file);
-            if(widget == ui->widget_3){
-                s << p->getImage().getThreshold() << "\n";
-                s << res.size() << "\n";
-            }
-            for (int i = 0; i < res.size(); ++i) {
-                s << res[i] << " " << pol[i] << "\n";
+        if(!dataFileName.isEmpty()){
+            QFile file(dataFileName);
+            if (file.open(QFile::WriteOnly)) {
+                QTextStream s(&file);
+                if(widget == ui->widget_3){
+                    s << p->getImage().getThreshold() << "\n";
+                    s << res.size() << "\n";
+                }
+                for (int i = 0; i < res.size(); ++i) {
+                    s << res[i] << " " << pol[i] << "\n";
+                }
             }
         }
         QString plotImageFileName = QFileDialog::getSaveFileName(this, tr("Save plot image"), "", tr("Images (*.png)"));
@@ -412,7 +435,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.7\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 void MainWindow::on_actionHelp_triggered()
@@ -432,20 +455,27 @@ void MainWindow::on_actionModeling_triggered()
 
 void MainWindow::on_actionTest_triggered()
 {
-//        ModelingCore* core = new ModelingCore;
-        ModelingWizard* wizard = new ModelingWizard(this);
-        wizard->setIs_integrated(true);
-        wizard->exec();
-        auto res = wizard->getDataRef();
-        res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
-//        core->setData(res);
-//        QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100);
-//        connect(core, SIGNAL(lil(int)), pd, SLOT(done(int)));
-//        connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)));
-//        QtConcurrent::run(core,&ModelingCore::run);    
-//        pd->exec();
+    //        ModelingCore* core = new ModelingCore;
+    ModelingWizard* wizard = new ModelingWizard(this);
+    wizard->setIs_integrated(true);
+    wizard->exec();
+    auto res = wizard->getDataRef();
+    res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
+    //        core->setData(res);
+    //        QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100);
+    //        connect(core, SIGNAL(lil(int)), pd, SLOT(done(int)));
+    //        connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)));
+    //        QtConcurrent::run(core,&ModelingCore::run);    
+    //        pd->exec();
     ModelingWindow* mw = new ModelingWindow;
     mw->setData(res);
     mw->start();
     mw->show();
+}
+
+void MainWindow::on_actionSplash_triggered()
+{
+    QPixmap splash("splash.png");
+    QSplashScreen ss(splash);
+    ss.show();
 }

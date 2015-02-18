@@ -2,7 +2,7 @@
 
 ModelingWizard::ModelingWizard(QWidget* parent)
 {
-    setPage(START_PAGE, new StartPage);
+    setPage(START_PAGE, new Pages::StartPage);
     setPage(SIZE_PAGE, new SizesPage);
     setPage(MATERIAL_PAGE, new MatPage);
     setPage(MISC_PAGE, new MiscPage);

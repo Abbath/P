@@ -345,6 +345,7 @@
     </property>
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionSplash"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -561,6 +562,11 @@
   <action name="actionTest">
    <property name="text">
     <string>Test</string>
+   </property>
+  </action>
+  <action name="actionSplash">
+   <property name="text">
+    <string>Splash</string>
    </property>
   </action>
  </widget>

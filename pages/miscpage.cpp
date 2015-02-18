@@ -1,6 +1,6 @@
 #include "miscpage.hpp"
 #include "ui_miscpage.h"
-#include "modelingwizard.hpp"
+#include "../modelingwizard.hpp"
 
 MiscPage::MiscPage(QWidget *parent) :
     QWizardPage(parent),

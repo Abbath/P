@@ -185,7 +185,6 @@ void Processor::next()
  */
 void Processor::openImage(const QStringList& names)
 {
-    qDebug() << "I'm in Processor::openImage\n";
     videoFileName.clear();
     fileNames.clear();
     fileNames.reserve(names.size());
@@ -363,8 +362,8 @@ void Processor::run()
             image.setFullCounter();
             image.setSquare(config.square0);
             run(true);
-            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / 1000.);
-            qDebug() << image.pressure;
+            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / area());
+//            qDebug() << image.pressure;
             pressureValues.push_back(image.pressure);
             pixelValues.push_back(image.getSum());
             QThread::currentThread()->usleep(50);
@@ -413,9 +412,9 @@ void Processor::calibrate(const QString& name, const QString& named, const QStri
         int n = tmp.toInt();
         autorun();
         for (int i = 0; i < 4; ++i) {
-            res4[i].push_back(images[0].getBoundCounter()[i] / 1000.);
+            res4[i].push_back(images[0].getBoundCounter()[i]);
         }
-        preparedPixels.push_back(images[0].getSum() / 1000.);
+        preparedPixels.push_back(images[0].getSum() / area());
         preparedPressures.push_back(n);
     }
     saveData(named);
@@ -663,7 +662,7 @@ void Processor::autorun(bool vu_flag)
             image.setFullCounter();
             image.setSquare(config.square0);
             run(true);
-            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / 1000.);
+            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / area());
             pressureValues.push_back(image.pressure);
             pixelValues.push_back(image.getSum());
         }
@@ -680,7 +679,7 @@ void Processor::autorun(bool vu_flag)
             image.setSquare(config.square0);
             image.setFullCounter();
             run(true);
-            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / 1000.);
+            image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / area());
             image.isProcessed = true;
             if (vu_flag) {
                 repaint();
@@ -690,4 +689,11 @@ void Processor::autorun(bool vu_flag)
             emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
     }
+}
+
+double Processor::area(){
+    Image& image = images[currentImageNumber];
+    int a = abs(image.getSquare()[0].x() - image.getSquare()[1].x());
+    int b = abs(image.getSquare()[1].y() - image.getSquare()[2].y());
+    return a*b;
 }

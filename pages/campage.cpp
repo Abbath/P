@@ -1,6 +1,6 @@
 #include "campage.hpp"
 #include "ui_campage.h"
-#include "modelingwizard.hpp"
+#include "../modelingwizard.hpp"
 
 CamPage::CamPage(QWidget *parent) :
     QWizardPage(parent),

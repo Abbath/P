@@ -1,6 +1,6 @@
 #include "sizespage.hpp"
 #include "ui_sizespage.h"
-#include "modelingwizard.hpp"
+#include "../modelingwizard.hpp"
 
 SizesPage::SizesPage(QWidget *parent) :
     QWizardPage(parent),

@@ -3,8 +3,8 @@
 
 #include <QWidget>
 #include <QtGui>
-#include <helpers.hpp>
-#include <processor.hpp>
+#include "helpers.hpp"
+#include "processor.hpp"
 
 namespace Ui {
   class ImageArea;

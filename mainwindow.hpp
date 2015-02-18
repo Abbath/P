@@ -7,8 +7,8 @@
 #include <QGraphicsScene>
 #include <QtMultimedia/QMediaPlayer>
 #include <QVideoWidget>
-#include <helpers.hpp>
-#include <processor.hpp>
+#include "helpers.hpp"
+#include "processor.hpp"
 #include <qwt_plot.h>
 #include <qwt.h>
 #include <qwt_plot_curve.h>
@@ -28,6 +28,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     void setProcessor(Processor * _p) { p = _p;}
+    void runCalibration();
     ~MainWindow();
     void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
 private:
@@ -75,6 +76,7 @@ private slots:
     void on_actionHelp_triggered();
     void on_actionModeling_triggered();
     void on_actionTest_triggered();
+    void on_actionSplash_triggered();
 };
 
 #endif // MAINWINDOW_HPP
