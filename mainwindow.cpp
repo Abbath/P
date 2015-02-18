@@ -68,6 +68,7 @@ void MainWindow::runCalibration()
  */
 MainWindow::~MainWindow()
 {
+    emit death();
     delete ui;
 }
 
@@ -378,6 +379,11 @@ void MainWindow::saveResults( const QVector<double>& pol,  const QVector<double>
             widget->grab().save(plotImageFileName);
         }
     }    
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    this->deleteLater();
 }
 
 /*!

@@ -22,7 +22,7 @@ public:
    
     Mode getMod() const;
     void setMod(const Mode &value);
-    
+    void closeEvent(QCloseEvent *);
     bool getAsk_for_data() const;
     void setAsk_for_data(bool value);
     
@@ -37,10 +37,15 @@ private slots:
     
     void on_pushButton_3_clicked();
     
+public slots:
+    void I_am_fucking_here();
+    
 private:
     Ui::Dialog *ui;
     Mode mod = MEASUREMENT;
     bool ask_for_data = false;
+    ModelingWindow* w;
+    MainWindow * mainw;
 };
 
 #endif // DIALOG_HPP

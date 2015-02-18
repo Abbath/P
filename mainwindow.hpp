@@ -31,6 +31,7 @@ public:
     void runCalibration();
     ~MainWindow();
     void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
+    void closeEvent(QCloseEvent *);
 private:
     QGraphicsScene *scene = nullptr;
     QwtPlotZoomer *zoom = nullptr;
@@ -44,6 +45,7 @@ private:
     void disableUi(bool b = true);
 signals:
     void stop();
+    void death();
 public slots:
     void Update(Display dis);
     void imageAreaUpdated(Display dis);

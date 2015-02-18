@@ -48,6 +48,8 @@ ModelingWindow::ModelingWindow(QWidget *parent) :
 
 ModelingWindow::~ModelingWindow()
 {
+    emit death();
+    std::cerr << "NO" << std::endl;
     writeSettings();
     delete ui;
 }
@@ -186,6 +188,11 @@ void ModelingWindow::keyPressEvent(QKeyEvent *e)
 void ModelingWindow::keyReleaseEvent(QKeyEvent *e)
 {
     e->accept();
+}
+
+void ModelingWindow::closeEvent(QCloseEvent *e)
+{
+    this->deleteLater();
 }
 
 void ModelingWindow::saveConfig()

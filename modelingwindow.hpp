@@ -31,6 +31,7 @@ private slots:
     void error(QString s);
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
+    void closeEvent(QCloseEvent *e);
     void on_pushButton_4_clicked();
     void on_pushButton_5_clicked();
     void on_actionStart_triggered();
@@ -48,6 +49,8 @@ private:
     ModelingDisplay * ia;
     ModelingCore *p;
     QLabel * label;
+signals:
+    void death();
 };
 
 #endif // MODELINGWINDOW_HPP
