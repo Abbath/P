@@ -39,7 +39,7 @@ private slots:
     
 public slots:
     void I_am_fucking_here();
-    
+    void trayHandle(QSystemTrayIcon::ActivationReason reason);
 private:
     Ui::Dialog *ui;
     Mode mod = MEASUREMENT;

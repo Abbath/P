@@ -63,6 +63,32 @@ void MainWindow::runCalibration()
     on_actionCalibrate_triggered();
 }
 
+void MainWindow::runMeasurements()
+{
+    QList<int> list;
+    list << 0 << ui->splitter->widget(0)->width()+ui->splitter->widget(1)->width() << ui->splitter->widget(2)->width();
+    ui->splitter->setSizes(list);
+    ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
+}
+
+void MainWindow::model()
+{
+    core = new ModelingCore;
+    ModelingWizard* wizard = new ModelingWizard(this);
+    wizard->setIs_integrated(true);
+    wizard->exec();
+    auto res = wizard->getDataRef();
+    res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
+    core->setData(res);
+    QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100, this);
+    pd->setWindowTitle("Progress");
+    pd->setModal(true);
+    connect(core, SIGNAL(lil(int)), pd, SLOT(setValue(int)), Qt::QueuedConnection);
+    connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)), Qt::QueuedConnection);
+    QtConcurrent::run(core,&ModelingCore::run);    
+    pd->exec();
+}
+
 /*!
  * \brief MainWindow::~MainWindow
  */
@@ -227,7 +253,9 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
-    QtConcurrent::run(p, &Processor::autorun, true);
+    //QtConcurrent::run(p, &Processor::autorun, true);
+    p->autorun(true);
+    model();
 }
 
 /*!
@@ -310,6 +338,7 @@ void MainWindow::on_actionSave_as_Default_triggered()
  */
 void MainWindow::on_action3D_triggered(bool checked)
 {
+    Q_UNUSED(checked);
     //    if (checked) {
     //        ui->widget->setStep((float)ui->imageArea->getThreshold() / 255.0);
     //        ui->widget->setImage(ui->imageArea->getImage());

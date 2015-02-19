@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
     //    ss.show();
     a.processEvents();
     Dialog *d = new Dialog;
+    d->setWindowIcon(QIcon(":/ops.png"));
     d->show();
     QSystemTrayIcon * qsti = new QSystemTrayIcon(d);
     QMenu *trayIconMenu;
@@ -40,8 +41,9 @@ int main(int argc, char* argv[])
     trayIconMenu->addAction (restoreAction);
     trayIconMenu->addAction (quitAction);
     qsti->setContextMenu(trayIconMenu);
+    qsti->setIcon(QIcon(":/ops.png"));
     qsti->show();
-    
+    QObject::connect(qsti, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), d, SLOT(trayHandle(QSystemTrayIcon::ActivationReason)));
             //    auto mode = d.getMod();
             //    bool afd = d.getAsk_for_data();
             //    if(d.result() == QDialog::Accepted){

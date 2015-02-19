@@ -9,6 +9,7 @@
 #include <QVideoWidget>
 #include "helpers.hpp"
 #include "processor.hpp"
+#include "modelingcore.hpp"
 #include <qwt_plot.h>
 #include <qwt.h>
 #include <qwt_plot_curve.h>
@@ -29,6 +30,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void setProcessor(Processor * _p) { p = _p;}
     void runCalibration();
+    void runMeasurements();
+    void model();
     ~MainWindow();
     void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
     void closeEvent(QCloseEvent *);
@@ -42,6 +45,7 @@ private:
     QMediaPlayer * player = nullptr;
     Ui::MainWindow *ui = nullptr;
     Processor *p = nullptr;
+    ModelingCore *core = nullptr;
     void disableUi(bool b = true);
 signals:
     void stop();

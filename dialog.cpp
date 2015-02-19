@@ -78,7 +78,7 @@ void Dialog::on_pushButton_2_clicked()
     mainw = new MainWindow;
     Processor *p = new Processor(mainw);
     mainw->setProcessor(p);
-    mainw->setWindowTitle("Calibration");
+    mainw->setWindowTitle("Measurements");
     qRegisterMetaType<Display>("Display");
     qRegisterMetaType<QVector<double> >("QVector<double>");
     QObject::connect(p, SIGNAL(Update(Display)), mainw, SLOT(Update(Display)), Qt::ConnectionType::QueuedConnection);
@@ -88,6 +88,7 @@ void Dialog::on_pushButton_2_clicked()
     QObject::connect(mainw, SIGNAL(stop()), p, SLOT(stopThis()), Qt::QueuedConnection);
     p->loadConf("default.conf");
     mainw->show();
+    mainw->runMeasurements();
     this->hide();
     connect(mainw, SIGNAL(death()), this, SLOT(show()), Qt::QueuedConnection);
 }
@@ -115,5 +116,19 @@ void Dialog::on_pushButton_3_clicked()
 void Dialog::I_am_fucking_here()
 {
     std::cerr << "Yep!" << std::endl;
+}
+
+void Dialog::trayHandle(QSystemTrayIcon::ActivationReason reason)
+{
+    if(reason == QSystemTrayIcon::Trigger){
+        if(this->isVisible()){
+            this->hide();
+        }else{
+            this->showNormal();
+        }
+    }
+    if(reason == QSystemTrayIcon::MiddleClick){
+        this->close();
+    }
 }
 
