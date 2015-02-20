@@ -46,8 +46,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->graphicsView->setScene(scene);
     ui->widget_3->hide();
     ui->pushButton_2->hide();
-    //ui->tab_6->setDisabled(true);
-    //ui->tab_6->hide();
     
     player = new QMediaPlayer;
     player->setVideoOutput(ui->widget_2);
@@ -73,7 +71,8 @@ void MainWindow::runMeasurements()
 
 void MainWindow::model()
 {
-    core = new ModelingCore;
+    if(core) core->deleteLater();
+    core = new ModelingCore(this);
     ModelingWizard* wizard = new ModelingWizard(this);
     wizard->setIs_integrated(true);
     wizard->exec();
@@ -83,8 +82,11 @@ void MainWindow::model()
     QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100, this);
     pd->setWindowTitle("Progress");
     pd->setModal(true);
+    pd->setMinimumSize(pd->size());
+    pd->setMaximumSize(pd->size());
     connect(core, SIGNAL(lil(int)), pd, SLOT(setValue(int)), Qt::QueuedConnection);
     connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)), Qt::QueuedConnection);
+    connect(pd, SIGNAL(canceled()), core, SLOT(Stop()));
     QtConcurrent::run(core,&ModelingCore::run);    
     pd->exec();
 }
@@ -253,7 +255,6 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
-    //QtConcurrent::run(p, &Processor::autorun, true);
     p->autorun(true);
     model();
 }
@@ -470,7 +471,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.1\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 void MainWindow::on_actionHelp_triggered()
@@ -490,18 +491,11 @@ void MainWindow::on_actionModeling_triggered()
 
 void MainWindow::on_actionTest_triggered()
 {
-    //        ModelingCore* core = new ModelingCore;
     ModelingWizard* wizard = new ModelingWizard(this);
     wizard->setIs_integrated(true);
     wizard->exec();
     auto res = wizard->getDataRef();
     res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
-    //        core->setData(res);
-    //        QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100);
-    //        connect(core, SIGNAL(lil(int)), pd, SLOT(done(int)));
-    //        connect(core, SIGNAL(sendImage(QImage)), ui->widget, SLOT(setImage(QImage)));
-    //        QtConcurrent::run(core,&ModelingCore::run);    
-    //        pd->exec();
     ModelingWindow* mw = new ModelingWindow;
     mw->setData(res);
     mw->start();

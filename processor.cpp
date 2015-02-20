@@ -328,7 +328,6 @@ void Processor::run()
     try{
         capture.isOpened();
         unsigned frameNumber = capture.get(CV_CAP_PROP_FRAME_COUNT);
-        //unsigned fps = capture.get(CV_CAP_PROP_FPS);
         cv::Mat frame;
         pressureValues.clear();
         pixelValues.clear();
@@ -363,7 +362,6 @@ void Processor::run()
             image.setSquare(config.square0);
             run(true);
             image.pressure = calculate(preparedPixels, preparedPressures, image.getSum() / area());
-//            qDebug() << image.pressure;
             pressureValues.push_back(image.pressure);
             pixelValues.push_back(image.getSum());
             QThread::currentThread()->usleep(50);

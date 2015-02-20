@@ -1,6 +1,6 @@
 #include "modelingwizard.hpp"
 
-ModelingWizard::ModelingWizard(QWidget* parent)
+ModelingWizard::ModelingWizard(QWidget* parent) : QWizard(parent)
 {
     setPage(START_PAGE, new Pages::StartPage);
     setPage(SIZE_PAGE, new SizesPage);

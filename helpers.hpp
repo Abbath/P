@@ -38,8 +38,6 @@ enum Modes
 
 };
 
-//typedef QVector3D Point;
-
 struct Line
 {
   double x1;
@@ -55,10 +53,8 @@ struct Line
 struct Config
 {
   QRect crop;
-  //QPoint square[3];
   Square square;
   Square square0;
-  //QPoint square0[3];
 };
 
 class Image
@@ -94,13 +90,11 @@ public:
 private:
   QImage image;
   QRect crop;
-  //QPoint square[3];
   Square square;
   Config config;
   QString fileName;
   unsigned int threshold = 128u;
   unsigned int counter = 0u;
-  //unsigned int bound_counter[4] = {0, 0, 0, 0};
   std::array<unsigned, 4> bound_counter;
 };
 

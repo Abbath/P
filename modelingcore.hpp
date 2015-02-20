@@ -110,6 +110,7 @@ public:
     
     void setData(const ModelingData& data);
     
+    void calculateStress(std::tuple<Point, Point, Point> three);
 private:
     double w(double x, double y);
     std::vector<Point> readFile(std::string filename);
@@ -167,6 +168,7 @@ private:
     double pr;
     std::atomic_bool stop;
     std::pair<double, double> stress(double x , double y, double z);
+    double w2(double x, double y);
 };
 
 #endif // MODELINGCORE_HPP

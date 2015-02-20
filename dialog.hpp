@@ -38,7 +38,6 @@ private slots:
     void on_pushButton_3_clicked();
     
 public slots:
-    void I_am_fucking_here();
     void trayHandle(QSystemTrayIcon::ActivationReason reason);
 private:
     Ui::Dialog *ui;

@@ -113,10 +113,6 @@ void Dialog::on_pushButton_3_clicked()
     this->close();
 }
 
-void Dialog::I_am_fucking_here()
-{
-    std::cerr << "Yep!" << std::endl;
-}
 
 void Dialog::trayHandle(QSystemTrayIcon::ActivationReason reason)
 {

@@ -39,7 +39,7 @@ void ModelingCore::run()
         some_strange_size = some_strange_size / 2;
     }
     int counter = 0;    
-//#pragma omp parallel for shared(counter)
+    //#pragma omp parallel for shared(counter)
     for(int i = 0; i < ray_number;  ++ i){ 
         if(!stop.load()){
             Point p;
@@ -225,26 +225,31 @@ double ModelingCore::z(double x, double y, std::tuple<Point, Point , Point> clos
     return (nom / den) + a.z;
 }
 
+void ModelingCore::calculateStress(std::tuple<Point, Point, Point> three)
+{
+    auto p1 = std::get<0>(three);
+    auto p2 = std::get<1>(three);
+    auto p3 = std::get<2>(three);
+    
+    auto displacement = (die_size - mem_size)/2.0;
+    
+    std::pair<double, double> st1 = stress(p1.x - displacement, p1.y - displacement, p1.z);
+    std::pair<double, double> st2 = stress(p2.x - displacement, p2.y - displacement, p2.z);
+    std::pair<double, double> st3 = stress(p3.x - displacement, p3.y - displacement, p3.z);
+    
+    if (st1.first > 7000*scale || st1.second > 7000*scale || st2.first > 7000*scale || st2.second > 7000*scale || st3.first > 7000*scale || st3.second > 7000*scale){
+        emit error("Membrane is broken");
+        stop.store(true);
+    }    
+}
+
 std::tuple<double, double> ModelingCore::test(const Point& p/*, const std::vector<Point>& data */){
     std::tuple<Point, Point, Point> three;
     if(is_data_external){
         three = closest_external(p, data);
     }else{
         three = closest_internal(p);
-        //        auto p1 = std::get<0>(three);
-        //        auto p2 = std::get<1>(three);
-        //        auto p3 = std::get<2>(three);
-        
-        //        auto displacement = (die_size - mem_size)/2.0;
-        
-        //        std::pair<double, double> st1 = stress(p1.x - displacement, p1.y - displacement, p1.z);
-        //        std::pair<double, double> st2 = stress(p2.x - displacement, p2.y - displacement, p2.z);
-        //        std::pair<double, double> st3 = stress(p3.x - displacement, p3.y - displacement, p3.z);
-        
-        //        if (st1.first > 7000*scale || st1.second > 7000*scale || st2.first > 7000*scale || st2.second > 7000*scale || st3.first > 7000*scale || st3.second > 7000*scale){
-        //            emit error("Membrane is broken");
-        //            stop.store(true);
-        //        }
+        //calculateStress(three);
     }
     auto norm = normal(three);
     
@@ -635,28 +640,32 @@ double ModelingCore::w(double x, double y)
     //res /= 10;
     return res + (thickness/2);
     
-    //    auto p = pressure;
-    //    auto u = mem_size/2;
-    //    auto v = mem_size/2;
-    //    auto b = mem_size/2;
-    //    auto d = mem_size/2;
-    //    auto l_x = mem_size;
-    //    auto l_y = mem_size;
-    //    auto pi = 3.1459265359;
-    //    auto t = thickness;
-    //    auto E = ym;
-    //    auto mu = pr;
-    //    auto k = pow(t, 3.0)*E/(12*(1-pow(mu, 2.0)));
-    //    double w = 0.0;
-    //    for(int i = 1; i <= N; ++i){
-    //        for(int j = 1; j <= N; ++j){
-    //            auto a_ij = 16*p/(pi*pi*i*j)*sin(i*pi*u/l_x)*sin(i*pi*b/l_x)*sin(j*pi*v/l_y)*sin(j*pi*d/l_y);
-    //            auto w_ij = a_ij/(k*pow(pi, 4.0)*pow((pow(i/l_x, 2.0)+pow(j/l_y, 2.0)), 2.0));
-    //            w += w_ij*sin(i*pi*x/l_x)*sin(j*pi*y/l_y);
-    //        }
-    //    }
-    //    std::cerr << w << '\n';
-    //    return w + (thickness/2);
+    
+}
+
+double ModelingCore::w2(double x, double y){
+    auto p = pressure;
+    auto u = mem_size/2;
+    auto v = mem_size/2;
+    auto b = mem_size/2;
+    auto d = mem_size/2;
+    auto l_x = mem_size;
+    auto l_y = mem_size;
+    auto pi = 3.1459265359;
+    auto t = thickness;
+    auto E = ym;
+    auto mu = pr;
+    auto k = pow(t, 3.0)*E/(12*(1-pow(mu, 2.0)));
+    double w = 0.0;
+    for(int i = 1; i <= N; ++i){
+        for(int j = 1; j <= N; ++j){
+            auto a_ij = 16*p/(pi*pi*i*j)*sin(i*pi*u/l_x)*sin(i*pi*b/l_x)*sin(j*pi*v/l_y)*sin(j*pi*d/l_y);
+            auto w_ij = a_ij/(k*pow(pi, 4.0)*pow((pow(i/l_x, 2.0)+pow(j/l_y, 2.0)), 2.0));
+            w += w_ij*sin(i*pi*x/l_x)*sin(j*pi*y/l_y);
+        }
+    }
+    std::cerr << w << '\n';
+    return w + (thickness/2);
 }
 
 std::pair<double, double> ModelingCore::stress(double x, double y, double z){

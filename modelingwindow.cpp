@@ -35,8 +35,6 @@ ModelingWindow::ModelingWindow(QWidget *parent) :
         ui->doubleSpinBox_10->setValue(25.0);
     }
     label->setText("Ready.");
-//    ui->pushButton->hide();
-//    ui->pushButton_2->hide();
     ui->pushButton_3->hide();
     ui->pushButton_4->hide();
     ui->pushButton_5->hide();
@@ -49,19 +47,15 @@ ModelingWindow::ModelingWindow(QWidget *parent) :
 ModelingWindow::~ModelingWindow()
 {
     emit death();
-    std::cerr << "NO" << std::endl;
     writeSettings();
     delete ui;
 }
 
 void ModelingWindow::setImage(QImage image)
 {
-//    ui->pushButton_2->setText("Start");
-//    ui->actionStart->setText("Start");
     ui->progressBar->hide();
     ia->setImage(image);
     label->setText("Done.");
-    //p->Stop();
 }
 
 void ModelingWindow::writeSettings(){
@@ -192,6 +186,7 @@ void ModelingWindow::keyReleaseEvent(QKeyEvent *e)
 
 void ModelingWindow::closeEvent(QCloseEvent *e)
 {
+    e->accept();
     this->deleteLater();
 }
 
@@ -266,9 +261,7 @@ void ModelingWindow::on_pushButton_5_clicked()
 
 void ModelingWindow::on_actionStart_triggered()
 {
-    //p->Stop();
     if(ui->actionStart->text() == QString("Stop")){
-        //ui->pushButton_2->setText("Start");
         ui->actionStart->setText("Start");        
         ui->progressBar->hide();
         p->Stop();
@@ -292,7 +285,6 @@ void ModelingWindow::on_actionStart_triggered()
         p->setHoles_rows_number(ui->spinBox_2->value());
         p->setHole_size(ui->spinBox_3->value());
         p->setSpace_size(ui->spinBox_4->value());
-        //ui->pushButton_2->setText("Stop");
         ui->actionStart->setText("Stop");        
         ui->progressBar->show();
         label->setText("Processing...");

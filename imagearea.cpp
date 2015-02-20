@@ -42,7 +42,7 @@ void ImageArea::paintEvent(QPaintEvent* e)
     }
     if (isRectangleDrawn) {
         painter.setPen(Qt::green);
-        painter.drawRect(im.getCrop()); //im.crop[0].x(), im.crop[0].y(), im.crop[1].x() - im.crop[0].x(), im.crop[1].y() - im.crop[0].y());
+        painter.drawRect(im.getCrop());
         painter.setPen(Qt::white);
     } else {
         if (isZoomed) {
@@ -76,8 +76,6 @@ void ImageArea::mousePressEvent(QMouseEvent* e)
 {
     if (e->button() == Qt::RightButton && !im.isImageNull()) {
         isRectangleDrawn = true;
-        //im.crop[0].setX(e->x());
-        //im.crop[0].setY(e->y());
         im.getCropRef().setTopLeft(QPoint(e->x(), e->y()));
         update();
     }
@@ -102,8 +100,6 @@ void ImageArea::mouseMoveEvent(QMouseEvent* e)
 {
     if (!im.isImageNull()) {
         if (isRectangleDrawn) {
-            //  im.crop[1].setX(e->x());
-            //  im.crop[1].setY(e->y());
             im.getCropRef().setBottomRight(QPoint(e->x(), e->y()));
         } else {
             zoom.setX(e->x());
