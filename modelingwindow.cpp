@@ -4,6 +4,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QtConcurrent/QtConcurrent>
 
 ModelingWindow::ModelingWindow(QWidget *parent) :
@@ -39,9 +40,10 @@ ModelingWindow::ModelingWindow(QWidget *parent) :
     ui->pushButton_4->hide();
     ui->pushButton_5->hide();
     QObject::connect(p,SIGNAL(lil(int)),this, SLOT(lil(int)), Qt::QueuedConnection);
-    QObject::connect(p,SIGNAL(saved()),this, SLOT(saved()), Qt::QueuedConnection);
+    QObject::connect(p,SIGNAL(saved(bool)),this, SLOT(saved(bool)), Qt::QueuedConnection);
     QObject::connect(p,SIGNAL(sendImage(QImage)), this, SLOT(setImage(QImage)));
     QObject::connect(p, SIGNAL(error(QString)), this, SLOT(error(QString)));
+    this->showMaximized();
 }
 
 ModelingWindow::~ModelingWindow()
@@ -53,6 +55,7 @@ ModelingWindow::~ModelingWindow()
 
 void ModelingWindow::setImage(QImage image)
 {
+    ui->actionStart->setText("Start");
     ui->progressBar->hide();
     ia->setImage(image);
     label->setText("Done.");
@@ -82,7 +85,7 @@ void ModelingWindow::writeSettings(){
     settings.beginGroup("HSet");
     settings.setValue("rows", ui->spinBox_2->value());
     settings.setValue("hs", ui->spinBox_3->value());
-    settings.setValue("ss", ui->spinBox_4->value());    
+    settings.setValue("ss", ui->spinBox_4->value());
     settings.endGroup();
 }
 
@@ -121,10 +124,14 @@ void ModelingWindow::lil(int i)
     update();
 }
 
-void ModelingWindow::saved()
+void ModelingWindow::saved(bool good)
 {
     ui->centralwidget->setEnabled(true);
-    QMessageBox::information(this,"Done!", "Image has been saved successfully!");
+    if(good){
+        QMessageBox::information(this,"Done!", "Image has been saved successfully!");
+    }else{
+        QMessageBox::warning(this, "Not done!", "Image can not be saved!");
+    }
 }
 
 void ModelingWindow::on_actionAbout_triggered()
@@ -176,6 +183,12 @@ void ModelingWindow::keyPressEvent(QKeyEvent *e)
         }else{
             ui->groupBox_2->hide();
         }
+    }else if(e->key() == Qt::Key_S && e->modifiers() == Qt::AltModifier){
+        bool ok;
+        auto sc = QInputDialog::getInt(this, "Set scale coefficient", "Enter an integer number", p->getScale_coef(), 1, 35, 1, &ok);
+        if(ok){
+            p->setScale_coef(sc);
+        }
     }
 }
 
@@ -193,14 +206,14 @@ void ModelingWindow::closeEvent(QCloseEvent *e)
 void ModelingWindow::saveConfig()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save config", ".", "Config files (*.conf)");
-    if(filename.isEmpty()) return;    
+    if(filename.isEmpty()) return;
     QFile file(filename);
     if(!file.open(QFile::WriteOnly)){
         error("Can not write to file: "+filename);
     }
     QTextStream str(&file);
     str << ui->doubleSpinBox->value() << "\n"
-        <<ui->doubleSpinBox_2->value() << "\n" 
+        <<ui->doubleSpinBox_2->value() << "\n"
        << ui->doubleSpinBox_6->value() << "\n"
        << ui->doubleSpinBox_4->value() << "\n"
        << ui->doubleSpinBox_5->value() << "\n"
@@ -213,9 +226,9 @@ void ModelingWindow::saveConfig()
        << ui->doubleSpinBox_10->value() << "\n"
        << ui->doubleSpinBox_13->value() << "\n"
        << ui->doubleSpinBox_14->value() << "\n"
-       << ui->doubleSpinBox_15->value() << "\n" 
-       << ui->spinBox_2->value() << "\n" 
-       << ui->spinBox_3->value() << "\n" 
+       << ui->doubleSpinBox_15->value() << "\n"
+       << ui->spinBox_2->value() << "\n"
+       << ui->spinBox_3->value() << "\n"
        << ui->spinBox_4->value() << "\n";
 }
 
@@ -262,7 +275,7 @@ void ModelingWindow::on_pushButton_5_clicked()
 void ModelingWindow::on_actionStart_triggered()
 {
     if(ui->actionStart->text() == QString("Stop")){
-        ui->actionStart->setText("Start");        
+        ui->actionStart->setText("Start");
         ui->progressBar->hide();
         p->Stop();
         label->setText("Stopped.");
@@ -285,7 +298,7 @@ void ModelingWindow::on_actionStart_triggered()
         p->setHoles_rows_number(ui->spinBox_2->value());
         p->setHole_size(ui->spinBox_3->value());
         p->setSpace_size(ui->spinBox_4->value());
-        ui->actionStart->setText("Stop");        
+        ui->actionStart->setText("Stop");
         ui->progressBar->show();
         label->setText("Processing...");
         QtConcurrent::run(p,&ModelingCore::run);

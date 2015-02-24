@@ -61,9 +61,6 @@ class Image
 {
 
 public:
-  double pressure = 0.0l;
-  bool isProcessed = false;
-  bool isLoaded = false;
   void resetCounter(){ counter = 0u; }
   void setFullCounter(){ counter = 3u; }
   bool isCounterFull(){ return counter == 3u; }
@@ -87,7 +84,16 @@ public:
   void setThreshold(unsigned th){ threshold = th; }
   bool isImageNull(){ return image.isNull(); }
   void cropImage(){ image = image.copy(crop); }
+  bool getIsProcessed() const { return isProcessed; }
+  void setIsProcessed(bool value) { isProcessed = value; }
+  bool getIsLoaded() const { return isLoaded; }
+  void setIsLoaded(bool value) { isLoaded = value; }
+  double getPressure() const { return pressure; }
+  void setPressure(double value) { pressure = value; }
 private:
+  double pressure = 0.0l;
+  bool isProcessed = false;
+  bool isLoaded = false;
   QImage image;
   QRect crop;
   Square square;
@@ -306,8 +312,12 @@ public:
         spacer_height = value;
     }
     
+  
+    
 };
 
 #endif // HELPERS_HPP
+
+
 
 

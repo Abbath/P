@@ -56,8 +56,12 @@ public:
     void setFilename(const QString &value){filename = value;}
     
     void saveImage(QString _filename){
-        if(im.save(_filename)){
-            emit saved();
+        QImageWriter wr(_filename);
+        if(wr.write(im)/*im.save(_filename)*/){
+            emit saved(true);
+        }else{
+            emit error(wr.errorString());
+            emit saved(false);
         }
     }
     double getPressure() const;
@@ -111,6 +115,9 @@ public:
     void setData(const ModelingData& data);
     
     void calculateStress(std::tuple<Point, Point, Point> three);
+    int getScale_coef() const;
+    void setScale_coef(int value);
+    
 private:
     double w(double x, double y);
     std::vector<Point> readFile(std::string filename);
@@ -130,7 +137,7 @@ private:
     std::pair<bool, Vector> check_grid(const Point &origin, const Vector &v, int y, int x0, int y0);
     QColor waveLengthToRGB(double wavelength);
 signals:
-    void saved();
+    void saved(bool);
     void lil(int);
     void sendImage(QImage image);
     void error(QString s);
@@ -145,6 +152,7 @@ private:
     bool is_data_external = false;
     int ray_number;
     int scale = 1000000;
+    int scale_coef = 10;
     int hole_size = 60;
     int space_size = 340;
     int holes_rows_number = 6;

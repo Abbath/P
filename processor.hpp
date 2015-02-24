@@ -12,6 +12,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "capturewrapper.hpp"
 #include "imageconverter.hpp"
+#include <fstream>
 
 /*!
  * \brief The Processor class
@@ -60,6 +61,7 @@ public slots:
     void stopThis();
     void openImage(const QStringList &names);
     void die();
+    Image& currImage();
 
 private:
     std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;

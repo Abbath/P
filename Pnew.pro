@@ -78,6 +78,7 @@ INCLUDEPATH += "E:\opencv\build\include"
 INCLUDEPATH += "E:\qwt-6.1.0\qwt-6.1.0\qwt"
 LIBS += -L"C:\Users\Dan\Downloads\qwt-6.1.0\qwt-6.1.0\lib"
 RESOURCES +=
+QMAKE_CXXFLAGS += -openmp
 }
 
 RESOURCES += \

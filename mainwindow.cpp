@@ -76,6 +76,9 @@ void MainWindow::model()
     ModelingWizard* wizard = new ModelingWizard(this);
     wizard->setIs_integrated(true);
     wizard->exec();
+    if(wizard->result() == QWizard::Rejected){
+        return;
+    }
     auto res = wizard->getDataRef();
     res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
     core->setData(res);
@@ -127,7 +130,7 @@ void MainWindow::Update(Display dis)
     
     
     ui->imageArea->setDisplay(dis);
-    ui->pressureLabel->setText(QString::number(dis.im.pressure));
+    ui->pressureLabel->setText(QString::number(dis.im.getPressure()));
     ui->sumLabel->setText(QString::number(dis.im.getSum()));
     ui->averageLabel->setText(QString::number(dis.im.getSum() / 4.0));
     ui->rightLabel->setText(QString::number(dis.im.getBoundCounter()[0]));
@@ -471,7 +474,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.1\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.4\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 void MainWindow::on_actionHelp_triggered()

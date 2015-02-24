@@ -14,13 +14,12 @@ void ModelingCore::run()
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_real_distribution<double> distribution((die_size - mem_size)/2.0, (die_size - mem_size)/2.0+mem_size);
-    QPixmap pix(die_size*scale, die_size*scale), pix0(die_size*scale, die_size*scale);
+    double image_scale = scale_coef * 423.0 / 15000;
+    QPixmap pix(die_size*scale*image_scale, die_size*scale*image_scale);
     QPainter painter(&pix);
-    QPainter painter0(&pix0);
     painter.setBrush(Qt::SolidPattern);
-    painter0.setPen(QColor(0, 255, 0));
     painter.setPen(QColor(0, 255, 0));
-    painter.drawRect((die_size-mem_size)/2*scale, (die_size-mem_size)/2*scale, mem_size*scale, mem_size*scale);
+    painter.fillRect(0,0,pix.width(), pix.height(),Qt::black);
     QColor color = waveLengthToRGB(wavelength);
     painter.setPen(color);
     if(is_data_external){
@@ -39,7 +38,7 @@ void ModelingCore::run()
         some_strange_size = some_strange_size / 2;
     }
     int counter = 0;    
-    //#pragma omp parallel for shared(counter)
+#pragma omp parallel for shared(counter)
     for(int i = 0; i < ray_number;  ++ i){ 
         if(!stop.load()){
             Point p;
@@ -48,18 +47,14 @@ void ModelingCore::run()
             p.z = 0;
             auto res = test(p);
             int x2, y2;
-            //            int x1 = static_cast<int>(p.x*scale);
-            //            int y1 = static_cast<int>(p.y*scale);
             
             x2 = (p.x - std::get<0>(res)) * scale;
             y2 = (p.y - std::get<1>(res)) * scale;
             
             if(x2 > 0 && y2 > 0 && x2 < die_size*scale && y2 < die_size*scale){
-                //                if(!((x2 > (die_size-mem_size)/2*scale && x2 < ((die_size-mem_size)/2+mem_size)*scale) && (y2 > (die_size-mem_size)/2*scale && y2 < ((die_size-mem_size)/2+mem_size)*scale))){
                 if(check_holes(x2, y2)){
-                    painter.fillRect(x2, y2, 30, 30, color);
+                    painter.fillRect(static_cast<int>(x2*image_scale), static_cast<int>(y2*image_scale), scale_coef, scale_coef, color);
                 }
-                //}
             }
         }
         counter ++ ;
@@ -69,13 +64,15 @@ void ModelingCore::run()
         }
     }
     painter.setPen(Qt::black);
-    painter.fillRect(int((die_size-mem_size)/2*scale),int((die_size-mem_size)/2*scale), int(mem_size*scale), int(mem_size*scale), Qt::SolidPattern );
-    int new_size = pix.height()*423/15000;
+    int new_size = pix.height() / scale_coef;
     im = pix.scaled(new_size, new_size).toImage();
+    pix.detach();
+    QPixmapCache::clear();
     im = rotate(im);
     im.save(QString::number((int)pressure*25/1000) + ".png");
     emit lil(100);
     emit sendImage(im);
+    im = QImage();
 }
 
 std::vector<Point> ModelingCore::readFile(std::string filename){
@@ -506,6 +503,16 @@ void ModelingCore::Stop()
 {
     stop.store(!stop.load());
 }
+int ModelingCore::getScale_coef() const
+{
+    return scale_coef;
+}
+
+void ModelingCore::setScale_coef(int value)
+{
+    scale_coef = value;
+}
+
 int ModelingCore::getSpace_size() const
 {
     return space_size;

@@ -52,18 +52,18 @@ void ImageArea::paintEvent(QPaintEvent* e)
         }
     }
     Update();
-    if (im.pressure <= fromGreenToYellow) {
+    if (im.getPressure() <= fromGreenToYellow) {
         painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
         painter.setPen(Qt::green);
-    } else if (im.pressure > fromGreenToYellow && im.pressure < fromYellowToRed) {
+    } else if (im.getPressure() > fromGreenToYellow && im.getPressure() < fromYellowToRed) {
         painter.setBrush(QBrush(Qt::yellow, Qt::SolidPattern));
         painter.setPen(Qt::yellow);
-    } else if (im.pressure >= fromYellowToRed) {
+    } else if (im.getPressure() >= fromYellowToRed) {
         painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
         painter.setPen(Qt::red);
     }
     painter.setFont(QFont("Ubuntu", 50));
-    painter.drawText(30, this->height() - 10, QString::number(im.pressure) + " kPa");
+    painter.drawText(30, this->height() - 10, QString::number(im.getPressure()) + " kPa");
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
     e->accept();
 }

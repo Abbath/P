@@ -26,7 +26,7 @@ public slots:
 private slots:
     void on_pushButton_3_clicked();
     void lil(int i);
-    void saved();
+    void saved(bool good);
     void on_actionAbout_triggered();
     void error(QString s);
     void keyPressEvent(QKeyEvent *e);
