@@ -214,6 +214,10 @@ void Processor::die()
     this->deleteLater();
 }
 
+/*!
+ * \brief Processor::currImage
+ * \return 
+ */
 Image &Processor::currImage()
 {
     return images[currentImageNumber];
@@ -697,6 +701,10 @@ void Processor::autorun(bool vu_flag)
     }
 }
 
+/*!
+ * \brief Processor::area
+ * \return 
+ */
 double Processor::area(){
     Image& image = currImage();
     int a = abs(image.getSquare()[0].x() - image.getSquare()[1].x());

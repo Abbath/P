@@ -11,105 +11,125 @@ enum class DataType{PIXELS, PRESSURE};
 
 typedef std::array<QPoint, 3> Square;
 
+/*!
+ * \brief The Comparator class
+ */
 class Comparator
 {
 public:
-  QPoint M;
-  Comparator(const QPoint& origin)
-  {
-    M = origin;
-  }
-
-  bool operator()(const QPoint& o1, const QPoint& o2)
-  {
-    const double angle1 = atan2(o1.y() - M.y(), o1.x() - M.x());
-    const double angle2 = atan2(o2.y() - M.y(), o2.x() - M.x());
-    return (angle1 < angle2);
-  }
+    QPoint M;
+    Comparator(const QPoint& origin)
+    {
+        M = origin;
+    }
+    
+    bool operator()(const QPoint& o1, const QPoint& o2)
+    {
+        const double angle1 = atan2(o1.y() - M.y(), o1.x() - M.x());
+        const double angle2 = atan2(o2.y() - M.y(), o2.x() - M.x());
+        return (angle1 < angle2);
+    }
 };
 
+/*!
+ * \brief The Modes enum
+ */
 enum Modes
 {
-  ISO,
-  TOP,
-  LEFT,
-  BOTTOM,
-  RIGHT
-
+    ISO,
+    TOP,
+    LEFT,
+    BOTTOM,
+    RIGHT
 };
 
+/*!
+ * \brief The Line struct
+ */
 struct Line
 {
-  double x1;
-  double y1;
-  double z1;
-  double x2;
-  double y2;
-  double z2;
-  int c;
-  Line() : x1( 0.0 ), y1( 0.0 ), z1( 0.0 ), x2( 0.0 ), y2( 0.0 ), z2( 0.0 ), c( 0 ) {}
+    double x1;
+    double y1;
+    double z1;
+    double x2;
+    double y2;
+    double z2;
+    int c;
+    Line() : x1( 0.0 ), y1( 0.0 ), z1( 0.0 ), x2( 0.0 ), y2( 0.0 ), z2( 0.0 ), c( 0 ) {}
 };
 
+/*!
+ * \brief The Config struct
+ */
 struct Config
 {
-  QRect crop;
-  Square square;
-  Square square0;
+    QRect crop;
+    Square square;
+    Square square0;
 };
 
+/*!
+ * \brief The Image class
+ */
 class Image
 {
-
+    
 public:
-  void resetCounter(){ counter = 0u; }
-  void setFullCounter(){ counter = 3u; }
-  bool isCounterFull(){ return counter == 3u; }
-  unsigned getSum() const { return std::accumulate(bound_counter.begin(), bound_counter.end(), 0); }
-  const QImage& getImageRef() const { return image; }
-  QRect& getCropRef(){ return crop; }
-  std::array<unsigned, 4>& getBoundCounterRef(){ return bound_counter; }
-  QImage getImage() const {return image; }
-  unsigned getThreshold() const { return threshold; }
-  std::array<unsigned, 4> getBoundCounter() const { return bound_counter; }
-  QString getFileName() const { return fileName; }
-  QRect getCrop() const { return crop; }
-  Square& getSquare() { return square; }
-  unsigned getCounter() const { return counter; }
-  void incrementCounter(){ counter++; }
-  void setImage(const QImage& _image){ image = _image; }
-  void setFileName(const QString& filename){ fileName = filename; }
-  void setCrop(const QRect& rect){ crop = rect; }
-  void setSquare(const Square& sq){ square = sq; }
-  void setConfig(const Config& conf){ config = conf; }
-  void setThreshold(unsigned th){ threshold = th; }
-  bool isImageNull(){ return image.isNull(); }
-  void cropImage(){ image = image.copy(crop); }
-  bool getIsProcessed() const { return isProcessed; }
-  void setIsProcessed(bool value) { isProcessed = value; }
-  bool getIsLoaded() const { return isLoaded; }
-  void setIsLoaded(bool value) { isLoaded = value; }
-  double getPressure() const { return pressure; }
-  void setPressure(double value) { pressure = value; }
+    void resetCounter(){ counter = 0u; }
+    void setFullCounter(){ counter = 3u; }
+    bool isCounterFull(){ return counter == 3u; }
+    unsigned getSum() const { return std::accumulate(bound_counter.begin(), bound_counter.end(), 0); }
+    const QImage& getImageRef() const { return image; }
+    QRect& getCropRef(){ return crop; }
+    std::array<unsigned, 4>& getBoundCounterRef(){ return bound_counter; }
+    QImage getImage() const {return image; }
+    unsigned getThreshold() const { return threshold; }
+    std::array<unsigned, 4> getBoundCounter() const { return bound_counter; }
+    QString getFileName() const { return fileName; }
+    QRect getCrop() const { return crop; }
+    Square& getSquare() { return square; }
+    unsigned getCounter() const { return counter; }
+    void incrementCounter(){ counter++; }
+    void setImage(const QImage& _image){ image = _image; }
+    void setFileName(const QString& filename){ fileName = filename; }
+    void setCrop(const QRect& rect){ crop = rect; }
+    void setSquare(const Square& sq){ square = sq; }
+    void setConfig(const Config& conf){ config = conf; }
+    void setThreshold(unsigned th){ threshold = th; }
+    bool isImageNull(){ return image.isNull(); }
+    void cropImage(){ image = image.copy(crop); }
+    bool getIsProcessed() const { return isProcessed; }
+    void setIsProcessed(bool value) { isProcessed = value; }
+    bool getIsLoaded() const { return isLoaded; }
+    void setIsLoaded(bool value) { isLoaded = value; }
+    double getPressure() const { return pressure; }
+    void setPressure(double value) { pressure = value; }
 private:
-  double pressure = 0.0l;
-  bool isProcessed = false;
-  bool isLoaded = false;
-  QImage image;
-  QRect crop;
-  Square square;
-  Config config;
-  QString fileName;
-  unsigned int threshold = 128u;
-  unsigned int counter = 0u;
-  std::array<unsigned, 4> bound_counter;
+    double pressure = 0.0l;
+    bool isProcessed = false;
+    bool isLoaded = false;
+    QImage image;
+    QRect crop;
+    Square square;
+    Config config;
+    QString fileName;
+    unsigned int threshold = 128u;
+    unsigned int counter = 0u;
+    std::array<unsigned, 4> bound_counter;
 };
 
+/*!
+ * \brief The Display struct
+ */
 struct Display
 {
-  Image im;
-  QPair<QPoint, QPoint> origin;
+    Image im;
+    QPair<QPoint, QPoint> origin;
 };
 
+/*!
+ * \brief The ModelingData class
+ */
 class ModelingData {
     bool is_ext = false;
     QString filename = "";
@@ -144,142 +164,142 @@ public:
     
     double getDie_size() const
     {
-    return die_size;
+        return die_size;
     }
     
     void setDie_size(double value)
     {
-    die_size = value;
+        die_size = value;
     }
     
     double getMem_size() const
     {
-    return mem_size;
+        return mem_size;
     }
     
     void setMem_size(double value)
     {
-    mem_size = value;
+        mem_size = value;
     }
     
     double getMem_thickness() const
     {
-    return mem_thickness;
+        return mem_thickness;
     }
     
     void setMem_thickness(double value)
     {
-    mem_thickness = value;
+        mem_thickness = value;
     }
     
     double getYm() const
     {
-    return ym;
+        return ym;
     }
     
     void setYm(double value)
     {
-    ym = value;
+        ym = value;
     }
     
     double getPr() const
     {
-    return pr;
+        return pr;
     }
     
     void setPr(double value)
     {
-    pr = value;
+        pr = value;
     }
     
     unsigned int getRay_number() const
     {
-    return ray_number;
+        return ray_number;
     }
     
     void setRay_number(unsigned int value)
     {
-    ray_number = value;
+        ray_number = value;
     }
     
     unsigned int getWavelength() const
     {
-    return wavelength;
+        return wavelength;
     }
     
     void setWavelength(unsigned int value)
     {
-    wavelength = value;
+        wavelength = value;
     }
     
     unsigned int getRows() const
     {
-    return rows;
+        return rows;
     }
     
     void setRows(unsigned int value)
     {
-    rows = value;
+        rows = value;
     }
     
     unsigned int getHole_size() const
     {
-    return hole_size;
+        return hole_size;
     }
     
     void setHole_size(unsigned int value)
     {
-    hole_size = value;
+        hole_size = value;
     }
     
     unsigned int getSpace_size() const
     {
-    return space_size;
+        return space_size;
     }
     
     void setSpace_size(unsigned int value)
     {
-    space_size = value;
+        space_size = value;
     }
     
     double getCamx() const
     {
-    return camx;
+        return camx;
     }
     
     void setCamx(double value)
     {
-    camx = value;
+        camx = value;
     }
     
     double getCamy() const
     {
-    return camy;
+        return camy;
     }
     
     void setCamy(double value)
     {
-    camy = value;
+        camy = value;
     }
     
     double getX_angle() const
     {
-    return x_angle;
+        return x_angle;
     }
     
     void setX_angle(double value)
     {
-    x_angle = value;
+        x_angle = value;
     }
     
     double getY_angle() const
     {
-    return y_angle;
+        return y_angle;
     }
     
     void setY_angle(double value)
     {
-    y_angle = value;
+        y_angle = value;
     }
     
     bool getIs_ext() const
@@ -291,7 +311,7 @@ public:
     {
         is_ext = value;
     }
-
+    
     double getPressure() const
     {
         return pressure;
@@ -311,8 +331,6 @@ public:
     {
         spacer_height = value;
     }
-    
-  
     
 };
 

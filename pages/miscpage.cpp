@@ -2,6 +2,10 @@
 #include "ui_miscpage.h"
 #include "../modelingwizard.hpp"
 
+/*!
+ * \brief MiscPage::MiscPage
+ * \param parent
+ */
 MiscPage::MiscPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::MiscPage)
@@ -10,11 +14,18 @@ MiscPage::MiscPage(QWidget *parent) :
     setTitle("Set pressure, ray number and light wavelength");
 }
 
+/*!
+ * \brief MiscPage::~MiscPage
+ */
 MiscPage::~MiscPage()
 {
     delete ui;
 }
 
+/*!
+ * \brief MiscPage::nextId
+ * \return 
+ */
 int MiscPage::nextId() const
 {
     ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());

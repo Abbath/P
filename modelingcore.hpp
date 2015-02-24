@@ -20,6 +20,9 @@
 #include <omp.h>
 #include "helpers.hpp"
 
+/*!
+ * \brief The Point struct
+ */
 struct Point{
     double x;
     double y;
@@ -28,11 +31,13 @@ struct Point{
         return {this->x+a.x, this->y+a.y, this->z+a.z};
     }
 };
+
 typedef Point Vector;
 typedef std::vector<std::tuple<Point, Point, Point, Point>> Grid;
 
-
-
+/*!
+ * \brief The ModelingCore class
+ */
 class ModelingCore : public QObject
 {
     Q_OBJECT

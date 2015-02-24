@@ -8,6 +8,9 @@ namespace Ui {
 class MiscPage;
 }
 
+/*!
+ * \brief The MiscPage class
+ */
 class MiscPage : public QWizardPage
 {
     Q_OBJECT

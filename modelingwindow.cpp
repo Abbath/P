@@ -7,6 +7,10 @@
 #include <QInputDialog>
 #include <QtConcurrent/QtConcurrent>
 
+/*!
+ * \brief ModelingWindow::ModelingWindow
+ * \param parent
+ */
 ModelingWindow::ModelingWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ModelingWindow)
@@ -46,6 +50,9 @@ ModelingWindow::ModelingWindow(QWidget *parent) :
     this->showMaximized();
 }
 
+/*!
+ * \brief ModelingWindow::~ModelingWindow
+ */
 ModelingWindow::~ModelingWindow()
 {
     emit death();
@@ -53,6 +60,10 @@ ModelingWindow::~ModelingWindow()
     delete ui;
 }
 
+/*!
+ * \brief ModelingWindow::setImage
+ * \param image
+ */
 void ModelingWindow::setImage(QImage image)
 {
     ui->actionStart->setText("Start");
@@ -61,6 +72,9 @@ void ModelingWindow::setImage(QImage image)
     label->setText("Done.");
 }
 
+/*!
+ * \brief ModelingWindow::writeSettings
+ */
 void ModelingWindow::writeSettings(){
     QSettings settings("CAD", "ANN");
     settings.beginGroup("Set");
@@ -89,6 +103,9 @@ void ModelingWindow::writeSettings(){
     settings.endGroup();
 }
 
+/*!
+ * \brief ModelingWindow::readSettings
+ */
 void ModelingWindow::readSettings(){
     QSettings settings("CAD", "ANN");
     ui->doubleSpinBox->setValue(settings.value("Set/ds").toDouble());
@@ -111,6 +128,9 @@ void ModelingWindow::readSettings(){
     ui->spinBox_4->setValue(settings.value("HSet/ss").toInt());
 }
 
+/*!
+ * \brief ModelingWindow::on_pushButton_3_clicked
+ */
 void ModelingWindow::on_pushButton_3_clicked()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save image","","Images (*.png *.bmp)");
@@ -118,12 +138,20 @@ void ModelingWindow::on_pushButton_3_clicked()
     QtConcurrent::run(p,&ModelingCore::saveImage, filename);
 }
 
+/*!
+ * \brief ModelingWindow::lil
+ * \param i
+ */
 void ModelingWindow::lil(int i)
 {
     ui->progressBar->setValue(i);
     update();
 }
 
+/*!
+ * \brief ModelingWindow::saved
+ * \param good
+ */
 void ModelingWindow::saved(bool good)
 {
     ui->centralwidget->setEnabled(true);
@@ -134,16 +162,27 @@ void ModelingWindow::saved(bool good)
     }
 }
 
+/*!
+ * \brief ModelingWindow::on_actionAbout_triggered
+ */
 void ModelingWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this,"About","Ray tracer for pressure sensor v0.6\nDanylo Lizanets © 2014");
+    QMessageBox::about(this,"About","Ray tracer for pressure sensor v0.7\nDanylo Lizanets © 2014");
 }
 
+/*!
+ * \brief ModelingWindow::error
+ * \param s
+ */
 void ModelingWindow::error(QString s)
 {
     QMessageBox::critical(this, "Error", s);
 }
 
+/*!
+ * \brief ModelingWindow::keyPressEvent
+ * \param e
+ */
 void ModelingWindow::keyPressEvent(QKeyEvent *e)
 {
     e->accept();
@@ -192,17 +231,28 @@ void ModelingWindow::keyPressEvent(QKeyEvent *e)
     }
 }
 
+/*!
+ * \brief ModelingWindow::keyReleaseEvent
+ * \param e
+ */
 void ModelingWindow::keyReleaseEvent(QKeyEvent *e)
 {
     e->accept();
 }
 
+/*!
+ * \brief ModelingWindow::closeEvent
+ * \param e
+ */
 void ModelingWindow::closeEvent(QCloseEvent *e)
 {
     e->accept();
     this->deleteLater();
 }
 
+/*!
+ * \brief ModelingWindow::saveConfig
+ */
 void ModelingWindow::saveConfig()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save config", ".", "Config files (*.conf)");
@@ -232,6 +282,9 @@ void ModelingWindow::saveConfig()
        << ui->spinBox_4->value() << "\n";
 }
 
+/*!
+ * \brief ModelingWindow::loadConfig
+ */
 void ModelingWindow::loadConfig()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Load config", ".", "Config files (*.conf)");
@@ -261,17 +314,25 @@ void ModelingWindow::loadConfig()
     ui->spinBox_4->setValue(str.readLine().toInt());
 }
 
-
+/*!
+ * \brief ModelingWindow::on_pushButton_4_clicked
+ */
 void ModelingWindow::on_pushButton_4_clicked()
 {
     saveConfig();
 }
 
+/*!
+ * \brief ModelingWindow::on_pushButton_5_clicked
+ */
 void ModelingWindow::on_pushButton_5_clicked()
 {
     loadConfig();
 }
 
+/*!
+ * \brief ModelingWindow::on_actionStart_triggered
+ */
 void ModelingWindow::on_actionStart_triggered()
 {
     if(ui->actionStart->text() == QString("Stop")){
@@ -305,6 +366,9 @@ void ModelingWindow::on_actionStart_triggered()
     }
 }
 
+/*!
+ * \brief ModelingWindow::on_actionLoad_data_triggered
+ */
 void ModelingWindow::on_actionLoad_data_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Load data","", "Text (*.txt)");
@@ -316,21 +380,34 @@ void ModelingWindow::on_actionLoad_data_triggered()
     }
 }
 
+/*!
+ * \brief ModelingWindow::on_actionLoad_config_triggered
+ */
 void ModelingWindow::on_actionLoad_config_triggered()
 {
     on_pushButton_5_clicked();
 }
 
+/*!
+ * \brief ModelingWindow::on_actionSave_config_triggered
+ */
 void ModelingWindow::on_actionSave_config_triggered()
 {
     on_pushButton_4_clicked();
 }
 
+/*!
+ * \brief ModelingWindow::on_actionSave_image_triggered
+ */
 void ModelingWindow::on_actionSave_image_triggered()
 {
     on_pushButton_3_clicked();
 }
 
+/*!
+ * \brief ModelingWindow::setData
+ * \param data
+ */
 void ModelingWindow::setData(ModelingData data)
 {
     ui->doubleSpinBox->setValue(data.getDie_size()*1e3);

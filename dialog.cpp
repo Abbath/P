@@ -22,22 +22,36 @@ Dialog::~Dialog()
     delete ui;
 }
 
+/*!
+ * \brief Dialog::getMod
+ * \return 
+ */
 Dialog::Mode Dialog::getMod() const
 {
     return mod;
 }
 
+/*!
+ * \brief Dialog::setMod
+ * \param value
+ */
 void Dialog::setMod(const Mode &value)
 {
     mod = value;
 }
 
+/*!
+ * \brief Dialog::closeEvent
+ */
 void Dialog::closeEvent(QCloseEvent *)
 {
     this->deleteLater();
 }
 
 
+/*!
+ * \brief Dialog::on_pushButton_clicked
+ */
 void Dialog::on_pushButton_clicked()
 {
     w = new ModelingWindow;
@@ -53,6 +67,9 @@ void Dialog::on_pushButton_clicked()
     connect(w, SIGNAL(death()), this, SLOT(show()), Qt::QueuedConnection);
 }
 
+/*!
+ * \brief Dialog::on_pushButton_4_clicked
+ */
 void Dialog::on_pushButton_4_clicked()
 {
     mainw = new MainWindow;
@@ -71,8 +88,12 @@ void Dialog::on_pushButton_4_clicked()
     mainw->show();
     mainw->runCalibration();
     this->hide();
-    connect(mainw, SIGNAL(death()), this, SLOT(show()), Qt::QueuedConnection);}
+    connect(mainw, SIGNAL(death()), this, SLOT(show()), Qt::QueuedConnection);
+}
 
+/*!
+ * \brief Dialog::on_pushButton_2_clicked
+ */
 void Dialog::on_pushButton_2_clicked()
 {
     mainw = new MainWindow;
@@ -93,27 +114,45 @@ void Dialog::on_pushButton_2_clicked()
     connect(mainw, SIGNAL(death()), this, SLOT(show()), Qt::QueuedConnection);
 }
 
+/*!
+ * \brief Dialog::on_checkBox_toggled
+ * \param checked
+ */
 void Dialog::on_checkBox_toggled(bool checked)
 {
     ask_for_data = checked;
 }
+
+/*!
+ * \brief Dialog::getAsk_for_data
+ * \return 
+ */
 bool Dialog::getAsk_for_data() const
 {
     return ask_for_data;
 }
 
+/*!
+ * \brief Dialog::setAsk_for_data
+ * \param value
+ */
 void Dialog::setAsk_for_data(bool value)
 {
     ask_for_data = value;
 }
 
-
+/*!
+ * \brief Dialog::on_pushButton_3_clicked
+ */
 void Dialog::on_pushButton_3_clicked()
 {
     this->close();
 }
 
-
+/*!
+ * \brief Dialog::trayHandle
+ * \param reason
+ */
 void Dialog::trayHandle(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger){

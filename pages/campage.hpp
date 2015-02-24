@@ -8,6 +8,9 @@ namespace Ui {
 class CamPage;
 }
 
+/*!
+ * \brief The CamPage class
+ */
 class CamPage : public QWizardPage
 {
     Q_OBJECT

@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->imageArea, SIGNAL(viewUpdated(Display)), this, SLOT(imageAreaUpdated(Display)));
 }
 
+/*!
+ * \brief MainWindow::runCalibration
+ */
 void MainWindow::runCalibration()
 {
     ui->mainToolBar->hide();
@@ -61,6 +64,9 @@ void MainWindow::runCalibration()
     on_actionCalibrate_triggered();
 }
 
+/*!
+ * \brief MainWindow::runMeasurements
+ */
 void MainWindow::runMeasurements()
 {
     QList<int> list;
@@ -69,6 +75,9 @@ void MainWindow::runMeasurements()
     ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
 }
 
+/*!
+ * \brief MainWindow::model
+ */
 void MainWindow::model()
 {
     if(core) core->deleteLater();
@@ -126,9 +135,7 @@ void MainWindow::disableUi(bool b)
  */
 void MainWindow::Update(Display dis)
 {
-    disableUi(false);
-    
-    
+    disableUi(false);  
     ui->imageArea->setDisplay(dis);
     ui->pressureLabel->setText(QString::number(dis.im.getPressure()));
     ui->sumLabel->setText(QString::number(dis.im.getSum()));
@@ -414,6 +421,9 @@ void MainWindow::saveResults( const QVector<double>& pol,  const QVector<double>
     }    
 }
 
+/*!
+ * \brief MainWindow::closeEvent
+ */
 void MainWindow::closeEvent(QCloseEvent *)
 {
     this->deleteLater();
@@ -461,11 +471,17 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     player->setPosition(player->duration() / 100 * value);
 }
 
+/*!
+ * \brief MainWindow::on_actionStop_triggered
+ */
 void MainWindow::on_actionStop_triggered()
 {
     emit stop();
 }
 
+/*!
+ * \brief MainWindow::on_actionAbout_triggered
+ */
 void MainWindow::on_actionAbout_triggered()
 {
     QString cv;
@@ -474,14 +490,20 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.4\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.5\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
+/*!
+ * \brief MainWindow::on_actionHelp_triggered
+ */
 void MainWindow::on_actionHelp_triggered()
 {
     QDesktopServices::openUrl(QUrl("manual.pdf"));
 }
 
+/*!
+ * \brief MainWindow::on_actionModeling_triggered
+ */
 void MainWindow::on_actionModeling_triggered()
 {
     ModelingWizard mw;
@@ -492,6 +514,9 @@ void MainWindow::on_actionModeling_triggered()
     window->show();
 }
 
+/*!
+ * \brief MainWindow::on_actionTest_triggered
+ */
 void MainWindow::on_actionTest_triggered()
 {
     ModelingWizard* wizard = new ModelingWizard(this);
@@ -505,6 +530,9 @@ void MainWindow::on_actionTest_triggered()
     mw->show();
 }
 
+/*!
+ * \brief MainWindow::on_actionSplash_triggered
+ */
 void MainWindow::on_actionSplash_triggered()
 {
     QPixmap splash("splash.png");

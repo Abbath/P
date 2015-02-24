@@ -2,6 +2,10 @@
 #include "ui_holespage.h"
 #include "../modelingwizard.hpp"
 
+/*!
+ * \brief HolesPage::HolesPage
+ * \param parent
+ */
 HolesPage::HolesPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::HolesPage)
@@ -10,11 +14,18 @@ HolesPage::HolesPage(QWidget *parent) :
     setTitle("Set holes parameters");
 }
 
+/*!
+ * \brief HolesPage::~HolesPage
+ */
 HolesPage::~HolesPage()
 {
     delete ui;
 }
 
+/*!
+ * \brief HolesPage::nextId
+ * \return 
+ */
 int HolesPage::nextId() const
 {
     ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());

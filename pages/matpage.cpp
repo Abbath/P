@@ -2,6 +2,10 @@
 #include "ui_matpage.h"
 #include "../modelingwizard.hpp"
 
+/*!
+ * \brief MatPage::MatPage
+ * \param parent
+ */
 MatPage::MatPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::MatPage)
@@ -10,11 +14,18 @@ MatPage::MatPage(QWidget *parent) :
     setTitle("Set material properties");
 }
 
+/*!
+ * \brief MatPage::~MatPage
+ */
 MatPage::~MatPage()
 {
     delete ui;
 }
 
+/*!
+ * \brief MatPage::nextId
+ * \return 
+ */
 int MatPage::nextId() const
 {
     ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());

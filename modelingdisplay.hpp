@@ -5,6 +5,9 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+/*!
+ * \brief The ModelingDisplay class
+ */
 class ModelingDisplay : public QWidget
 {
     Q_OBJECT

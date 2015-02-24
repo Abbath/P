@@ -11,6 +11,9 @@ namespace Ui {
 class ModelingWindow;
 }
 
+/*!
+ * \brief The ModelingWindow class
+ */
 class ModelingWindow : public QMainWindow
 {
     Q_OBJECT

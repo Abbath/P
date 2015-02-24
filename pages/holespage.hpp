@@ -8,6 +8,9 @@ namespace Ui {
 class HolesPage;
 }
 
+/*!
+ * \brief The HolesPage class
+ */
 class HolesPage : public QWizardPage
 {
     Q_OBJECT

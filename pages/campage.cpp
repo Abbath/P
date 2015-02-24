@@ -2,6 +2,10 @@
 #include "ui_campage.h"
 #include "../modelingwizard.hpp"
 
+/*!
+ * \brief CamPage::CamPage
+ * \param parent
+ */
 CamPage::CamPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::CamPage)
@@ -11,11 +15,18 @@ CamPage::CamPage(QWidget *parent) :
     registerField("CamX", ui->camx);
 }
 
+/*!
+ * \brief CamPage::~CamPage
+ */
 CamPage::~CamPage()
 {
     delete ui;
 }
 
+/*!
+ * \brief CamPage::nextId
+ * \return 
+ */
 int CamPage::nextId() const
 {
     ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());

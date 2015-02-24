@@ -42,6 +42,8 @@ QImage ImageConverter::Mat2QImage(const cv::Mat &src)
     return dest;
 }
 
+/*!
+ * \brief ImageConverter::ImageConverter
+ */
 ImageConverter::ImageConverter()
-{
-}
+{}

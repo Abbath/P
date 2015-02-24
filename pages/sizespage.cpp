@@ -2,6 +2,10 @@
 #include "ui_sizespage.h"
 #include "../modelingwizard.hpp"
 
+/*!
+ * \brief SizesPage::SizesPage
+ * \param parent
+ */
 SizesPage::SizesPage(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::SizesPage)
@@ -10,11 +14,18 @@ SizesPage::SizesPage(QWidget *parent) :
     setTitle("Set sizes of the sensor");
 }
 
+/*!
+ * \brief SizesPage::~SizesPage
+ */
 SizesPage::~SizesPage()
 {
     delete ui;
 }
 
+/*!
+ * \brief SizesPage::nextId
+ * \return 
+ */
 int SizesPage::nextId() const
 {
     ModelingWizard * mw = dynamic_cast<ModelingWizard*>(wizard());

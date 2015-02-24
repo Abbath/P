@@ -1,5 +1,9 @@
 #include "modelingcore.hpp"
 
+/*!
+ * \brief ModelingCore::ModelingCore
+ * \param parent
+ */
 ModelingCore::ModelingCore(QObject *parent) :
     QObject(parent)
 {
@@ -8,6 +12,9 @@ ModelingCore::ModelingCore(QObject *parent) :
     clean_space_b = (die_size - mem_size) / 2 + mem_size;
 }
 
+/*!
+ * \brief ModelingCore::run
+ */
 void ModelingCore::run()
 {
     stop.store(false);
@@ -37,6 +44,7 @@ void ModelingCore::run()
     }else if(some_strange_size < hole_size){
         some_strange_size = some_strange_size / 2;
     }
+    
     int counter = 0;    
 #pragma omp parallel for shared(counter)
     for(int i = 0; i < ray_number;  ++ i){ 
@@ -69,12 +77,19 @@ void ModelingCore::run()
     pix.detach();
     QPixmapCache::clear();
     im = rotate(im);
-    im.save(QString::number((int)pressure*25/1000) + ".png");
+    if(!im.save(QString::number((int)pressure*25/1000) + ".png")){
+        emit error("Cannot save image!");
+    }
     emit lil(100);
     emit sendImage(im);
     im = QImage();
 }
 
+/*!
+ * \brief ModelingCore::readFile
+ * \param filename
+ * \return 
+ */
 std::vector<Point> ModelingCore::readFile(std::string filename){
     std::ifstream in(filename.c_str());
     std::vector<Point> res;
@@ -92,15 +107,34 @@ std::vector<Point> ModelingCore::readFile(std::string filename){
     return res;
 }
 
+/*!
+ * \brief ModelingCore::dist
+ * \param a
+ * \param b
+ * \return 
+ */
 double ModelingCore::dist(const Point& a, const Point& b){
     return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
 
+/*!
+ * \brief ModelingCore::square
+ * \param a
+ * \param b
+ * \param c
+ * \return 
+ */
 double ModelingCore::square(const Point &a, const Point &b, const Point &c)
 {
     return 0.5*((a.x - c.x)*(b.y - c.y) - (b.x - c.x)*(a.y - c.y));
 }
 
+/*!
+ * \brief ModelingCore::closest_external
+ * \param p
+ * \param v
+ * \return 
+ */
 std::tuple<Point, Point, Point> ModelingCore::closest_external(const Point& p, const std::vector<Point>& v){
     std::vector<double> dists;
     dists.reserve(v.size());
@@ -125,6 +159,11 @@ std::tuple<Point, Point, Point> ModelingCore::closest_external(const Point& p, c
     return std::make_tuple(a, b, c);
 }
 
+/*!
+ * \brief ModelingCore::closest_internal
+ * \param p
+ * \return 
+ */
 std::tuple<Point, Point, Point> ModelingCore::closest_internal(const Point &p)
 {
     Point p1, p2, p3;
@@ -178,6 +217,11 @@ std::tuple<Point, Point, Point> ModelingCore::closest_internal(const Point &p)
     
 }
 
+/*!
+ * \brief ModelingCore::normal
+ * \param points
+ * \return 
+ */
 Vector ModelingCore::normal(std::tuple<Point, Point, Point> points){
     Point a = std::get<0>(points);
     Point b = std::get<1>(points);
@@ -198,12 +242,24 @@ Vector ModelingCore::normal(std::tuple<Point, Point, Point> points){
     return res;
 }
 
+/*!
+ * \brief ModelingCore::angle
+ * \param a
+ * \param b
+ * \return 
+ */
 double ModelingCore::angle(const Vector& a, const Vector& b){
     auto nom = a.x*b.x + a.y*b.y + a.z*b.z;
     auto den = sqrt(a.x*a.x + a.y*a.y + a.z*a.z) * sqrt(b.x*b.x + b.y*b.y + b.z*b.z);
     return acos(nom / den);
 }
 
+/*!
+ * \brief ModelingCore::reflect
+ * \param v
+ * \param n
+ * \return 
+ */
 Vector ModelingCore::reflect(const Vector& v, const Vector& n){
     Vector res;
     auto dot = v.x*n.x + v.y*n.y + v.z*n.z;
@@ -213,6 +269,13 @@ Vector ModelingCore::reflect(const Vector& v, const Vector& n){
     return res;
 }
 
+/*!
+ * \brief ModelingCore::z
+ * \param x
+ * \param y
+ * \param closest
+ * \return 
+ */
 double ModelingCore::z(double x, double y, std::tuple<Point, Point , Point> closest){
     Point a = std::get<0>(closest);
     Point b = std::get<1>(closest);
@@ -222,6 +285,10 @@ double ModelingCore::z(double x, double y, std::tuple<Point, Point , Point> clos
     return (nom / den) + a.z;
 }
 
+/*!
+ * \brief ModelingCore::calculateStress
+ * \param three
+ */
 void ModelingCore::calculateStress(std::tuple<Point, Point, Point> three)
 {
     auto p1 = std::get<0>(three);
@@ -240,6 +307,11 @@ void ModelingCore::calculateStress(std::tuple<Point, Point, Point> three)
     }    
 }
 
+/*!
+ * \brief ModelingCore::test
+ * \param p
+ * \return 
+ */
 std::tuple<double, double> ModelingCore::test(const Point& p/*, const std::vector<Point>& data */){
     std::tuple<Point, Point, Point> three;
     if(is_data_external){
@@ -268,6 +340,12 @@ std::tuple<double, double> ModelingCore::test(const Point& p/*, const std::vecto
     return std::make_tuple(x, y);
 }
 
+/*!
+ * \brief ModelingCore::check_holes
+ * \param x
+ * \param y
+ * \return 
+ */
 bool ModelingCore::check_holes(int x, int y){
     int hole_space_size = hole_size + space_size;
     
@@ -305,6 +383,12 @@ bool ModelingCore::check_holes(int x, int y){
     return false;
 }
 
+/*!
+ * \brief ModelingCore::check_triangle
+ * \param p
+ * \param closest
+ * \return 
+ */
 bool ModelingCore::check_triangle(const Point &p, const std::tuple<Point, Point, Point> &closest)
 {
     Point a = std::get<0>(closest);
@@ -317,6 +401,10 @@ bool ModelingCore::check_triangle(const Point &p, const std::tuple<Point, Point,
     return fabs(sabc - spbc - sapc - sabp) <= std::numeric_limits<double>::epsilon();
 }
 
+/*!
+ * \brief ModelingCore::build_grid
+ * \return 
+ */
 Grid ModelingCore::build_grid()
 {
     Grid res;
@@ -398,6 +486,11 @@ Grid ModelingCore::build_grid()
     return res;
 }
 
+/*!
+ * \brief ModelingCore::rotate
+ * \param im
+ * \return 
+ */
 QImage ModelingCore::rotate(const QImage &im)
 {
     QImage res(im.width(), im.height(), im.format());
@@ -416,6 +509,15 @@ QImage ModelingCore::rotate(const QImage &im)
     return res;
 }
 
+/*!
+ * \brief ModelingCore::check_grid
+ * \param origin
+ * \param v
+ * \param y
+ * \param x0
+ * \param y0
+ * \return 
+ */
 std::pair<bool, Vector> ModelingCore::check_grid(const Point& origin, const Vector& v/*, int x*/, int y, int x0, int y0)
 { 
     double yy = y/scale;
@@ -448,6 +550,11 @@ std::pair<bool, Vector> ModelingCore::check_grid(const Point& origin, const Vect
     return std::make_pair(false, Vector{0, 0, 0});
 }
 
+/*!
+ * \brief ModelingCore::waveLengthToRGB
+ * \param wavelength
+ * \return 
+ */
 QColor ModelingCore::waveLengthToRGB(double wavelength)
 {
     double gamma = 0.8;
@@ -499,35 +606,63 @@ QColor ModelingCore::waveLengthToRGB(double wavelength)
     return QColor(R, G, B);
 }
 
+/*!
+ * \brief ModelingCore::Stop
+ */
 void ModelingCore::Stop()
 {
     stop.store(!stop.load());
 }
+
+/*!
+ * \brief ModelingCore::getScale_coef
+ * \return 
+ */
 int ModelingCore::getScale_coef() const
 {
     return scale_coef;
 }
 
+/*!
+ * \brief ModelingCore::setScale_coef
+ * \param value
+ */
 void ModelingCore::setScale_coef(int value)
 {
     scale_coef = value;
 }
 
+/*!
+ * \brief ModelingCore::getSpace_size
+ * \return 
+ */
 int ModelingCore::getSpace_size() const
 {
     return space_size;
 }
 
+/*!
+ * \brief ModelingCore::setSpace_size
+ * \param value
+ */
 void ModelingCore::setSpace_size(int value)
 {
     space_size = value;
 }
 
+/*!
+ * \brief ModelingCore::setHole_size
+ * \param value
+ */
 void ModelingCore::setHole_size(int value)
 {
     hole_size = value;
 }
 
+/*!
+ * \brief ModelingCore::setData
+ * \param data
+ */
 void ModelingCore::setData(const ModelingData &data)
 {
     pressure = data.getPressure();
@@ -550,77 +685,138 @@ void ModelingCore::setData(const ModelingData &data)
     y_angle = data.getY_angle();
 }
 
+/*!
+ * \brief ModelingCore::getHoles_rows_number
+ * \return 
+ */
 int ModelingCore::getHoles_rows_number() const
 {
     return holes_rows_number;
 }
 
+/*!
+ * \brief ModelingCore::setHoles_rows_number
+ * \param value
+ */
 void ModelingCore::setHoles_rows_number(int value)
 {
     holes_rows_number = value;
 }
 
+/*!
+ * \brief ModelingCore::getPr
+ * \return 
+ */
 double ModelingCore::getPr() const
 {
     return pr;
 }
 
+/*!
+ * \brief ModelingCore::setPr
+ * \param value
+ */
 void ModelingCore::setPr(double value)
 {
     pr = value;
 }
 
+/*!
+ * \brief ModelingCore::getYm
+ * \return 
+ */
 double ModelingCore::getYm() const
 {
     return ym;
 }
 
+/*!
+ * \brief ModelingCore::setYm
+ * \param value
+ */
 void ModelingCore::setYm(double value)
 {
     ym = value;
 }
 
+/*!
+ * \brief ModelingCore::getN
+ * \return 
+ */
 int ModelingCore::getN() const
 {
     return N;
 }
 
+/*!
+ * \brief ModelingCore::setN
+ * \param value
+ */
 void ModelingCore::setN(int value)
 {
     N = value;
 }
 
+/*!
+ * \brief ModelingCore::getCam_angle_y
+ * \return 
+ */
 double ModelingCore::getCam_angle_y() const
 {
     return cam_angle_y;
 }
 
+/*!
+ * \brief ModelingCore::setCam_angle_y
+ * \param value
+ */
 void ModelingCore::setCam_angle_y(double value)
 {
     cam_angle_y = value;
 }
 
+/*!
+ * \brief ModelingCore::getCam_angle_x
+ * \return 
+ */
 double ModelingCore::getCam_angle_x() const
 {
     return cam_angle_x;
 }
 
+/*!
+ * \brief ModelingCore::setCam_angle_x
+ * \param value
+ */
 void ModelingCore::setCam_angle_x(double value)
 {
     cam_angle_x = value;
 }
 
+/*!
+ * \brief ModelingCore::getIs_data_external
+ * \return 
+ */
 bool ModelingCore::getIs_data_external() const
 {
     return is_data_external;
 }
 
+/*!
+ * \brief ModelingCore::setIs_data_external
+ * \param value
+ */
 void ModelingCore::setIs_data_external(bool value)
 {
     is_data_external = value;
 }
 
-
+/*!
+ * \brief ModelingCore::w
+ * \param x
+ * \param y
+ * \return 
+ */
 double ModelingCore::w(double x, double y)
 {
     auto q0 = pressure;
@@ -645,11 +841,15 @@ double ModelingCore::w(double x, double y)
     //res /= exp(2*dist)-1;
     //std::cout << x << " " << y << " " << res << '\n';
     //res /= 10;
-    return res + (thickness/2);
-    
-    
+    return res + (thickness/2);  
 }
 
+/*!
+ * \brief ModelingCore::w2
+ * \param x
+ * \param y
+ * \return 
+ */
 double ModelingCore::w2(double x, double y){
     auto p = pressure;
     auto u = mem_size/2;
@@ -675,6 +875,13 @@ double ModelingCore::w2(double x, double y){
     return w + (thickness/2);
 }
 
+/*!
+ * \brief ModelingCore::stress
+ * \param x
+ * \param y
+ * \param z
+ * \return 
+ */
 std::pair<double, double> ModelingCore::stress(double x, double y, double z){
     auto q0 = pressure;
     auto a = mem_size;
@@ -709,113 +916,199 @@ std::pair<double, double> ModelingCore::stress(double x, double y, double z){
     return std::make_pair(res1, res2);
 }
 
+/*!
+ * \brief ModelingCore::getY_angle
+ * \return 
+ */
 double ModelingCore::getY_angle() const
 {
     return y_angle;
 }
 
+/*!
+ * \brief ModelingCore::setY_angle
+ * \param value
+ */
 void ModelingCore::setY_angle(double value)
 {
     y_angle = value;
 }
 
+/*!
+ * \brief ModelingCore::getX_angle
+ * \return 
+ */
 double ModelingCore::getX_angle() const
 {
     return x_angle;
 }
 
+/*!
+ * \brief ModelingCore::setX_angle
+ * \param value
+ */
 void ModelingCore::setX_angle(double value)
 {
     x_angle = value;
 }
 
+/*!
+ * \brief ModelingCore::getWavelength
+ * \return 
+ */
 double ModelingCore::getWavelength() const
 {
     return wavelength;
 }
 
+/*!
+ * \brief ModelingCore::setWavelength
+ * \param value
+ */
 void ModelingCore::setWavelength(double value)
 {
     wavelength = value;
 }
 
+/*!
+ * \brief ModelingCore::getIm
+ * \return 
+ */
 QImage ModelingCore::getIm() const
 {
     return im;
 }
 
+/*!
+ * \brief ModelingCore::setIm
+ * \param value
+ */
 void ModelingCore::setIm(const QImage &value)
 {
     im = value;
 }
 
+/*!
+ * \brief ModelingCore::getThickness
+ * \return 
+ */
 double ModelingCore::getThickness() const
 {
     return thickness;
 }
 
+/*!
+ * \brief ModelingCore::setThickness
+ * \param value
+ */
 void ModelingCore::setThickness(double value)
 {
     thickness = value;
 }
 
+/*!
+ * \brief ModelingCore::getSpacer_height
+ * \return 
+ */
 double ModelingCore::getSpacer_height() const
 {
     return spacer_height;
 }
 
+/*!
+ * \brief ModelingCore::setSpacer_height
+ * \param value
+ */
 void ModelingCore::setSpacer_height(double value)
 {
     spacer_height = value;
 }
 
+/*!
+ * \brief ModelingCore::getPressure
+ * \return 
+ */
 double ModelingCore::getPressure() const
 {
     return pressure;
 }
 
+/*!
+ * \brief ModelingCore::setPressure
+ * \param value
+ */
 void ModelingCore::setPressure(double value)
 {
     pressure = value;
 }
 
-
+/*!
+ * \brief ModelingCore::getMargin
+ * \return 
+ */
 double ModelingCore::getMargin() const
 {
     return margin;
 }
 
+/*!
+ * \brief ModelingCore::setMargin
+ * \param value
+ */
 void ModelingCore::setMargin(double value)
 {
     margin = value;
 }
 
-
+/*!
+ * \brief ModelingCore::getMem_size
+ * \return 
+ */
 double ModelingCore::getMem_size() const
 {
     return mem_size;
 }
 
+/*!
+ * \brief ModelingCore::setMem_size
+ * \param value
+ */
 void ModelingCore::setMem_size(double value)
 {
     mem_size = value;
 }
 
+/*!
+ * \brief ModelingCore::getDie_size
+ * \return 
+ */
 double ModelingCore::getDie_size() const
 {
     return die_size;
 }
 
+/*!
+ * \brief ModelingCore::setDie_size
+ * \param value
+ */
 void ModelingCore::setDie_size(double value)
 {
     die_size = value;
 }
 
+/*!
+ * \brief ModelingCore::getRay_number
+ * \return 
+ */
 int ModelingCore::getRay_number() const
 {
     return ray_number;
 }
 
+/*!
+ * \brief ModelingCore::setRay_number
+ * \param value
+ */
 void ModelingCore::setRay_number(int value)
 {
     ray_number = value;

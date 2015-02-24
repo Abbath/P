@@ -8,6 +8,9 @@ namespace Ui {
 class SizesPage;
 }
 
+/*!
+ * \brief The SizesPage class
+ */
 class SizesPage : public QWizardPage
 {
     Q_OBJECT

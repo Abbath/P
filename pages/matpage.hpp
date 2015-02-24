@@ -8,6 +8,9 @@ namespace Ui {
 class MatPage;
 }
 
+/*!
+ * \brief The MatPage class
+ */
 class MatPage : public QWizardPage
 {
     Q_OBJECT

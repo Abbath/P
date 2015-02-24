@@ -8,6 +8,9 @@ namespace Ui {
 class StartPage;
 }
 namespace Pages{
+/*!
+ * \brief The StartPage class
+ */
 class StartPage : public QWizardPage
 {
     Q_OBJECT

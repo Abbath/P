@@ -12,6 +12,9 @@
 #include "pages/campage.hpp"
 #include "helpers.hpp"
 
+/*!
+ * \brief The ModelingWizard class
+ */
 class ModelingWizard : public QWizard
 {
     Q_OBJECT
