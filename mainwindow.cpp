@@ -60,7 +60,8 @@ void MainWindow::runCalibration()
     ui->mainToolBar->hide();
     ui->splitter->widget(0)->hide();
     ui->splitter->widget(2)->hide();
-    ui->menuBar->hide();
+    //ui->menuBar->hide();
+    
     on_actionCalibrate_triggered();
 }
 
@@ -73,6 +74,8 @@ void MainWindow::runMeasurements()
     list << 0 << ui->splitter->widget(0)->width()+ui->splitter->widget(1)->width() << ui->splitter->widget(2)->width();
     ui->splitter->setSizes(list);
     ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
+    on_actionLoad_triggered();
+    on_actionLoad_2_triggered();
 }
 
 /*!
@@ -310,9 +313,28 @@ void MainWindow::on_actionLoad_triggered()
  */
 void MainWindow::on_actionSave_triggered()
 {
-    QString name = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
-    if(name.isEmpty()) return;
+    static int counter = 0; 
+    QString name;
+    if(counter == 1){
+        name = saved_config_name;
+    }else{
+        name = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
+    }
+    saved_config_name = name;
+    if(name.isEmpty()){
+        counter = 0;
+        i_am_mad = false;
+        return;
+    }
     QtConcurrent::run(p, &Processor::saveConf, name, false);
+    if(i_am_mad){
+        if(counter == 1){
+            counter = 0;
+            on_actionCalibrate_triggered();
+        }else{
+            counter++;
+        }
+    }
 }
 
 /*!
@@ -365,8 +387,27 @@ void MainWindow::on_action3D_triggered(bool checked)
  */
 void MainWindow::on_actionCalibrate_triggered()
 {
-    QString name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
-    if(name.isEmpty()) return;
+    QString name = saved_config_name;
+    if(!i_am_mad){
+        QStringList lst;
+        lst << "Create" << "Open";
+        bool ok;
+        QString item = QInputDialog::getItem(this, "Choose an option", "Create or open config", lst, 0, false, &ok);
+        if(ok){
+            if(item == "Open"){
+                name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
+                if(name.isEmpty()) return;
+            }else{
+                QMessageBox::information(this, "Info", "Create new config");
+                i_am_mad = true;
+                return;
+            }
+        }else{
+            return;
+        }
+    }else{
+        i_am_mad = false;
+    }
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
     if(names.isEmpty()) return;
     QString named = QFileDialog::getSaveFileName(this, tr("Save data"), "", tr("Data (*.dat)"));

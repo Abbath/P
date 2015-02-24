@@ -47,6 +47,8 @@ private:
     Processor *p = nullptr;
     ModelingCore *core = nullptr;
     void disableUi(bool b = true);
+    bool i_am_mad = false;
+    QString saved_config_name;
 signals:
     void stop();
     void death();
