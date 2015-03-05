@@ -65,7 +65,7 @@ unix{
 LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -L"/usr/local/qwt-6.1.0/lib" -lqwt
 INCLUDEPATH += "/usr/local/qwt-6.1.0/include"
 LIBS += -lqwt
-QMAKE_CXXFLAGS += -Wall -Wextra -std=c++11   -fopenmp
+QMAKE_CXXFLAGS += -Wall -Wextra -std=c++1y   -fopenmp
 QMAKE_LFLAGS += -fopenmp
 }
 

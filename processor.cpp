@@ -315,6 +315,7 @@ void Processor::repaint()
  */
 unsigned Processor::searchTheLight(const Image& im, QRect rect)
 {
+    assert(im.getSquare(1) == config.square0);
     rect = rect.normalized();
     unsigned tre = im.getThreshold();
     QImage image = sharpen(im.getImage());
@@ -365,19 +366,19 @@ void Processor::run()
             
             currImage().setImage(timage);
             Image& image = currImage();
-            image.setCrop(config.crop);
-            image.setSquare(config.square);
+            image.setConfig(config);
+            //image.setCrop(config.crop);
+            //image.setSquare(config.square);
             image.cropImage();
             image.setFullCounter();
             align();
             image.setFullCounter();
-            image.setSquare(config.square0);
+            //image.setSquare(config.square0);
             run(true);
             image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             pressureValues.push_back(image.getPressure());
             pixelValues.push_back(image.getSum());
             QThread::currentThread()->usleep(50);
-            
             emit plot(pressureValues);
         }
     }
@@ -397,6 +398,18 @@ void Processor::run()
  * \param named
  * \param names
  */
+int Processor::extractPressure(auto it)
+{
+    QString tmp = *it;
+    int a = tmp.lastIndexOf('.');
+    tmp.chop(tmp.size() - a);
+    a = tmp.lastIndexOf('/');
+    tmp = tmp.right(tmp.size() - a - 1);
+    int n = tmp.toInt();
+
+    return n;
+}
+
 void Processor::calibrate(const QString& name, const QString& named, const QStringList& names)
 {
     loadConf(name);
@@ -414,12 +427,7 @@ void Processor::calibrate(const QString& name, const QString& named, const QStri
         currImage().setIsLoaded(true);
         currImage().setIsProcessed(false);
         currImage().setFullCounter();
-        QString tmp = *it;
-        int a = tmp.lastIndexOf('.');
-        tmp.chop(tmp.size() - a);
-        a = tmp.lastIndexOf('/');
-        tmp = tmp.right(tmp.size() - a - 1);
-        int n = tmp.toInt();
+        int n = extractPressure(it);
         autorun();
         for (int i = 0; i < 4; ++i) {
             res4[i].push_back(currImage().getBoundCounter()[i]);
@@ -508,9 +516,9 @@ void Processor::saveConf(const QString& name, bool def)
                 QTextStream str(&file);
                 str << image.getCrop().left() << " " << image.getCrop().top() << "\n";
                 str << image.getCrop().right() << " " << image.getCrop().bottom() << "\n";
-                str << image.getSquare()[0].x() << " " << image.getSquare()[0].y() << "\n";
-                str << image.getSquare()[1].x() << " " << image.getSquare()[1].y() << "\n";
-                str << image.getSquare()[2].x() << " " << image.getSquare()[2].y() << "\n";
+                str << image.getSquare(0)[0].x() << " " << image.getSquare(0)[0].y() << "\n";
+                str << image.getSquare(0)[1].x() << " " << image.getSquare(0)[1].y() << "\n";
+                str << image.getSquare(0)[2].x() << " " << image.getSquare(0)[2].y() << "\n";
                 emit somethingWentWrong("Next step", "Put 3 points then press Save again");
             } else {
                 emit somethingWentWrong("Error", "Can not open a file");
@@ -520,9 +528,9 @@ void Processor::saveConf(const QString& name, bool def)
             QFile file(filename);
             if (file.open(QFile::Append)) {
                 QTextStream str(&file);
-                str << image.getSquare()[0].x() << " " << image.getSquare()[0].y() << "\n";
-                str << image.getSquare()[1].x() << " " << image.getSquare()[1].y() << "\n";
-                str << image.getSquare()[2].x() << " " << image.getSquare()[2].y() << "\n";
+                str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
+                str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
+                str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
             } else {
                 emit somethingWentWrong("Error", "Can not open a file");
             }
@@ -591,9 +599,10 @@ void Processor::align()
 {
     Image& image = currImage();
     QMatrix matrix;
-    matrix.shear(4 * (image.getSquare()[1].x() - image.getSquare()[2].x()) / (double)image.getImage().width(), 4 * (image.getSquare()[0].y() - image.getSquare()[1].y()) / (double)image.getImage().height());
+    matrix.shear(4 * (image.getSquare(0)[1].x() - image.getSquare(0)[2].x()) / (double)image.getImage().width(), 4 * (image.getSquare(0)[0].y() - image.getSquare(0)[1].y()) / (double)image.getImage().height());
     image.setImage(image.getImage().transformed(matrix));
     image.resetCounter();
+    image.setSi(1);
     if (!vid)
         repaint();
 }
@@ -607,24 +616,24 @@ void Processor::run(bool vu_flag)
     Image& image = currImage();
 
     if (image.isCounterFull() && !image.getImage().isNull()) {
-        unsigned x1 = image.getSquare()[1].x() - origin.second.x();
+        unsigned x1 = image.getSquare(1)[1].x() - origin.second.x();
         unsigned x2 = image.getImage().width() - 1;
-        unsigned y1 = image.getSquare()[1].y() - origin.second.y();
-        unsigned y2 = image.getSquare()[2].y() - origin.second.y();
+        unsigned y1 = image.getSquare(1)[1].y() - origin.second.y();
+        unsigned y2 = image.getSquare(1)[2].y() - origin.second.y();
         image.getBoundCounterRef()[0] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
         x1 = 0;
-        x2 = image.getSquare()[0].x() - origin.second.x();
-        y1 = image.getSquare()[0].y() - origin.second.y();
-        y2 = image.getSquare()[2].y() - origin.second.y();
+        x2 = image.getSquare(1)[0].x() - origin.second.x();
+        y1 = image.getSquare(1)[0].y() - origin.second.y();
+        y2 = image.getSquare(1)[2].y() - origin.second.y();
         image.getBoundCounterRef()[1] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
-        x1 = image.getSquare()[0].x() - origin.second.x();
-        x2 = image.getSquare()[1].x() - origin.second.x();
+        x1 = image.getSquare(1)[0].x() - origin.second.x();
+        x2 = image.getSquare(1)[1].x() - origin.second.x();
         y1 = 0;
-        y2 = image.getSquare()[0].y() - origin.second.y();
+        y2 = image.getSquare(1)[0].y() - origin.second.y();
         image.getBoundCounterRef()[2] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
-        x1 = image.getSquare()[0].x() - origin.second.x();
-        x2 = image.getSquare()[1].x() - origin.second.x();
-        y1 = image.getSquare()[2].y() - origin.second.y();
+        x1 = image.getSquare(1)[0].x() - origin.second.x();
+        x2 = image.getSquare(1)[1].x() - origin.second.x();
+        y1 = image.getSquare(1)[2].y() - origin.second.y();
         y2 = image.getImage().height() - 1;
         image.getBoundCounterRef()[3] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
     } else {
@@ -664,13 +673,14 @@ void Processor::autorun(bool vu_flag)
             currentImageNumber = i;
             currImage().setImage(loadImage(fileNames[currentImageNumber]));
             Image& image = currImage();
-            image.setCrop(config.crop);
-            image.setSquare(config.square);
+            image.setConfig(config);
+            //image.setCrop(config.crop);
+            //image.setSquare(config.square);
             image.cropImage();
             image.setFullCounter();
             align();
             image.setFullCounter();
-            image.setSquare(config.square0);
+            //image.setSquare(config.square0);
             run(true);
             image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             pressureValues.push_back(image.getPressure());
@@ -680,15 +690,18 @@ void Processor::autorun(bool vu_flag)
     } else {
         Image& image = currImage();
         if (!image.getIsProcessed() && image.getIsLoaded()) {
-            image.setCrop(config.crop);
-            image.setSquare(config.square);
+            image.setConfig(config);
+            //image.setCrop(config.crop);
+            //image.setSquare(config.square);
             image.cropImage();
             image.setFullCounter();
             repaint();
             align();
-            image.setSquare(config.square0);
+            //image.setSquare(config.square0);
             image.setFullCounter();
             run(true);
+            qDebug() << image.getBoundCounter()[0] << " " << image.getBoundCounter()[1] << " " << image.getBoundCounter()[2] << " " << image.getBoundCounter()[3];
+            qDebug() << image.getSum() / area();            
             image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             image.setIsProcessed(true);
             if (vu_flag) {
@@ -707,7 +720,7 @@ void Processor::autorun(bool vu_flag)
  */
 double Processor::area(){
     Image& image = currImage();
-    int a = abs(image.getSquare()[0].x() - image.getSquare()[1].x());
-    int b = abs(image.getSquare()[1].y() - image.getSquare()[2].y());
+    int a = abs(image.getSquare(1)[0].x() - image.getSquare(1)[1].x());
+    int b = abs(image.getSquare(1)[1].y() - image.getSquare(1)[2].y());
     return a*b;
 }

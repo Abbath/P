@@ -231,7 +231,10 @@ void MainWindow::on_actionOpen_Image_s_triggered()
     ui->splitter->widget(2)->show();
     disableUi();
     QStringList names = QFileDialog::getOpenFileNames(this, "Open Image(s)", ".", "Images (*.bmp)");
-    if(names.isEmpty()) return;
+    if(names.isEmpty()) {
+        disableUi(false);
+        return;
+    }
     QtConcurrent::run(p, &Processor::openImage, names);
 }
 
@@ -392,7 +395,7 @@ void MainWindow::on_actionCalibrate_triggered()
         QStringList lst;
         lst << "Create" << "Open";
         bool ok;
-        QString item = QInputDialog::getItem(this, "Choose an option", "Create or open config", lst, 0, false, &ok);
+        QString item = QInputDialog::getItem(this, "Choose an option", "Create or open config", lst, 1, false, &ok);
         if(ok){
             if(item == "Open"){
                 name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
@@ -531,7 +534,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.5\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.6\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 /*!

@@ -34,9 +34,10 @@ void ImageArea::paintEvent(QPaintEvent* e)
     if (im.getCounter() > 0) {
         for (unsigned i = 0; i < im.getCounter(); ++i) {
             painter.setPen(Qt::red);
-            painter.drawLine(im.getSquare()[i].x() - origin.first.x() - 4, im.getSquare()[i].y() - origin.first.y(), im.getSquare()[i].x() - origin.first.x() + 4, im.getSquare()[i].y() - origin.first.y());
-            painter.drawLine(im.getSquare()[i].x() - origin.first.x(), im.getSquare()[i].y() - origin.first.y() - 4, im.getSquare()[i].x() - origin.first.x(), im.getSquare()[i].y() - origin.first.y() + 4);
-            painter.drawText(im.getSquare()[i].x() - origin.first.x() + 3, im.getSquare()[i].y() - origin.first.y() - 3, QString::number(i + 1));
+            int n = im.getSi();
+            painter.drawLine(im.getSquare(n)[i].x() - origin.first.x() - 4, im.getSquare(n)[i].y() - origin.first.y(), im.getSquare(n)[i].x() - origin.first.x() + 4, im.getSquare(n)[i].y() - origin.first.y());
+            painter.drawLine(im.getSquare(n)[i].x() - origin.first.x(), im.getSquare(n)[i].y() - origin.first.y() - 4, im.getSquare(n)[i].x() - origin.first.x(), im.getSquare(n)[i].y() - origin.first.y() + 4);
+            painter.drawText(im.getSquare(1)[i].x() - origin.first.x() + 3, im.getSquare(1)[i].y() - origin.first.y() - 3, QString::number(i + 1));
             painter.setPen(Qt::white);
         }
     }
@@ -131,8 +132,8 @@ void ImageArea::mouseReleaseEvent(QMouseEvent* e)
     }
     if (e->button() == Qt::LeftButton && !im.isImageNull()) {
         if (im.getCounter() < 3) {
-            im.getSquare()[im.getCounter()].setX(e->x() + origin.first.x());
-            im.getSquare()[im.getCounter()].setY(e->y() + origin.first.y());
+            im.getSquareRef(im.getSi())[im.getCounter()].setX(e->x() + origin.first.x());
+            im.getSquareRef(im.getSi())[im.getCounter()].setY(e->y() + origin.first.y());
             im.incrementCounter();
         } else {
             im.resetCounter();

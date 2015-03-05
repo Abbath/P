@@ -80,37 +80,42 @@ public:
     bool isCounterFull(){ return counter == 3u; }
     unsigned getSum() const { return std::accumulate(bound_counter.begin(), bound_counter.end(), 0); }
     const QImage& getImageRef() const { return image; }
-    QRect& getCropRef(){ return crop; }
+    QRect& getCropRef(){ return config.crop; }
     std::array<unsigned, 4>& getBoundCounterRef(){ return bound_counter; }
     QImage getImage() const {return image; }
     unsigned getThreshold() const { return threshold; }
     std::array<unsigned, 4> getBoundCounter() const { return bound_counter; }
     QString getFileName() const { return fileName; }
-    QRect getCrop() const { return crop; }
-    Square& getSquare() { return square; }
+    QRect getCrop() const { return config.crop; }
+    const Square& getSquare(int index) const { if(index == 0) return config.square; else return config.square0; }
+    Square& getSquareRef(int index) { if(index == 0) return config.square; else return config.square0; }
     unsigned getCounter() const { return counter; }
     void incrementCounter(){ counter++; }
     void setImage(const QImage& _image){ image = _image; }
     void setFileName(const QString& filename){ fileName = filename; }
-    void setCrop(const QRect& rect){ crop = rect; }
-    void setSquare(const Square& sq){ square = sq; }
+    void setCrop(const QRect& rect){ config.crop = rect; }
+    void setSquare(int index, const Square& sq){ if(index == 1) config.square0 = sq; else config.square = sq; }
     void setConfig(const Config& conf){ config = conf; }
     void setThreshold(unsigned th){ threshold = th; }
     bool isImageNull(){ return image.isNull(); }
-    void cropImage(){ image = image.copy(crop); }
+    void cropImage(){ image = image.copy(config.crop); }
     bool getIsProcessed() const { return isProcessed; }
     void setIsProcessed(bool value) { isProcessed = value; }
     bool getIsLoaded() const { return isLoaded; }
     void setIsLoaded(bool value) { isLoaded = value; }
     double getPressure() const { return pressure; }
     void setPressure(double value) { pressure = value; }
+    int getSi() const { return si; }
+    void setSi(int value) { si = value;}
+    
 private:
     double pressure = 0.0l;
     bool isProcessed = false;
     bool isLoaded = false;
     QImage image;
-    QRect crop;
-    Square square;
+    //QRect crop;
+    //Square square;
+    int si = 0;
     Config config;
     QString fileName;
     unsigned int threshold = 128u;
@@ -335,6 +340,7 @@ public:
 };
 
 #endif // HELPERS_HPP
+
 
 
 
