@@ -42,7 +42,7 @@ public:
     const QVector<double>& getPreparedPressures() const { return preparedPressures;}
     const QString getVName() const { return videoFileName;}    
 
-    int extractPressure(auto it);
+    int extractPressure(QStringList::const_iterator it);
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);

@@ -398,7 +398,7 @@ void Processor::run()
  * \param named
  * \param names
  */
-int Processor::extractPressure(auto it)
+int Processor::extractPressure(QStringList::const_iterator it)
 {
     QString tmp = *it;
     int a = tmp.lastIndexOf('.');
