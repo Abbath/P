@@ -37,7 +37,7 @@ void ImageArea::paintEvent(QPaintEvent* e)
             int n = im.getSi();
             painter.drawLine(im.getSquare(n)[i].x() - origin.first.x() - 4, im.getSquare(n)[i].y() - origin.first.y(), im.getSquare(n)[i].x() - origin.first.x() + 4, im.getSquare(n)[i].y() - origin.first.y());
             painter.drawLine(im.getSquare(n)[i].x() - origin.first.x(), im.getSquare(n)[i].y() - origin.first.y() - 4, im.getSquare(n)[i].x() - origin.first.x(), im.getSquare(n)[i].y() - origin.first.y() + 4);
-            painter.drawText(im.getSquare(1)[i].x() - origin.first.x() + 3, im.getSquare(1)[i].y() - origin.first.y() - 3, QString::number(i + 1));
+            painter.drawText(im.getSquare(n)[i].x() - origin.first.x() + 3, im.getSquare(n)[i].y() - origin.first.y() - 3, QString::number(i + 1));
             painter.setPen(Qt::white);
         }
     }

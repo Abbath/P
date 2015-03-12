@@ -347,15 +347,8 @@
     <addaction name="actionAbout"/>
     <addaction name="actionSplash"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="action3D"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
-   <addaction name="menuView"/>
    <addaction name="menuConfig"/>
    <addaction name="menuData"/>
    <addaction name="menuHelp"/>

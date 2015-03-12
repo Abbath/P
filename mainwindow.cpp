@@ -227,6 +227,7 @@ void MainWindow::on_actionOpen_Image_s_triggered()
 {
     ui->pushButton_2->hide();
     ui->widget_3->hide();
+    ui->widget->show();
     ui->tabWidget_2->show();
     ui->splitter->widget(2)->show();
     disableUi();
@@ -236,6 +237,9 @@ void MainWindow::on_actionOpen_Image_s_triggered()
         return;
     }
     QtConcurrent::run(p, &Processor::openImage, names);
+    if(i_am_mad){
+        QMessageBox::information(this, "Info", "The second step - crop image by right mouse button to the size of the sensor. Then set 3 points on the left and right top and the right bottom corners of the central hole of the sensor. Then click Image->Align.");
+    }
 }
 
 /*!
@@ -245,6 +249,9 @@ void MainWindow::on_actionAlign_triggered()
 {
     disableUi();
     QtConcurrent::run(p, &Processor::align);
+    if(i_am_mad){
+        QMessageBox::information(this, "Info", "Set 3 points again and then click Config->Save");
+    }
 }
 
 /*!
@@ -316,27 +323,16 @@ void MainWindow::on_actionLoad_triggered()
  */
 void MainWindow::on_actionSave_triggered()
 {
-    static int counter = 0; 
     QString name;
-    if(counter == 1){
-        name = saved_config_name;
-    }else{
-        name = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
-    }
-    saved_config_name = name;
+    name = QFileDialog::getSaveFileName(this, tr("Save config"), "", tr("Config files (*.conf)"));
     if(name.isEmpty()){
-        counter = 0;
         i_am_mad = false;
         return;
     }
     QtConcurrent::run(p, &Processor::saveConf, name, false);
     if(i_am_mad){
-        if(counter == 1){
-            counter = 0;
-            on_actionCalibrate_triggered();
-        }else{
-            counter++;
-        }
+        saved_config_name = name;
+        on_actionCalibrate_triggered();
     }
 }
 
@@ -401,8 +397,9 @@ void MainWindow::on_actionCalibrate_triggered()
                 name = QFileDialog::getOpenFileName(this, tr("Open config"), "", tr("Config files (*.conf)"));
                 if(name.isEmpty()) return;
             }else{
-                QMessageBox::information(this, "Info", "Create new config");
+                QMessageBox::information(this, "Info", "Create new config. First step - open the sample image");
                 i_am_mad = true;
+                on_actionOpen_Image_s_triggered();
                 return;
             }
         }else{
@@ -426,6 +423,7 @@ void MainWindow::on_actionOpen_Video_triggered()
 {
     QString videoFileName = QFileDialog::getOpenFileName(this, tr("Open data file"), "", tr("Video files (*.avi)"));
     if (!videoFileName.isNull() && !videoFileName.isEmpty()) {
+        ui->widget->hide();
         ui->widget_3->show();
         ui->pushButton_2->show();
         ui->tabWidget_2->hide();
