@@ -7,9 +7,7 @@ DB::DB(QObject *parent) : QObject(parent)
 
 DB::~DB()
 {
-    if(db.isOpen()){
-        db.close();
-    }
+
 }
 
 QSqlError DB::init()
@@ -54,9 +52,9 @@ QSqlError DB::addSensor(QString name, const ModelingData &data, int confId, int 
         if(!db.open()){
             return db.lastError();
         }
+        db.setDatabaseName("./sensors.db");
     }
     
-    db.setDatabaseName("./sensors.db");
     
     QSqlQuery q(db);
     QString sensor = "";
@@ -224,5 +222,26 @@ QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
     }
     
     return QSqlError();
+}
+
+QStringList DB::getSensorNames()
+{
+    QStringList l;
+    QString query = "select * from sensors";
+    QSqlQuery q(query);
+    int fn = q.record().indexOf("name");
+    while(q.next()){
+        l << q.value(fn).toString();
+    }
+    return l;
+}
+
+std::unique_ptr<DB> DB::instance;
+std::once_flag DB::onceFlag;
+
+DB &DB::getInstance()
+{
+    std::call_once(onceFlag, []{ instance.reset(new DB); instance.get()->init();});
+    return *instance.get();
 }
 

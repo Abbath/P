@@ -55,15 +55,5 @@ int main(int argc, char* argv[])
     
     QObject::connect(qsti, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), d, SLOT(trayHandle(QSystemTrayIcon::ActivationReason)));
     
-//    DB db;
-    
-//    qDebug() << db.init().text();
-    
-//    ModelingWizard *wiz = new ModelingWizard;
-    
-//    wiz->exec();
-    
-//    qDebug() << db.addSensor("sensor2", wiz->getDataRef(),2 ,2);
-    
     return a.exec();
 }

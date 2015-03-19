@@ -31,7 +31,8 @@ public:
     void setProcessor(Processor * _p) { p = _p;}
     void runCalibration();
     void runMeasurements();
-    void model();
+    QPair<ModelingData, bool> preModel();
+    void model(ModelingData data);
     ~MainWindow();
     void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
     void closeEvent(QCloseEvent *);

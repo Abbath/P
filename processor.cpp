@@ -489,10 +489,8 @@ void Processor::saveData(const QString& name)
             str << res4[0][i] << " " << res4[1][i] << " " << res4[2][i] << " " << res4[3][i] << " ";
             str << preparedPixels[i] << " " << preparedPressures[i] << " \n";
         }
-        DB db;
-        db.init();
         
-        qDebug() << db.addData(preparedPixels, preparedPressures).text() << db.addConf(config);
+        qDebug() << DB::getInstance().addData(preparedPixels, preparedPressures).text() << DB::getInstance().addConf(config);
     } else {
         emit somethingWentWrong("Error", "Can not open data file");
     }
@@ -558,11 +556,8 @@ void Processor::saveConf(const QString& name, bool def)
             str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
             str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
             
-            DB db;
-            
-            db.init();
-            
-            qDebug() << db.addConf(image.getConfig()).text();
+           
+            qDebug() << DB::getInstance().addConf(image.getConfig()).text();
         }else {
             emit somethingWentWrong("Error", "Can not open a file");
         }
@@ -734,6 +729,8 @@ void Processor::autorun(bool vu_flag)
             emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
     }
+    
+    
 }
 
 /*!

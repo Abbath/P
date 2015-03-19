@@ -71,6 +71,7 @@ void MainWindow::runCalibration()
  */
 void MainWindow::runMeasurements()
 {
+    QInputDialog::getItem(this, "Select sensor", "Please select sensor name", DB::getInstance().getSensorNames(),0,false);
     QList<int> list;
     list << 0 << ui->splitter->widget(0)->width()+ui->splitter->widget(1)->width() << ui->splitter->widget(2)->width();
     ui->splitter->setSizes(list);
@@ -79,10 +80,7 @@ void MainWindow::runMeasurements()
     on_actionLoad_2_triggered();
 }
 
-/*!
- * \brief MainWindow::model
- */
-void MainWindow::model()
+QPair<ModelingData, bool> MainWindow::preModel()
 {
     if(core) core->deleteLater();
     core = new ModelingCore(this);
@@ -90,10 +88,17 @@ void MainWindow::model()
     wizard->setIs_integrated(true);
     wizard->exec();
     if(wizard->result() == QWizard::Rejected){
-        return;
+        return QPair<ModelingData,bool>(wizard->getDataRef(), false);
     }
-    auto res = wizard->getDataRef();
-    res.setPressure(ui->pressureLabel->text().toDouble()/25*1000);
+    return QPair<ModelingData, bool>(wizard->getDataRef(), true);
+}
+
+/*!
+ * \brief MainWindow::model
+ */
+void MainWindow::model(ModelingData res)
+{
+    res.setPressure(p->currImage().getPressure()/25*1000);
     core->setData(res);
     QProgressDialog* pd = new QProgressDialog("Modeling","Stop",0,100, this);
     pd->setWindowTitle("Progress");
@@ -279,8 +284,11 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionAutorun_triggered()
 {
     disableUi();
-    p->autorun(true);
-    model();
+    auto md = preModel();
+    if(md.second){
+        p->autorun(true);
+        model(md.first);
+    }
 }
 
 /*!
@@ -391,10 +399,8 @@ void MainWindow::on_actionCalibrate_triggered()
     if(!i_am_mad){
         ModelingWizard * wiz = new ModelingWizard;
         wiz->exec();
-        DB db;
-        db.init();
         QString sname = QInputDialog::getText(this, "Name", "Enter name for sensor configuration");
-        db.addSensor(sname, wiz->getDataRef(), 100, 100);
+        DB::getInstance().addSensor(sname, wiz->getDataRef(), 100, 100);
         QStringList lst;
         lst << "Create" << "Open";
         bool ok;
@@ -539,7 +545,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.8.8\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2014\nVersion 0.9\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 /*!
