@@ -66,6 +66,11 @@ void ImageArea::paintEvent(QPaintEvent* e)
     painter.setFont(QFont("Ubuntu", 50));
     painter.drawText(30, this->height() - 10, QString::number(im.getPressure()) + " kPa");
     painter.drawEllipse(this->width() - 100, this->height() - 100, 80, 80);
+//    painter.drawEllipse(13, 61, 335-13, 261-61);
+//    painter.drawLine(QPoint(13, 0), QPoint(13,im.getImage().height()-1));
+//    painter.drawLine(QPoint(335, 0), QPoint(335, im.getImage().height()-1));
+//    painter.drawLine(QPoint(0, 61), QPoint(im.getImage().width()-1,61));
+//    painter.drawLine(QPoint(0, 261), QPoint(im.getImage().width()-1, 261));
     e->accept();
 }
 

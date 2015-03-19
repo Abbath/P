@@ -320,15 +320,22 @@ unsigned Processor::searchTheLight(const Image& im, QRect rect)
     unsigned tre = im.getThreshold();
     QImage image = sharpen(im.getImage());
     unsigned counter = 0;
+    int maxi=rect.left(), mini = rect.right(), maxj=rect.top(), minj = rect.bottom();
     for (auto i = rect.left() + 1; i != rect.right(); ++i) {
         for (auto j = rect.top() + 1; j != rect.bottom(); ++j) {
             if(i < image.width() && j < image.height()){
                 if (static_cast<unsigned>(qGray(image.pixel(i, j))) >= tre) {
                     counter++;
+                    if(i > maxi) maxi = i;
+                    if(i < mini) mini = i;
+                    if(j > maxj) maxj = j;
+                    if(j < minj) minj = j;
                 }
             }
         }
     }
+    qDebug() << rect.left() << rect.right() << rect.top() << rect.bottom();
+    qDebug() << mini << maxi << minj << maxj << "\n";
     return counter;
 }
 
