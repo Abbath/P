@@ -1,5 +1,5 @@
 #include "processor.hpp"
-
+#include "db.hpp"
 /*!
  * \brief Processor::Processor
  * \param parent
@@ -489,6 +489,10 @@ void Processor::saveData(const QString& name)
             str << res4[0][i] << " " << res4[1][i] << " " << res4[2][i] << " " << res4[3][i] << " ";
             str << preparedPixels[i] << " " << preparedPressures[i] << " \n";
         }
+        DB db;
+        db.init();
+        
+        qDebug() << db.addData(preparedPixels, preparedPressures).text();
     } else {
         emit somethingWentWrong("Error", "Can not open data file");
     }
@@ -553,6 +557,12 @@ void Processor::saveConf(const QString& name, bool def)
             str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
             str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
             str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
+            
+            DB db;
+            
+            db.init();
+            
+            qDebug() << db.addConf(image.getConfig()).text();
         }else {
             emit somethingWentWrong("Error", "Can not open a file");
         }

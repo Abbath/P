@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia multimediawidgets
+QT       += core gui multimedia multimediawidgets sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 qtHaveModule(opengl) {
     QT += opengl
@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     pages/matpage.cpp \
     pages/miscpage.cpp \
     pages/holespage.cpp \
-    pages/campage.cpp
+    pages/campage.cpp \
+    db.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
@@ -47,7 +48,8 @@ HEADERS  += mainwindow.hpp \
     pages/matpage.hpp \
     pages/miscpage.hpp \
     pages/holespage.hpp \
-    pages/campage.hpp
+    pages/campage.hpp \
+    db.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \

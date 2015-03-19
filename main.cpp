@@ -3,6 +3,7 @@
 #include "modelingwizard.hpp"
 #include "dialog.hpp"
 #include "processor.hpp"
+#include "db.hpp"
 #include <QApplication>
 #include <QtGui>
 #include <QThreadPool>
@@ -53,6 +54,16 @@ int main(int argc, char* argv[])
     qsti->show();
     
     QObject::connect(qsti, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), d, SLOT(trayHandle(QSystemTrayIcon::ActivationReason)));
+    
+//    DB db;
+    
+//    qDebug() << db.init().text();
+    
+//    ModelingWizard *wiz = new ModelingWizard;
+    
+//    wiz->exec();
+    
+//    qDebug() << db.addSensor("sensor2", wiz->getDataRef(),2 ,2);
     
     return a.exec();
 }

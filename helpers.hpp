@@ -107,6 +107,7 @@ public:
     void setPressure(double value) { pressure = value; }
     int getSi() const { return si; }
     void setSi(int value) { si = value;}
+    Config getConfig(){return config;}
     
 private:
     double pressure = 0.0l;
