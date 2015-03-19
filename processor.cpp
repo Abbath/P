@@ -492,7 +492,7 @@ void Processor::saveData(const QString& name)
         DB db;
         db.init();
         
-        qDebug() << db.addData(preparedPixels, preparedPressures).text();
+        qDebug() << db.addData(preparedPixels, preparedPressures).text() << db.addConf(config);
     } else {
         emit somethingWentWrong("Error", "Can not open data file");
     }

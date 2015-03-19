@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "modelingwindow.hpp"
 #include "modelingwizard.hpp"
+#include "db.hpp"
 #include <QtConcurrent/QtConcurrent>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -388,6 +389,12 @@ void MainWindow::on_actionCalibrate_triggered()
 {
     QString name = saved_config_name;
     if(!i_am_mad){
+        ModelingWizard * wiz = new ModelingWizard;
+        wiz->exec();
+        DB db;
+        db.init();
+        QString sname = QInputDialog::getText(this, "Name", "Enter name for sensor configuration");
+        db.addSensor(sname, wiz->getDataRef(), 100, 100);
         QStringList lst;
         lst << "Create" << "Open";
         bool ok;

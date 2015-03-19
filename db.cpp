@@ -136,7 +136,7 @@ QSqlError DB::addConf(Config config)
     db.setDatabaseName("./sensors.db");
     
     QSqlQuery q(db);
-    QString conf = "";
+    QString conf = "100, ";
     
 //    conf += "\"" + name + "\"";
 //    conf += ", ";
@@ -189,7 +189,7 @@ QSqlError DB::addConf(Config config)
     
     conf += QString::number(config.square0[2].y());
     
-    QString query = "insert into configs(cr1x, cr1y, cr2x, cr2y, sq1x, sq1y, sq2x, sq2y, sq3x, sq3y, sq01x, sq01y, sq02x, sq02y, sq03x, sq03y) values(" + conf + ")";
+    QString query = "insert into configs(id, cr1x, cr1y, cr2x, cr2y, sq1x, sq1y, sq2x, sq2y, sq3x, sq3y, sq01x, sq01y, sq02x, sq02y, sq03x, sq03y) values(" + conf + ")";
     
     if(!q.exec(query)){
         return db.lastError();
@@ -210,14 +210,14 @@ QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
     db.setDatabaseName("./sensors.db");
     
     QSqlQuery q(db);
-    QString data = "\"";
+    QString data = "100, \"";
     for(int i = 0; i < pix.size(); ++i){
-        data += QString::number(pix[i]) + " " + QString::number(press[i]) ;
+        data += QString::number(pix[i]) + " " + QString::number(press[i]) + " " ;
     }
     
     data += "\"";
     
-    QString query = "insert into datum(data) values(" + data + ")";
+    QString query = "insert into datum(id, data) values(" + data + ")";
     
     if(!q.exec(query)){
         return db.lastError();
