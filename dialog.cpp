@@ -84,7 +84,7 @@ void Dialog::on_pushButton_4_clicked()
     QObject::connect(p, SIGNAL(plot(QVector<double>, QVector<double>)), mainw, SLOT(plot(QVector<double>, QVector<double>)), Qt::QueuedConnection);
     QObject::connect(mainw, SIGNAL(stop()), p, SLOT(stopThis()), Qt::QueuedConnection);
     
-    p->loadConf("default.conf");
+    //p->loadConf("default.conf");
     mainw->show();
     mainw->runCalibration();
     this->hide();
@@ -107,7 +107,7 @@ void Dialog::on_pushButton_2_clicked()
     QObject::connect(p, SIGNAL(plot(QVector<double>)), mainw, SLOT(plot(QVector<double>)), Qt::QueuedConnection);
     QObject::connect(p, SIGNAL(plot(QVector<double>, QVector<double>)), mainw, SLOT(plot(QVector<double>, QVector<double>)), Qt::QueuedConnection);
     QObject::connect(mainw, SIGNAL(stop()), p, SLOT(stopThis()), Qt::QueuedConnection);
-    p->loadConf("default.conf");
+    //p->loadConf("default.conf");
     mainw->show();
     mainw->runMeasurements();
     this->hide();

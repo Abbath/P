@@ -303,6 +303,16 @@ void Processor::repaint()
     dis.origin = origin;
     emit Update(dis);
 }
+Config Processor::getConfig() const
+{
+    return config;
+}
+
+void Processor::setConfig(const Config &value)
+{
+    config = value;
+}
+
 
 /*!
  * \brief Processor::searchTheLight

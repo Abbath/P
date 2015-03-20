@@ -43,6 +43,10 @@ public:
     const QString getVName() const { return videoFileName;}    
 
     int extractPressure(QStringList::const_iterator it);
+    Config getConfig() const;
+    void setConfig(const Config &value);
+    void setDatum(const QVector<double>& pix, const QVector<double> pres){ preparedPixels = pix; preparedPressures = pres;}
+    
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);

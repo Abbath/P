@@ -2,7 +2,25 @@
 
 DB::DB(QObject *parent) : QObject(parent)
 {
+    
+}
 
+QPair<QVector<int>, QVector<int>> DB::getCDIDs()
+{
+    QSqlQuery q("select id from configs");
+    //q.next();
+    QVector<int> cids, dids;
+    while(q.next()){
+        cids.push_back(q.value(0).toInt());
+    }
+    
+    QSqlQuery q0("select id from datum");
+    //q.next();
+    while(q.next()){
+        dids.push_back(q.value(0).toInt());
+    }
+    
+    return QPair<QVector<int>, QVector<int>> (cids, dids);
 }
 
 DB::~DB()
@@ -46,15 +64,15 @@ QSqlError DB::init()
     return QSqlError();
 }
 
-QSqlError DB::addSensor(QString name, const ModelingData &data, int confId, int dataId)
+QSqlError DB::addSensor(QString name, const ModelingData &data)
 {
-    if(!db.isOpen()){
-        if(!db.open()){
-            return db.lastError();
-        }
-        db.setDatabaseName("./sensors.db");
-    }
-    
+//    if(!db.isOpen()){
+//        if(!db.open()){
+//            return db.lastError();
+//        }
+//        db.setDatabaseName("./sensors.db");
+//    }
+    auto ids = getCDIDs();
     
     QSqlQuery q(db);
     QString sensor = "";
@@ -109,8 +127,21 @@ QSqlError DB::addSensor(QString name, const ModelingData &data, int confId, int 
     sensor += QString::number(data.getPr());
     sensor += ", ";
     
+    for(int i = 0; true; i++){
+        if(!ids.first.contains(i)){
+            confId = i;
+            break;
+        }
+    }
     sensor += QString::number(confId);
     sensor += ", ";
+    
+    for(int i = 0; true; i++){
+        if(!ids.second.contains(i)){
+            dataId = i;   
+            break;
+        }
+    }
     
     sensor += QString::number(dataId);
     
@@ -134,7 +165,7 @@ QSqlError DB::addConf(Config config)
     db.setDatabaseName("./sensors.db");
     
     QSqlQuery q(db);
-    QString conf = "100, ";
+    QString conf = QString::number(confId) + ", ";
     
 //    conf += "\"" + name + "\"";
 //    conf += ", ";
@@ -208,7 +239,7 @@ QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
     db.setDatabaseName("./sensors.db");
     
     QSqlQuery q(db);
-    QString data = "100, \"";
+    QString data = QString::number(dataId) + ", \"";
     for(int i = 0; i < pix.size(); ++i){
         data += QString::number(pix[i]) + " " + QString::number(press[i]) + " " ;
     }
@@ -222,6 +253,74 @@ QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
     }
     
     return QSqlError();
+}
+
+ModelingData DB::getSensor(QString name, int& cid, int& did)
+{
+    ModelingData data;
+    QSqlQuery q("select * from sensors where name = \"" + name + "\"");
+    if(!q.exec()){
+        qDebug() << db.lastError().text() << q.lastError().text();
+        return data;
+    }
+    q.next();
+    data.setDie_size(q.value(2).toDouble()/1000);
+    data.setMem_size(q.value(3).toDouble()/1000);
+    data.setMem_thickness(q.value(4).toDouble()/1000000);
+    data.setSpacer_height(q.value(5).toDouble()/100);
+    data.setPressure(q.value(6).toDouble()*1000/25);
+    data.setWavelength(q.value(7).toInt());
+    data.setX_angle(q.value(8).toDouble()/57.3);
+    data.setY_angle(q.value(9).toDouble()/57.3);
+    data.setCamx(q.value(10).toDouble()/57.3);
+    data.setCamy(q.value(11).toDouble()/57.3);
+    data.setRows(q.value(12).toInt());
+    data.setHole_size(q.value(13).toInt());
+    data.setSpace_size(q.value(14).toInt());
+    data.setYm(q.value(15).toDouble()*1e9);
+    data.setPr(q.value(16).toDouble());
+    cid = q.value(17).toInt();
+    did = q.value(18).toInt();
+    return data;
+}
+
+Config DB::getConfig(int id)
+{
+    Config conf;
+    QSqlQuery q("select * from configs where id = "+ QString::number(id));
+    q.next();
+    conf.crop.setLeft(q.value(1).toInt());
+    conf.crop.setTop(q.value(2).toInt());
+    conf.crop.setRight(q.value(3).toInt());
+    conf.crop.setBottom(q.value(4).toInt());
+    conf.square[0].setX(q.value(5).toInt());
+    conf.square[0].setY(q.value(6).toInt());        
+    conf.square[1].setX(q.value(7).toInt());
+    conf.square[1].setY(q.value(8).toInt());
+    conf.square[2].setX(q.value(9).toInt());
+    conf.square[2].setY(q.value(10).toInt());
+    conf.square0[0].setX(q.value(11).toInt());
+    conf.square0[0].setY(q.value(12).toInt());
+    conf.square0[1].setX(q.value(13).toInt());
+    conf.square0[1].setY(q.value(14).toInt());
+    conf.square0[2].setX(q.value(15).toInt());
+    conf.square0[2].setY(q.value(16).toInt());
+    return conf;
+}
+
+QPair<QVector<double>, QVector<double> > DB::getData(int id)
+{
+    QVector<double> pix, pres;
+    
+    QSqlQuery q("select * from datum where id = " + QString::number(id));
+    q.next();
+    QString data = q.value(1).toString();
+    QStringList lst = data.split(QChar(' '));
+    for(int i = 0; i < lst.size()-1; i+=2){
+        pix.push_back(lst[i].toDouble());
+        pres.push_back(lst[i+1].toDouble());
+    }
+    return QPair<QVector<double>, QVector<double> >(pix, pres);
 }
 
 QStringList DB::getSensorNames()
@@ -244,4 +343,24 @@ DB &DB::getInstance()
     std::call_once(onceFlag, []{ instance.reset(new DB); instance.get()->init();});
     return *instance.get();
 }
+int DB::getConfId() const
+{
+    return confId;
+}
+
+void DB::setConfId(int value)
+{
+    confId = value;
+}
+int DB::getDataId() const
+{
+    return dataId;
+}
+
+void DB::setDataId(int value)
+{
+    dataId = value;
+}
+
+
 
