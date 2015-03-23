@@ -25,7 +25,7 @@ QPair<QVector<int>, QVector<int>> DB::getCDIDs()
 
 DB::~DB()
 {
-
+    
 }
 
 QSqlError DB::init()
@@ -58,26 +58,43 @@ QSqlError DB::init()
     }
     
     if(!q.exec(QString("insert into sensors(id, name, dsize, msize, mthick, sheight, pressure, wl, xa, ya, cxa, cya, rows, hs, ss, ym, pr, conf, data) values(0, \"sensor0\", 15, 5, 20, 20, 40, 535, 0.0, 0.0, 0.0, 30.0, 6, 60, 340, 130.0, 0.27, 0, 0)"))){
-            return db.lastError();
+        return db.lastError();
     }
     
     return QSqlError();
 }
 
+QSqlError DB::addFullSensor(QString name, const Sensor &sensor)
+{
+    QSqlError err = addSensor(name, sensor.getModelingData());
+    if(err.isValid()){
+        return db.lastError();
+    }
+    err = addConf(sensor.getConf());
+    if(err.isValid()){
+        return db.lastError();
+    }
+    err = addData(sensor.getMeasurementData().first, sensor.getMeasurementData().second);
+    if(err.isValid()){
+        return db.lastError();
+    }
+    return QSqlError();
+}
+
 QSqlError DB::addSensor(QString name, const ModelingData &data)
 {
-//    if(!db.isOpen()){
-//        if(!db.open()){
-//            return db.lastError();
-//        }
-//        db.setDatabaseName("./sensors.db");
-//    }
+    //    if(!db.isOpen()){
+    //        if(!db.open()){
+    //            return db.lastError();
+    //        }
+    //        db.setDatabaseName("./sensors.db");
+    //    }
     auto ids = getCDIDs();
     
     QSqlQuery q(db);
     QString sensor = "";
-   // sensor += QString::number(1);
-   // sensor += ", ";
+    // sensor += QString::number(1);
+    // sensor += ", ";
     
     sensor += "\"" + name + "\"";
     sensor += ", ";
@@ -167,56 +184,55 @@ QSqlError DB::addConf(Config config)
     QSqlQuery q(db);
     QString conf = QString::number(confId) + ", ";
     
-//    conf += "\"" + name + "\"";
-//    conf += ", ";
+    //    conf += "\"" + name + "\"";
+    //    conf += ", ";
     
-    conf += QString::number(config.crop.left());
+    conf += QString::number(config.getCrop().left());
     conf += ", ";
     
-    
-    conf += QString::number(config.crop.top());
+    conf += QString::number(config.getCrop().top());
     conf += ", ";
     
-    conf += QString::number(config.crop.right());
+    conf += QString::number(config.getCrop().right());
     conf += ", ";
     
-    conf += QString::number(config.crop.bottom());
+    conf += QString::number(config.getCrop().bottom());
     conf += ", ";
     
-    conf += QString::number(config.square[0].x());
+    conf += QString::number(config.getSquare()[0].x());
     conf += ", ";
     
-    conf += QString::number(config.square[0].y());
+    conf += QString::number(config.getSquare()[0].y());
     conf += ", ";
     
-    conf += QString::number(config.square[1].x());
+    conf += QString::number(config.getSquare()[1].x());
     conf += ", ";
     
-    conf += QString::number(config.square[1].y());
+    conf += QString::number(config.getSquare()[1].y());
     conf += ", ";
     
-    conf += QString::number(config.square[2].x());
+    conf += QString::number(config.getSquare()[2].x());
     conf += ", ";
     
-    conf += QString::number(config.square[2].y());
+    conf += QString::number(config.getSquare()[2].y());
     conf += ", ";
     
-    conf += QString::number(config.square0[0].x());
+    conf += QString::number(config.getSquare0()[0].x());
     conf += ", ";
     
-    conf += QString::number(config.square0[0].y());
+    conf += QString::number(config.getSquare0()[0].y());
     conf += ", ";
     
-    conf += QString::number(config.square0[1].x());
+    conf += QString::number(config.getSquare0()[1].x());
     conf += ", ";
     
-    conf += QString::number(config.square0[1].y());
+    conf += QString::number(config.getSquare0()[1].y());
     conf += ", ";
     
-    conf += QString::number(config.square0[2].x());
+    conf += QString::number(config.getSquare0()[2].x());
     conf += ", ";
     
-    conf += QString::number(config.square0[2].y());
+    conf += QString::number(config.getSquare0()[2].y());
     
     QString query = "insert into configs(id, cr1x, cr1y, cr2x, cr2y, sq1x, sq1y, sq2x, sq2y, sq3x, sq3y, sq01x, sq01y, sq02x, sq02y, sq03x, sq03y) values(" + conf + ")";
     
@@ -229,7 +245,7 @@ QSqlError DB::addConf(Config config)
 
 QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
 {
-
+    
     if(!db.isOpen()){
         if(!db.open()){
             return db.lastError();
@@ -289,22 +305,22 @@ Config DB::getConfig(int id)
     Config conf;
     QSqlQuery q("select * from configs where id = "+ QString::number(id));
     q.next();
-    conf.crop.setLeft(q.value(1).toInt());
-    conf.crop.setTop(q.value(2).toInt());
-    conf.crop.setRight(q.value(3).toInt());
-    conf.crop.setBottom(q.value(4).toInt());
-    conf.square[0].setX(q.value(5).toInt());
-    conf.square[0].setY(q.value(6).toInt());        
-    conf.square[1].setX(q.value(7).toInt());
-    conf.square[1].setY(q.value(8).toInt());
-    conf.square[2].setX(q.value(9).toInt());
-    conf.square[2].setY(q.value(10).toInt());
-    conf.square0[0].setX(q.value(11).toInt());
-    conf.square0[0].setY(q.value(12).toInt());
-    conf.square0[1].setX(q.value(13).toInt());
-    conf.square0[1].setY(q.value(14).toInt());
-    conf.square0[2].setX(q.value(15).toInt());
-    conf.square0[2].setY(q.value(16).toInt());
+    conf.getCropRef().setLeft(q.value(1).toInt());
+    conf.getCropRef().setTop(q.value(2).toInt());
+    conf.getCropRef().setRight(q.value(3).toInt());
+    conf.getCropRef().setBottom(q.value(4).toInt());
+    conf.getSquareRef()[0].setX(q.value(5).toInt());
+    conf.getSquareRef()[0].setY(q.value(6).toInt());        
+    conf.getSquareRef()[1].setX(q.value(7).toInt());
+    conf.getSquareRef()[1].setY(q.value(8).toInt());
+    conf.getSquareRef()[2].setX(q.value(9).toInt());
+    conf.getSquareRef()[2].setY(q.value(10).toInt());
+    conf.getSquare0Ref()[0].setX(q.value(11).toInt());
+    conf.getSquare0Ref()[0].setY(q.value(12).toInt());
+    conf.getSquare0Ref()[1].setX(q.value(13).toInt());
+    conf.getSquare0Ref()[1].setY(q.value(14).toInt());
+    conf.getSquare0Ref()[2].setX(q.value(15).toInt());
+    conf.getSquare0Ref()[2].setY(q.value(16).toInt());
     return conf;
 }
 

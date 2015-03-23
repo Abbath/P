@@ -5,7 +5,9 @@
 #include <QtSql>
 #include <memory>
 #include <mutex>
-#include "helpers.hpp"
+#include "config.hpp"
+#include "modelingdata.hpp"
+#include "sensor.hpp"
 
 class DB : public QObject
 {
@@ -13,6 +15,7 @@ class DB : public QObject
 public:
     virtual ~DB();
     QSqlError init();
+    QSqlError addFullSensor(QString name, const Sensor& sensor);
     QSqlError addSensor(QString name, const ModelingData& data);
     QSqlError addConf(Config config);
     QSqlError addData(const QVector<double> &pix, const QVector<double> &press);

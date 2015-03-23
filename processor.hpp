@@ -12,6 +12,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "capturewrapper.hpp"
 #include "imageconverter.hpp"
+#include "imageprocessor.hpp"
 #include <fstream>
 
 /*!
@@ -25,7 +26,6 @@ public:
     explicit Processor(QObject *parent = 0);
     QImage loadImage(const QString &name);
     void saveImage(const QString &name);
-    unsigned searchTheLight(const Image &im, QRect rect);
     void run(bool vu_flag);
     void calibrate(const QString &name, const QString &named, const QStringList &names);
     void saveResults(const QString &name);
@@ -71,7 +71,6 @@ public slots:
 private:
     std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
     double calculate(const QVector<double> &preparedPixels, const QVector<double> &preparedPressures, double val) const;
-    QImage sharpen(const QImage& im );
     void repaint();
 private:
     QVector<Image> images;

@@ -30,7 +30,13 @@ SOURCES += main.cpp\
     pages/miscpage.cpp \
     pages/holespage.cpp \
     pages/campage.cpp \
-    db.cpp
+    db.cpp \
+    imageprocessor.cpp \
+    config.cpp \
+    calculator.cpp \
+    image.cpp \
+    modelingdata.cpp \
+    sensor.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
@@ -49,7 +55,13 @@ HEADERS  += mainwindow.hpp \
     pages/miscpage.hpp \
     pages/holespage.hpp \
     pages/campage.hpp \
-    db.hpp
+    db.hpp \
+    imageprocessor.hpp \
+    config.hpp \
+    calculator.hpp \
+    image.hpp \
+    modelingdata.hpp \
+    sensor.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \

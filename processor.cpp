@@ -245,49 +245,6 @@ Display Processor::getDisplay()
     return dis;
 }
 
-/*!
- * \brief Processor::sharpen
- * \param im
- * \return
- */
-QImage Processor::sharpen(const QImage& im)
-{
-    QImage image = im;
-    QImage oldImage = im;
-    int kernel[3][3] = { { 0, -1, 0 },
-                         { -1, 5, -1 },
-                         { 0, -1, 0 } };
-    /* int kernel  [5][5] ={
-                        {0,0,-1,0,0},
-                        {0,-1,-2,-1,0},
-                        {-1,-2,20,-2,-1},
-                        {0,-1,-2,-1,0},
-                        {0,0,-1,0,0}};*/
-    int kernelSize = 3;
-    int sumKernel = 1;
-    int r, g, b;
-    QColor color;
-    for (int x = kernelSize / 2; x < image.width() - (kernelSize / 2); x++) {
-        for (int y = kernelSize / 2; y < image.height() - (kernelSize / 2); y++) {
-            r = 0;
-            g = 0;
-            b = 0;
-            for (int i = -kernelSize / 2; i <= kernelSize / 2; i++) {
-                for (int j = -kernelSize / 2; j <= kernelSize / 2; j++) {
-                    color = QColor(oldImage.pixel(x + i, y + j));
-                    r += color.red() * kernel[kernelSize / 2 + i][kernelSize / 2 + j];
-                    g += color.green() * kernel[kernelSize / 2 + i][kernelSize / 2 + j];
-                    b += color.blue() * kernel[kernelSize / 2 + i][kernelSize / 2 + j];
-                }
-            }
-            r = qBound(0, r / sumKernel, 255);
-            g = qBound(0, g / sumKernel, 255);
-            b = qBound(0, b / sumKernel, 255);
-            image.setPixel(x, y, qRgb(r, g, b));
-        }
-    }
-    return image;
-}
 
 /*!
  * \brief Processor::repaint
@@ -311,42 +268,6 @@ Config Processor::getConfig() const
 void Processor::setConfig(const Config &value)
 {
     config = value;
-}
-
-
-/*!
- * \brief Processor::searchTheLight
- * \param image
- * \param tre
- * \param x1
- * \param y1
- * \param x2
- * \param y2
- */
-unsigned Processor::searchTheLight(const Image& im, QRect rect)
-{
-    assert(im.getSquare(1) == config.square0);
-    rect = rect.normalized();
-    unsigned tre = im.getThreshold();
-    QImage image = sharpen(im.getImage());
-    unsigned counter = 0;
-    int maxi=rect.left(), mini = rect.right(), maxj=rect.top(), minj = rect.bottom();
-    for (auto i = rect.left() + 1; i != rect.right(); ++i) {
-        for (auto j = rect.top() + 1; j != rect.bottom(); ++j) {
-            if(i < image.width() && j < image.height()){
-                if (static_cast<unsigned>(qGray(image.pixel(i, j))) >= tre) {
-                    counter++;
-                    if(i > maxi) maxi = i;
-                    if(i < mini) mini = i;
-                    if(j > maxj) maxj = j;
-                    if(j < minj) minj = j;
-                }
-            }
-        }
-    }
-    qDebug() << rect.left() << rect.right() << rect.top() << rect.bottom();
-    qDebug() << mini << maxi << minj << maxj << "\n";
-    return counter;
 }
 
 /*!
@@ -522,72 +443,46 @@ void Processor::stopThis()
 void Processor::saveConf(const QString& name, bool def)
 {
     Image& image = currImage();
-    //static bool fp = true;
-    static QString filename = QString("default.conf");
-    if (!def) {
-//        if (fp) {
-//            filename = name;
-//            QFile file(filename);
-//            if (file.open(QFile::WriteOnly)) {
-//                QTextStream str(&file);
-//                str << image.getCrop().left() << " " << image.getCrop().top() << "\n";
-//                str << image.getCrop().right() << " " << image.getCrop().bottom() << "\n";
-//                str << image.getSquare(0)[0].x() << " " << image.getSquare(0)[0].y() << "\n";
-//                str << image.getSquare(0)[1].x() << " " << image.getSquare(0)[1].y() << "\n";
-//                str << image.getSquare(0)[2].x() << " " << image.getSquare(0)[2].y() << "\n";
-//                emit somethingWentWrong("Next step", "Put 3 points then press Save again");
-//            } else {
-//                emit somethingWentWrong("Error", "Can not open a file");
-//            }
-//            fp = false;
-//        } else {
-//            QFile file(filename);
-//            if (file.open(QFile::Append)) {
-//                QTextStream str(&file);
-//                str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
-//                str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
-//                str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
-//            } else {
-//                emit somethingWentWrong("Error", "Can not open a file");
-//            }
-//            fp = true;
-//            filename = QString("default.conf");
-//        }
-        filename = name;
-        QFile file(filename);
-        if (file.open(QFile::WriteOnly)) {
-            QTextStream str(&file);
-            str << image.getCrop().left() << " " << image.getCrop().top() << "\n";
-            str << image.getCrop().right() << " " << image.getCrop().bottom() << "\n";
-            str << image.getSquare(0)[0].x() << " " << image.getSquare(0)[0].y() << "\n";
-            str << image.getSquare(0)[1].x() << " " << image.getSquare(0)[1].y() << "\n";
-            str << image.getSquare(0)[2].x() << " " << image.getSquare(0)[2].y() << "\n";
-            str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
-            str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
-            str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
+    image.getConfig().saveConf(name);
+    DB::getInstance().addConf(image.getConfig());
+    
+//    static QString filename = QString("default.conf");
+//    if (!def) {
+//        filename = name;
+//        QFile file(filename);
+//        if (file.open(QFile::WriteOnly)) {
+//            QTextStream str(&file);
+//            str << image.getCrop().left() << " " << image.getCrop().top() << "\n";
+//            str << image.getCrop().right() << " " << image.getCrop().bottom() << "\n";
+//            str << image.getSquare(0)[0].x() << " " << image.getSquare(0)[0].y() << "\n";
+//            str << image.getSquare(0)[1].x() << " " << image.getSquare(0)[1].y() << "\n";
+//            str << image.getSquare(0)[2].x() << " " << image.getSquare(0)[2].y() << "\n";
+//            str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
+//            str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
+//            str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
             
            
-            qDebug() << DB::getInstance().addConf(image.getConfig()).text();
-        }else {
-            emit somethingWentWrong("Error", "Can not open a file");
-        }
-        filename = QString("default.conf");        
-    } else {
-        QFile file(filename);
-        if (file.open(QFile::WriteOnly)) {
-            QTextStream str(&file);
-            str << config.crop.left() << " " << config.crop.top() << "\n";
-            str << config.crop.right() << " " << config.crop.bottom() << "\n";
-            str << config.square[0].x() << " " << config.square[0].y() << "\n";
-            str << config.square[1].x() << " " << config.square[1].y() << "\n";
-            str << config.square[2].x() << " " << config.square[2].y() << "\n";
-            str << config.square0[0].x() << " " << config.square0[0].y() << "\n";
-            str << config.square0[1].x() << " " << config.square0[1].y() << "\n";
-            str << config.square0[2].x() << " " << config.square0[2].y() << "\n";
-        } else {
-            emit somethingWentWrong("Error", "Can not open a file");
-        }
-    }
+//            qDebug() << DB::getInstance().addConf(image.getConfig()).text();
+//        }else {
+//            emit somethingWentWrong("Error", "Can not open a file");
+//        }
+//        filename = QString("default.conf");        
+//    } else {
+//        QFile file(filename);
+//        if (file.open(QFile::WriteOnly)) {
+//            QTextStream str(&file);
+//            str << config.crop.left() << " " << config.crop.top() << "\n";
+//            str << config.crop.right() << " " << config.crop.bottom() << "\n";
+//            str << config.square[0].x() << " " << config.square[0].y() << "\n";
+//            str << config.square[1].x() << " " << config.square[1].y() << "\n";
+//            str << config.square[2].x() << " " << config.square[2].y() << "\n";
+//            str << config.square0[0].x() << " " << config.square0[0].y() << "\n";
+//            str << config.square0[1].x() << " " << config.square0[1].y() << "\n";
+//            str << config.square0[2].x() << " " << config.square0[2].y() << "\n";
+//        } else {
+//            emit somethingWentWrong("Error", "Can not open a file");
+//        }
+//    }
 }
 
 /*!
@@ -597,30 +492,33 @@ void Processor::saveConf(const QString& name, bool def)
 void Processor::loadConf(const QString& name)
 {
     Image& image = currImage();
-    QString filename = name;
-    QFile file(filename);
-    if (file.open(QFile::ReadOnly)) {
-        QTextStream str(&file);
-        int r, t, l, b;
-        str >> l >> t;
-        str >> r >> b;
-        config.crop.setRight(r);
-        config.crop.setLeft(l);
-        config.crop.setTop(t);
-        config.crop.setBottom(b);
-        str >> config.square[0].rx() >> config.square[0].ry();
-        str >> config.square[1].rx() >> config.square[1].ry();
-        str >> config.square[2].rx() >> config.square[2].ry();
-        str >> config.square0[0].rx() >> config.square0[0].ry();
-        str >> config.square0[1].rx() >> config.square0[1].ry();
-        str >> config.square0[2].rx() >> config.square0[2].ry();
-        if (str.status() & QTextStream::ReadCorruptData || str.status() & QTextStream::ReadPastEnd) {
-            emit somethingWentWrong("Error", "Can not read config!");
-            return;
-        }
-    } else {
-        emit somethingWentWrong("Error", "Can not open a file");
-        repaint();
+//    QString filename = name;
+//    QFile file(filename);
+//    if (file.open(QFile::ReadOnly)) {
+//        QTextStream str(&file);
+//        int r, t, l, b;
+//        str >> l >> t;
+//        str >> r >> b;
+//        config.crop.setRight(r);
+//        config.crop.setLeft(l);
+//        config.crop.setTop(t);
+//        config.crop.setBottom(b);
+//        str >> config.square[0].rx() >> config.square[0].ry();
+//        str >> config.square[1].rx() >> config.square[1].ry();
+//        str >> config.square[2].rx() >> config.square[2].ry();
+//        str >> config.square0[0].rx() >> config.square0[0].ry();
+//        str >> config.square0[1].rx() >> config.square0[1].ry();
+//        str >> config.square0[2].rx() >> config.square0[2].ry();
+//        if (str.status() & QTextStream::ReadCorruptData || str.status() & QTextStream::ReadPastEnd) {
+//            emit somethingWentWrong("Error", "Can not read config!");
+//            return;
+//        }
+//    } else {
+//        emit somethingWentWrong("Error", "Can not open a file");
+//        repaint();
+//    }
+    if(!config.loadConf(name)){
+        emit somethingWentWrong("Error", "Can not read config!");
     }
     image.setConfig(config);
     image.setFullCounter();
@@ -633,9 +531,8 @@ void Processor::loadConf(const QString& name)
 void Processor::align()
 {
     Image& image = currImage();
-    QMatrix matrix;
-    matrix.shear(4 * (image.getSquare(0)[1].x() - image.getSquare(0)[2].x()) / (double)image.getImage().width(), 4 * (image.getSquare(0)[0].y() - image.getSquare(0)[1].y()) / (double)image.getImage().height());
-    image.setImage(image.getImage().transformed(matrix));
+    ImageProcessor ip;
+    image.setImage(ip.align(image.getImage(), image.getSquare(0)));
     image.resetCounter();
     image.setSi(1);
     if (!vid)
@@ -651,26 +548,8 @@ void Processor::run(bool vu_flag)
     Image& image = currImage();
     
     if (image.isCounterFull() && !image.getImage().isNull()) {
-        unsigned x1 = image.getSquare(1)[1].x() - origin.second.x();
-        unsigned x2 = image.getImage().width() - 1;
-        unsigned y1 = image.getSquare(1)[1].y() - origin.second.y();
-        unsigned y2 = image.getSquare(1)[2].y() - origin.second.y();
-        image.getBoundCounterRef()[0] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
-        x1 = 0;
-        x2 = image.getSquare(1)[0].x() - origin.second.x();
-        y1 = image.getSquare(1)[0].y() - origin.second.y();
-        y2 = image.getSquare(1)[2].y() - origin.second.y();
-        image.getBoundCounterRef()[1] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
-        x1 = image.getSquare(1)[0].x() - origin.second.x();
-        x2 = image.getSquare(1)[1].x() - origin.second.x();
-        y1 = 0;
-        y2 = image.getSquare(1)[0].y() - origin.second.y();
-        image.getBoundCounterRef()[2] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
-        x1 = image.getSquare(1)[0].x() - origin.second.x();
-        x2 = image.getSquare(1)[1].x() - origin.second.x();
-        y1 = image.getSquare(1)[2].y() - origin.second.y();
-        y2 = image.getImage().height() - 1;
-        image.getBoundCounterRef()[3] = searchTheLight(image, QRect(QPoint(x1, y1), QPoint(x2, y2)));
+        ImageProcessor ip;
+        image.getBoundCounterRef() = ip.getLightAmount(image.getImage(), image.getConfig(), origin, image.getThreshold());
     } else {
         emit somethingWentWrong("No points or image", "Put 3 points or open image");
     }
