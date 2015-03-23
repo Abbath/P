@@ -13,6 +13,7 @@
 #include "capturewrapper.hpp"
 #include "imageconverter.hpp"
 #include "imageprocessor.hpp"
+#include "calculator.hpp"
 #include <fstream>
 
 /*!
@@ -60,7 +61,7 @@ public slots:
     void prev();
     void next();
     void loadConf(const QString &name);
-    void saveConf(const QString &name, bool def);
+    void saveConf(const QString &name);
     void loadData(const QString &name);
     void saveData(const QString &name);
     void stopThis();
@@ -69,8 +70,6 @@ public slots:
     Image& currImage();
 
 private:
-    std::pair<long double,long double> leastsquares(const QVector<double> &x, const QVector<double> &yy) const;
-    double calculate(const QVector<double> &preparedPixels, const QVector<double> &preparedPressures, double val) const;
     void repaint();
 private:
     QVector<Image> images;

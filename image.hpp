@@ -26,7 +26,7 @@ public:
     QString getFileName() const { return fileName; }
     QRect getCrop() const { return config.getCrop(); }
     Square getSquare(int index) const { if(index == 0) return config.getSquare(); else return config.getSquare0(); }
-    Square& getSquareRef(int index) { if(index == 0) return config.getSquare0Ref(); else return config.getSquare0Ref(); }
+    Square& getSquareRef(int index) { if(index == 0) return config.getSquareRef(); else return config.getSquare0Ref(); }
     unsigned getCounter() const { return counter; }
     void incrementCounter(){ counter++; }
     void setImage(const QImage& _image){ image = _image; }
@@ -52,8 +52,6 @@ private:
     bool isProcessed = false;
     bool isLoaded = false;
     QImage image;
-    //QRect crop;
-    //Square square;
     int si = 0;
     Config config;
     QString fileName;

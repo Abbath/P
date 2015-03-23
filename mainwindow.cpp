@@ -347,7 +347,7 @@ void MainWindow::on_actionSave_triggered()
         i_am_mad = false;
         return;
     }
-    QtConcurrent::run(p, &Processor::saveConf, name, false);
+    QtConcurrent::run(p, &Processor::saveConf, name);
     if(i_am_mad){
         saved_config_name = name;
         on_actionCalibrate_triggered();
@@ -379,7 +379,7 @@ void MainWindow::on_actionSave_2_triggered()
  */
 void MainWindow::on_actionSave_as_Default_triggered()
 {
-    QtConcurrent::run(p, &Processor::saveConf, QString("default.conf"), true);
+    QtConcurrent::run(p, &Processor::saveConf, QString("default.conf"));
 }
 
 /*!

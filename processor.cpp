@@ -11,126 +11,6 @@ Processor::Processor(QObject* parent)
 }
 
 /*!
- * \brief Processor::leastsquares
- * \param x
- * \param yy
- * \return
- */
-std::pair<long double, long double> Processor::leastsquares(const QVector<double>& x, const QVector<double>& yy) const
-{
-    QVector<double> y = yy;
-    for (int i = 0; i < y.size(); ++i) {
-        y[i] += 1.0;
-    }
-    long double A, B, a = 0, b = 0, at = 0, tt = 0, bt = 0, tmp = 0;
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += x[i] * x[i] * y[i];
-    }
-    
-    a = tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i] * log(y[i]);
-    }
-    
-    a *= tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i] * x[i];
-    }
-    
-    at = tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i] * x[i] * log(y[i]);
-    }
-    
-    at *= tmp;
-    tmp = 0;
-    
-    a -= at;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i];
-    }
-    
-    at = tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += x[i] * x[i] * y[i];
-    }
-    
-    tt = at * tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += x[i] * y[i];
-    }
-    
-    tt -= tmp * tmp;
-    tmp = 0;
-    
-    a /= tt;
-    
-    A = exp(a);
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i];
-    }
-    
-    b = tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += x[i] * y[i] * log(y[i]);
-    }
-    
-    b *= tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i] * x[i];
-    }
-    
-    bt = tmp;
-    tmp = 0;
-    
-    for (int i = 0; i < x.size(); ++i) {
-        tmp += y[i] * log(y[i]);
-    }
-    
-    bt *= tmp;
-    tmp = 0;
-    
-    b -= bt;
-    
-    b /= tt;
-    
-    B = b;
-    
-    return std::make_pair(A, B);
-}
-
-/*!
- * \brief Processor::calculate
- * \param res
- * \param pres
- * \param val
- * \return
- */
-double Processor::calculate(const QVector<double>& res, const QVector<double>& pres, double val) const
-{
-    auto p = leastsquares(res, pres);
-    //qDebug() << (double)p.first << " " << (double)p.second;
-    double sum = p.first * exp(p.second * val) - 1.0;
-    return sum;
-}
-
-/*!
  * \brief Processor::loadImage
  * \param name
  * \return
@@ -310,7 +190,8 @@ void Processor::run()
             align();
             image.setFullCounter();
             run(true);
-            image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
+            Calculator calc;
+            image.setPressure(calc.calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             pressureValues.push_back(image.getPressure());
             pixelValues.push_back(image.getSum());
             QThread::currentThread()->usleep(50);
@@ -440,49 +321,13 @@ void Processor::stopThis()
  * \param name
  * \param def
  */
-void Processor::saveConf(const QString& name, bool def)
+void Processor::saveConf(const QString& name)
 {
     Image& image = currImage();
-    image.getConfig().saveConf(name);
+    if(!image.getConfig().saveConf(name)){
+        emit somethingWentWrong("Error", "Can not write config!");
+    }
     DB::getInstance().addConf(image.getConfig());
-    
-//    static QString filename = QString("default.conf");
-//    if (!def) {
-//        filename = name;
-//        QFile file(filename);
-//        if (file.open(QFile::WriteOnly)) {
-//            QTextStream str(&file);
-//            str << image.getCrop().left() << " " << image.getCrop().top() << "\n";
-//            str << image.getCrop().right() << " " << image.getCrop().bottom() << "\n";
-//            str << image.getSquare(0)[0].x() << " " << image.getSquare(0)[0].y() << "\n";
-//            str << image.getSquare(0)[1].x() << " " << image.getSquare(0)[1].y() << "\n";
-//            str << image.getSquare(0)[2].x() << " " << image.getSquare(0)[2].y() << "\n";
-//            str << image.getSquare(1)[0].x() << " " << image.getSquare(1)[0].y() << "\n";
-//            str << image.getSquare(1)[1].x() << " " << image.getSquare(1)[1].y() << "\n";
-//            str << image.getSquare(1)[2].x() << " " << image.getSquare(1)[2].y() << "\n";
-            
-           
-//            qDebug() << DB::getInstance().addConf(image.getConfig()).text();
-//        }else {
-//            emit somethingWentWrong("Error", "Can not open a file");
-//        }
-//        filename = QString("default.conf");        
-//    } else {
-//        QFile file(filename);
-//        if (file.open(QFile::WriteOnly)) {
-//            QTextStream str(&file);
-//            str << config.crop.left() << " " << config.crop.top() << "\n";
-//            str << config.crop.right() << " " << config.crop.bottom() << "\n";
-//            str << config.square[0].x() << " " << config.square[0].y() << "\n";
-//            str << config.square[1].x() << " " << config.square[1].y() << "\n";
-//            str << config.square[2].x() << " " << config.square[2].y() << "\n";
-//            str << config.square0[0].x() << " " << config.square0[0].y() << "\n";
-//            str << config.square0[1].x() << " " << config.square0[1].y() << "\n";
-//            str << config.square0[2].x() << " " << config.square0[2].y() << "\n";
-//        } else {
-//            emit somethingWentWrong("Error", "Can not open a file");
-//        }
-//    }
 }
 
 /*!
@@ -492,31 +337,6 @@ void Processor::saveConf(const QString& name, bool def)
 void Processor::loadConf(const QString& name)
 {
     Image& image = currImage();
-//    QString filename = name;
-//    QFile file(filename);
-//    if (file.open(QFile::ReadOnly)) {
-//        QTextStream str(&file);
-//        int r, t, l, b;
-//        str >> l >> t;
-//        str >> r >> b;
-//        config.crop.setRight(r);
-//        config.crop.setLeft(l);
-//        config.crop.setTop(t);
-//        config.crop.setBottom(b);
-//        str >> config.square[0].rx() >> config.square[0].ry();
-//        str >> config.square[1].rx() >> config.square[1].ry();
-//        str >> config.square[2].rx() >> config.square[2].ry();
-//        str >> config.square0[0].rx() >> config.square0[0].ry();
-//        str >> config.square0[1].rx() >> config.square0[1].ry();
-//        str >> config.square0[2].rx() >> config.square0[2].ry();
-//        if (str.status() & QTextStream::ReadCorruptData || str.status() & QTextStream::ReadPastEnd) {
-//            emit somethingWentWrong("Error", "Can not read config!");
-//            return;
-//        }
-//    } else {
-//        emit somethingWentWrong("Error", "Can not open a file");
-//        repaint();
-//    }
     if(!config.loadConf(name)){
         emit somethingWentWrong("Error", "Can not read config!");
     }
@@ -593,7 +413,8 @@ void Processor::autorun(bool vu_flag)
             align();
             image.setFullCounter();
             run(true);
-            image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
+            Calculator calc;
+            image.setPressure(calc.calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             pressureValues.push_back(image.getPressure());
             pixelValues.push_back(image.getSum());
         }
@@ -608,7 +429,8 @@ void Processor::autorun(bool vu_flag)
             align();
             image.setFullCounter();
             run(true);
-            image.setPressure(calculate(preparedPixels, preparedPressures, image.getSum() / area()));
+            Calculator calc;
+            image.setPressure(calc.calculate(preparedPixels, preparedPressures, image.getSum() / area()));
             image.setIsProcessed(true);
             if (vu_flag) {
                 repaint();
@@ -617,9 +439,7 @@ void Processor::autorun(bool vu_flag)
             repaint();
             emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
-    }
-    
-    
+    }  
 }
 
 /*!
