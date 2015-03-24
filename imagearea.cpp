@@ -19,7 +19,7 @@ ImageArea::ImageArea(QWidget* parent)
 void ImageArea::Update()
 {
     Display dis;
-    dis.im = im();
+    //dis.im = im();
     dis.origin = origin;
     emit viewUpdated(dis);
 }
@@ -179,7 +179,7 @@ void ImageArea::wheelEvent(QWheelEvent* e)
  */
 void ImageArea::setDisplay(Display dis)
 {
-    im() = dis.im;
+    //im() = dis.im;
     origin = dis.origin;
     update();
 }

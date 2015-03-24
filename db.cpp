@@ -16,8 +16,8 @@ QPair<QVector<int>, QVector<int>> DB::getCDIDs()
     
     QSqlQuery q0("select id from datum");
     //q.next();
-    while(q.next()){
-        dids.push_back(q.value(0).toInt());
+    while(q0.next()){
+        dids.push_back(q0.value(0).toInt());
     }
     
     return QPair<QVector<int>, QVector<int>> (cids, dids);

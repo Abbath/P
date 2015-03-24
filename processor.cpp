@@ -117,7 +117,7 @@ Image &Processor::currImage()
 void Processor::setDisplay(const Display& dis)
 {
     //images[currentImageNumber] = dis.im;
-    ImageStorage::getInstance().getCurrImageRef() = dis.im;
+    //ImageStorage::getInstance().getCurrImageRef() = dis.im;
     origin = dis.origin;
 }
 
