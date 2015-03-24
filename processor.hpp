@@ -36,7 +36,7 @@ public:
     void setDisplay(const Display& dis);
     void setVideoFileName(QString _f){videoFileName = _f;}
     Display getDisplay();
-    Image& getImage(){ return images[currentImageNumber];}
+    Image& getImage();
     const QVector<double>& getPressureValues() const {return pressureValues;}
     const QVector<double>& getPixelValues() const {return pixelValues;}
     const QVector<double>& getPreparedPixels() const { return preparedPixels;}
@@ -57,6 +57,7 @@ public slots:
     void align();
     void reset();
     void autorun(bool vu_flag = true);
+    void detectRun();
     void run();
     void prev();
     void next();

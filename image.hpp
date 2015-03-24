@@ -33,7 +33,7 @@ public:
     void setFileName(const QString& filename){ fileName = filename; }
     void setCrop(const QRect& rect){ config.setCrop(rect); }
     void setSquare(int index, const Square& sq){ if(index == 1) config.setSquare0(sq); else config.setSquare(sq); }
-    void setConfig(const Config& conf){ config.setCrop(conf.getCrop()); config.setSquare(conf.getSquare()); config.setSquare0(conf.getSquare0()); }
+    void setConfig(const Config& conf){ config = conf; }
     void setThreshold(unsigned th){ threshold = th; }
     bool isImageNull(){ return image.isNull(); }
     void cropImage(){ image = image.copy(config.getCrop()); }

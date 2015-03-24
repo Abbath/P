@@ -36,7 +36,9 @@ SOURCES += main.cpp\
     calculator.cpp \
     image.cpp \
     modelingdata.cpp \
-    sensor.cpp
+    sensor.cpp \
+    detector.cpp \
+    imagestorage.cpp
 
 HEADERS  += mainwindow.hpp \
     processor.hpp \
@@ -61,7 +63,9 @@ HEADERS  += mainwindow.hpp \
     calculator.hpp \
     image.hpp \
     modelingdata.hpp \
-    sensor.hpp
+    sensor.hpp \
+    detector.hpp \
+    imagestorage.hpp
 
 FORMS    += mainwindow.ui \
     imagearea.ui \

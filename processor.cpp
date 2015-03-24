@@ -1,5 +1,8 @@
 #include "processor.hpp"
 #include "db.hpp"
+#include "detector.hpp"
+#include <vector>
+#include "imagestorage.hpp"
 /*!
  * \brief Processor::Processor
  * \param parent
@@ -7,7 +10,8 @@
 Processor::Processor(QObject* parent)
     : QObject(parent)
 {
-    images.resize(1);
+    //images.resize(1);
+    ImageStorage::getInstance().resize(1);
 }
 
 /*!
@@ -72,9 +76,11 @@ void Processor::openImage(const QStringList& names)
     for (int i = 0; i < names.size(); ++i) {
         fileNames.push_back(names[i]);
     }
-    images.clear();
+    //images.clear();
+    ImageStorage::getInstance().clear();
     if (!fileNames.empty()) {
-        images.resize(fileNames.size());
+        //images.resize(fileNames.size());
+        ImageStorage::getInstance().resize(fileNames.size());
         for (currentImageNumber = 0; currentImageNumber < static_cast<unsigned>(fileNames.size()); ++currentImageNumber) {
             currImage().setImage(loadImage(fileNames[currentImageNumber]));
             currImage().resetCounter();
@@ -100,7 +106,8 @@ void Processor::die()
  */
 Image &Processor::currImage()
 {
-    return images[currentImageNumber];
+    //return images[currentImageNumber];
+    return ImageStorage::getInstance().getCurrImageRef();
 }
 
 /*!
@@ -109,7 +116,8 @@ Image &Processor::currImage()
  */
 void Processor::setDisplay(const Display& dis)
 {
-    images[currentImageNumber] = dis.im;
+    //images[currentImageNumber] = dis.im;
+    ImageStorage::getInstance().getCurrImageRef() = dis.im;
     origin = dis.origin;
 }
 
@@ -123,6 +131,11 @@ Display Processor::getDisplay()
     dis.im = currImage();
     dis.origin = origin;
     return dis;
+}
+
+Image &Processor::getImage()
+{
+    return ImageStorage::getInstance().getCurrImageRef();
 }
 
 
@@ -164,14 +177,16 @@ void Processor::run()
         pixelValues.clear();
         vid = true;
         fileNames.clear();
-        images.clear();
+        //images.clear();
+        ImageStorage::getInstance().clear();
         for (auto i = 0u; i < frameNumber; ++i) {
             if (stop) {
                 stop = false;
                 break;
             }
             currentImageNumber = i;
-            images.resize(i + 1);
+            //images.resize(i + 1);
+            ImageStorage::getInstance().resize(i + 1);
             capture.read(frame);
             QImage timage = ImageConverter::Mat2QImage(frame);
             for (int i = 0; i < timage.width(); ++i) {
@@ -229,8 +244,10 @@ int Processor::extractPressure(QStringList::const_iterator it)
 void Processor::calibrate(const QString& name, const QString& named, const QStringList& names)
 {
     loadConf(name);
-    images.clear();
-    images.resize(1);
+    //images.clear();
+    //images.resize(1);
+    ImageStorage::getInstance().clear();
+    ImageStorage::getInstance().resize(1);
     preparedPixels.clear();
     preparedPressures.clear();
     for (int i = 0; i < 4; ++i) {
@@ -399,8 +416,10 @@ void Processor::autorun(bool vu_flag)
     if (!videoFileName.isEmpty()) {
         vid = true;
         fileNames.clear();
-        images.clear();
-        images.resize(frame_num);
+        //images.clear();
+        //images.resize(frame_num);
+        ImageStorage::getInstance().clear();
+        ImageStorage::getInstance().resize(frame_num);
         QList<QFuture<double> > sums;
         for (unsigned i = 0; i < frame_num; ++i) {
             fileNames.push_back((QString("frame_") + QString::number(i) + QString(".bmp")));
@@ -424,6 +443,9 @@ void Processor::autorun(bool vu_flag)
         if (!image.getIsProcessed() && image.getIsLoaded()) {
             image.setConfig(config);
             image.cropImage();
+            //            QImage t("templ3.png");
+            //            Detector d;
+            //            image.setImage(image.getImage().copy(d.detect(t, image.getImage())));
             image.setFullCounter();
             repaint();
             align();
@@ -440,6 +462,32 @@ void Processor::autorun(bool vu_flag)
             emit somethingWentWrong("Fail", "Image already processed or not loaded");
         }
     }  
+}
+
+void Processor::detectRun()
+{
+    Image& image = currImage();
+    if (!image.getIsProcessed() && image.getIsLoaded()) {
+        QImage t("templ2.png");
+        Detector d;
+        QRect r = d.detect(t, image.getImage());
+        image.setImage(image.getImage().copy(r));
+        repaint();
+        std::vector<std::vector<cv::Point> > arr;
+        cv::Mat mat = ImageConverter::QImage2Mat(image.getImage());
+        std::vector<cv::Vec4i> h;            
+        findContours(mat, arr, h, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+        double sum = 0;
+        for (unsigned int j = 0; j < arr.size();++j) {
+            if(h[j][3] < 0){
+                sum += contourArea(arr[j]);
+            }
+        }
+        Calculator calc;
+        image.setPressure(calc.calculate(preparedPixels, preparedPressures, sum));
+        image.setIsProcessed(true);
+        repaint();
+    }
 }
 
 /*!
