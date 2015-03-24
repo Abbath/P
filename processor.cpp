@@ -43,10 +43,10 @@ QImage Processor::loadImage(const QString& name)
  */
 void Processor::prev()
 {
-    if (!currentImageNumber) {
+    if (!currentImageNumber()) {
         repaint();
     } else {
-        currentImageNumber--;
+        currentImageNumber()--;
         repaint();
     }
 }
@@ -56,10 +56,10 @@ void Processor::prev()
  */
 void Processor::next()
 {
-    if (currentImageNumber == (unsigned)fileNames.size() - 1) {
+    if (currentImageNumber() == (unsigned)fileNames.size() - 1) {
         repaint();
     } else {
-        currentImageNumber++;
+        currentImageNumber()++;
         repaint();
     }
 }
@@ -81,13 +81,13 @@ void Processor::openImage(const QStringList& names)
     if (!fileNames.empty()) {
         //images.resize(fileNames.size());
         ImageStorage::getInstance().resize(fileNames.size());
-        for (currentImageNumber = 0; currentImageNumber < static_cast<unsigned>(fileNames.size()); ++currentImageNumber) {
-            currImage().setImage(loadImage(fileNames[currentImageNumber]));
+        for (currentImageNumber() = 0; currentImageNumber() < static_cast<unsigned>(fileNames.size()); ++currentImageNumber()) {
+            currImage().setImage(loadImage(fileNames[currentImageNumber()]));
             currImage().resetCounter();
             currImage().setIsLoaded(true);
             currImage().setIsProcessed(false);
         }
-        currentImageNumber = 0;
+        currentImageNumber() = 0;
         repaint();
     }
 }
@@ -148,7 +148,7 @@ void Processor::repaint()
     Display dis;
     dis.im = currImage();
     if (!fileNames.isEmpty()) {
-        dis.im.setFileName(fileNames[currentImageNumber]);
+        dis.im.setFileName(fileNames[currentImageNumber()]);
     }
     dis.origin = origin;
     emit Update(dis);
@@ -184,7 +184,7 @@ void Processor::run()
                 stop = false;
                 break;
             }
-            currentImageNumber = i;
+            currentImageNumber() = i;
             //images.resize(i + 1);
             ImageStorage::getInstance().resize(i + 1);
             capture.read(frame);
@@ -253,7 +253,7 @@ void Processor::calibrate(const QString& name, const QString& named, const QStri
     for (int i = 0; i < 4; ++i) {
         res4[i].clear();
     }
-    currentImageNumber = 0;
+    currentImageNumber() = 0;
     fileNames.append(names[0]);
     for (auto it = names.begin(); it != names.end(); ++it) {
         currImage().setImage(loadImage(*it));
@@ -400,7 +400,7 @@ void Processor::run(bool vu_flag)
 void Processor::reset()
 {
     Image& image = currImage();
-    image.setImage(loadImage(fileNames[currentImageNumber]));
+    image.setImage(loadImage(fileNames[currentImageNumber()]));
     image.resetCounter();
     origin = {{0, 0 }, {0, 0}};
     image.setIsProcessed(false);
@@ -423,8 +423,8 @@ void Processor::autorun(bool vu_flag)
         QList<QFuture<double> > sums;
         for (unsigned i = 0; i < frame_num; ++i) {
             fileNames.push_back((QString("frame_") + QString::number(i) + QString(".bmp")));
-            currentImageNumber = i;
-            currImage().setImage(loadImage(fileNames[currentImageNumber]));
+            currentImageNumber() = i;
+            currImage().setImage(loadImage(fileNames[currentImageNumber()]));
             Image& image = currImage();
             image.setConfig(config);
             image.cropImage();
@@ -499,4 +499,9 @@ double Processor::area(){
     int a = abs(image.getSquare(1)[0].x() - image.getSquare(1)[1].x());
     int b = abs(image.getSquare(1)[1].y() - image.getSquare(1)[2].y());
     return a*b;
+}
+
+unsigned &Processor::currentImageNumber()
+{
+    return ImageStorage::getInstance().getCurrNumRef();
 }

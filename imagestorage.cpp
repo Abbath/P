@@ -31,5 +31,10 @@ Image &ImageStorage::getCurrImageRef()
     return images[current];
 }
 
+unsigned int &ImageStorage::getCurrNumRef()
+{
+    return current;
+}
+
 std::unique_ptr<ImageStorage> ImageStorage::instance;
 std::once_flag ImageStorage::onceFlag;

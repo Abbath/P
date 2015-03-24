@@ -26,8 +26,8 @@ public:
 
   void setProcessor(Processor * p){ processor = p; }
   void setDisplay(Display dis);
-  QImage getImage(){return im.getImage();}
-  unsigned getThreshold(){return im.getThreshold();}
+  QImage getImage(){return im().getImage();}
+  unsigned getThreshold(){return im().getThreshold();}
   ~ImageArea();
 
 signals:
@@ -39,7 +39,8 @@ private:
 private:
   Ui::ImageArea *ui;
   Processor * processor;
-  Image im;
+  //Image im;
+  Image& im();
   QPair<QPoint, QPoint> origin = { {0,0}, {0,0} };
   double fromGreenToYellow = 25;
   double fromYellowToRed = 35;

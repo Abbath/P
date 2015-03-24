@@ -74,7 +74,7 @@ private:
     void repaint();
 private:
     QVector<Image> images;
-    unsigned currentImageNumber = 0, frame_num = 0;
+    unsigned /*currentImageNumber = 0,*/ frame_num = 0;
     QPair<QPoint, QPoint> origin = {{0,0},{0,0}};
     QString videoFileName;
     QStringList fileNames;
@@ -91,6 +91,7 @@ private:
     unsigned int threshold = 255;    
     volatile bool stop = false;
     double area();
+    unsigned& currentImageNumber();
 };
 
 #endif // PROCESSOR_HPP

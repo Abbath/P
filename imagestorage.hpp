@@ -16,6 +16,7 @@ public:
     void resize(int size);
     void clear();
     Image& getCurrImageRef();
+    unsigned int &getCurrNumRef();
 signals:
     
 public slots:
@@ -24,7 +25,7 @@ private:
     static std::unique_ptr<ImageStorage> instance;
     static std::once_flag onceFlag;
     QVector<Image> images; 
-    int current = 0;
+    unsigned int current = 0;
     explicit ImageStorage(QObject *parent = 0);
     ImageStorage(const ImageStorage& is);
     ImageStorage& operator=(const ImageStorage& rhs);
