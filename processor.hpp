@@ -48,6 +48,9 @@ public:
     void setConfig(const Config &value);
     void setDatum(const QVector<double>& pix, const QVector<double> pres){ preparedPixels = pix; preparedPressures = pres;}
     
+    bool getDetect() const;
+    void setDetect(bool value);
+    
 signals:
     void Update(Display dis);
     void somethingWentWrong(QString, QString);
@@ -57,7 +60,8 @@ public slots:
     void align();
     void reset();
     void autorun(bool vu_flag = true);
-    void detectRun();
+    int detectRun();
+    int detectAutorun();
     void run();
     void prev();
     void next();
@@ -88,6 +92,7 @@ private:
 
     QVector<double> res4[4];
     bool vid = false;
+    bool detect = false;
     unsigned int threshold = 255;    
     volatile bool stop = false;
     double area();

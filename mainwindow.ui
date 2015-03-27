@@ -367,6 +367,7 @@
    <addaction name="actionNext"/>
    <addaction name="actionModeling"/>
    <addaction name="actionTest"/>
+   <addaction name="actionDBremove"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -560,6 +561,14 @@
   <action name="actionSplash">
    <property name="text">
     <string>Splash</string>
+   </property>
+  </action>
+  <action name="actionDBremove">
+   <property name="text">
+    <string>DBremove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove records from DB</string>
    </property>
   </action>
  </widget>

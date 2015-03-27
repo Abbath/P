@@ -1,6 +1,6 @@
 #include "db.hpp"
 
-DB::DB(QObject *parent) : QObject(parent)
+DB::DB()
 {
     
 }
@@ -25,7 +25,7 @@ QPair<QVector<int>, QVector<int>> DB::getCDIDs()
 
 DB::~DB()
 {
-    
+
 }
 
 QSqlError DB::init()
@@ -268,6 +268,15 @@ QSqlError DB::addData(const QVector<double>& pix, const QVector<double>& press)
         return db.lastError();
     }
     
+    return QSqlError();
+}
+
+QSqlError DB::removeSensor(QString name)
+{
+    QSqlQuery q("delete from sensors where name = \"" + name + "\"");
+    if(!q.exec()){
+        return db.lastError();
+    }
     return QSqlError();
 }
 

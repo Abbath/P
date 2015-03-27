@@ -153,6 +153,16 @@ void Processor::repaint()
     dis.origin = origin;
     emit Update(dis);
 }
+bool Processor::getDetect() const
+{
+    return detect;
+}
+
+void Processor::setDetect(bool value)
+{
+    detect = value;
+}
+
 Config Processor::getConfig() const
 {
     return config;
@@ -261,11 +271,24 @@ void Processor::calibrate(const QString& name, const QString& named, const QStri
         currImage().setIsProcessed(false);
         currImage().setFullCounter();
         int n = extractPressure(it);
-        autorun();
-        for (int i = 0; i < 4; ++i) {
-            res4[i].push_back(currImage().getBoundCounter()[i]);
+        int sum = 0;
+        if(detect){
+            sum = detectAutorun();
+        }else{
+            autorun();
         }
-        preparedPixels.push_back(currImage().getSum() / area());
+        for (int i = 0; i < 4; ++i) {
+            if(detect){
+                res4[i].push_back(0);
+            }else{
+                res4[i].push_back(currImage().getBoundCounter()[i]);
+            }
+        }
+        if(detect){
+            preparedPixels.push_back(sum);
+        }else{
+            preparedPixels.push_back(currImage().getSum() / area());
+        }
         preparedPressures.push_back(n);
     }
     saveData(named);
@@ -464,30 +487,40 @@ void Processor::autorun(bool vu_flag)
     }  
 }
 
-void Processor::detectRun()
+int Processor::detectRun()
+{
+    Image& image = currImage();    
+    std::vector<std::vector<cv::Point> > arr;
+    cv::Mat mat = ImageConverter::QImage2Mat(image.getImage());
+    std::vector<cv::Vec4i> h;            
+    cv::threshold(mat, mat, 128, 255, 0);    
+    findContours(mat, arr, h, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+    int sum = 0;
+    for (unsigned int j = 0; j < arr.size();++j) {
+        if(h[j][3] < 0){
+            sum += contourArea(arr[j]);
+        }
+    }
+    return sum;
+}
+
+int Processor::detectAutorun()
 {
     Image& image = currImage();
+    int sum = 0;
     if (!image.getIsProcessed() && image.getIsLoaded()) {
-        QImage t("templ2.png");
+        QImage t("templ3.png");
         Detector d;
         QRect r = d.detect(t, image.getImage());
         image.setImage(image.getImage().copy(r));
         repaint();
-        std::vector<std::vector<cv::Point> > arr;
-        cv::Mat mat = ImageConverter::QImage2Mat(image.getImage());
-        std::vector<cv::Vec4i> h;            
-        findContours(mat, arr, h, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-        double sum = 0;
-        for (unsigned int j = 0; j < arr.size();++j) {
-            if(h[j][3] < 0){
-                sum += contourArea(arr[j]);
-            }
-        }
+        sum = detectRun();
         Calculator calc;
         image.setPressure(calc.calculate(preparedPixels, preparedPressures, sum));
         image.setIsProcessed(true);
         repaint();
     }
+    return sum;
 }
 
 /*!

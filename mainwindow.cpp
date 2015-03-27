@@ -3,6 +3,7 @@
 #include "modelingwindow.hpp"
 #include "modelingwizard.hpp"
 #include "db.hpp"
+#include "imagestorage.hpp"
 #include <QtConcurrent/QtConcurrent>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -74,21 +75,21 @@ void MainWindow::runMeasurements()
     QList<int> list;
     list << 0 << ui->splitter->widget(0)->width()+ui->splitter->widget(1)->width() << ui->splitter->widget(2)->width();
     ui->splitter->setSizes(list);
-    ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
-   // on_actionLoad_triggered();
-   // on_actionLoad_2_triggered();
+    //ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
+    // on_actionLoad_triggered();
+    // on_actionLoad_2_triggered();
 }
 
 QPair<ModelingData, bool> MainWindow::preModel()
 {
-
-//    ModelingWizard* wizard = new ModelingWizard(this);
-//    wizard->setIs_integrated(true);
-//    wizard->exec();
-//    if(wizard->result() == QWizard::Rejected){
-//        return QPair<ModelingData,bool>(wizard->getDataRef(), false);
-//    }
-//    return QPair<ModelingData, bool>(wizard->getDataRef(), true);
+    
+    //    ModelingWizard* wizard = new ModelingWizard(this);
+    //    wizard->setIs_integrated(true);
+    //    wizard->exec();
+    //    if(wizard->result() == QWizard::Rejected){
+    //        return QPair<ModelingData,bool>(wizard->getDataRef(), false);
+    //    }
+    //    return QPair<ModelingData, bool>(wizard->getDataRef(), true);
     QString item = QInputDialog::getItem(this, "Select sensor", "Please select sensor name", DB::getInstance().getSensorNames(),0,false);
     int cid, did;
     ModelingData data = DB::getInstance().getSensor(item, cid, did);
@@ -104,6 +105,7 @@ QPair<ModelingData, bool> MainWindow::preModel()
  */
 void MainWindow::model(ModelingData res)
 {
+    ui->widget->setSizePolicy(QSizePolicy::Expanding, ui->widget->sizePolicy().verticalPolicy());
     if(core) core->deleteLater();
     core = new ModelingCore(this);
     res.setPressure(p->currImage().getPressure()/25*1000);
@@ -127,6 +129,8 @@ void MainWindow::model(ModelingData res)
 MainWindow::~MainWindow()
 {
     emit death();
+    ImageStorage::getInstance().clear();
+    ImageStorage::getInstance().getCurrNumRef() = 0u;
     delete ui;
 }
 
@@ -295,8 +299,13 @@ void MainWindow::on_actionAutorun_triggered()
     disableUi();
     auto md = preModel();
     if(md.second){
-        p->autorun(true);
-        model(md.first);
+        if(p->getDetect()){
+            p->detectAutorun();
+            model(md.first);
+        }else{
+            p->autorun(true);
+            model(md.first);
+        }
     }
 }
 
@@ -554,7 +563,7 @@ void MainWindow::on_actionAbout_triggered()
 #elif defined(_MSC_VER)
     cv = "MSVC " + QString::number(_MSC_FULL_VER);
 #endif
-    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2015\nVersion 0.9.1\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
+    QMessageBox::about(this,"About", "Radiation sensor toolkit. © 2013-2015\nVersion 0.9.3\nQt version: " + QString(QT_VERSION_STR) + "\nCompiler Version: " + cv);
 }
 
 /*!
@@ -602,4 +611,14 @@ void MainWindow::on_actionSplash_triggered()
     QPixmap splash("splash.png");
     QSplashScreen ss(splash);
     ss.show();
+}
+
+void MainWindow::on_actionDBremove_triggered()
+{
+    QStringList names = DB::getInstance().getSensorNames();
+    bool ok;
+    QString name = QInputDialog::getItem(this, "DB remove", "Select sensor to delete", names, 0, false, &ok);
+    if(ok){
+        DB::getInstance().removeSensor(name);
+    }
 }

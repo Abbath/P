@@ -74,6 +74,9 @@ void Dialog::on_pushButton_4_clicked()
 {
     mainw = new MainWindow;
     Processor *p = new Processor(mainw);
+    if(ui->checkBox_2->isChecked()){
+        p->setDetect(true);
+    }
     mainw->setProcessor(p);
     mainw->setWindowTitle("Calibration");
     qRegisterMetaType<Display>("Display");
@@ -98,6 +101,9 @@ void Dialog::on_pushButton_2_clicked()
 {
     mainw = new MainWindow;
     Processor *p = new Processor(mainw);
+    if(ui->checkBox_2->isChecked()){
+        p->setDetect(true);
+    }
     mainw->setProcessor(p);
     mainw->setWindowTitle("Measurements");
     qRegisterMetaType<Display>("Display");
@@ -166,4 +172,3 @@ void Dialog::trayHandle(QSystemTrayIcon::ActivationReason reason)
         this->close();
     }
 }
-

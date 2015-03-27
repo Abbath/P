@@ -9,9 +9,8 @@
 #include "modelingdata.hpp"
 #include "sensor.hpp"
 
-class DB : public QObject
+class DB
 {
-    Q_OBJECT
 public:
     virtual ~DB();
     QSqlError init();
@@ -19,6 +18,7 @@ public:
     QSqlError addSensor(QString name, const ModelingData& data);
     QSqlError addConf(Config config);
     QSqlError addData(const QVector<double> &pix, const QVector<double> &press);
+    QSqlError removeSensor(QString name);
     ModelingData getSensor(QString name, int &cid, int &did);
     Config getConfig(int id);
     QPair<QVector<double>, QVector<double>> getData(int id);
@@ -40,7 +40,7 @@ private:
     int dataId;
     static std::unique_ptr<DB> instance;
     static std::once_flag onceFlag;
-    explicit DB(QObject *parent = 0);
+    explicit DB();
     DB(const DB& src);
     DB& operator=(const DB& rhs);
     QPair<QVector<int>, QVector<int> > getCDIDs();

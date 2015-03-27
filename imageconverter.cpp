@@ -7,6 +7,7 @@
  */
 cv::Mat ImageConverter::QImage2Mat(const QImage &src)
 {
+    qDebug() << "Q2M" ;
     cv::Mat tmp;
     
     if(src.format() == QImage::Format_RGB888){
@@ -15,10 +16,16 @@ cv::Mat ImageConverter::QImage2Mat(const QImage &src)
     }else if(src.format() == QImage::Format_RGB32){
         cv::Mat tmp1(src.height(), src.width(), CV_8UC4, (uchar*)src.bits(), src.bytesPerLine());
         tmp1.copyTo(tmp);
+    }else{
+        qDebug() << src.format();
     }
     
     cv::Mat result(src.height(), src.width(), CV_8UC1);
-    cvtColor(tmp, result, CV_BGR2GRAY, 1);
+    if(tmp.channels() == 3 || tmp.channels() == 4){
+        cvtColor(tmp, result, CV_BGR2GRAY, 1);
+    }else{
+        tmp.copyTo(result);
+    }
     return result;
 }
 
@@ -29,6 +36,7 @@ cv::Mat ImageConverter::QImage2Mat(const QImage &src)
  */
 QImage ImageConverter::Mat2QImage(const cv::Mat &src)
 {
+    qDebug() << "M2Q" ;
     cv::Mat temp;
     
     if(src.channels() == 1){
