@@ -2,67 +2,91 @@
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
-#include <QtCore>
-#include <QtGui>
 #include <QFileDialog>
-#include <QGraphicsScene>
 #include <QMessageBox>
-#include <helpers.hpp>
+#include <QGraphicsScene>
+#include <QtMultimedia/QMediaPlayer>
+#include <QVideoWidget>
+#include "helpers.hpp"
+#include "processor.hpp"
+#include "modelingcore.hpp"
 #include <qwt_plot.h>
 #include <qwt.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
-#include <QVideoWidget>
-#include <QMediaPlayer>
+
 namespace Ui {
 class MainWindow;
 }
 
+/*!
+ * \brief The MainWindow class
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void keyPressEvent(QKeyEvent *e);
+    void setProcessor(Processor * _p) { p = _p;}
+    void runCalibration();
+    void runMeasurements();
+    QPair<ModelingData, bool> preModel();
+    void model(ModelingData data);
     ~MainWindow();
-
-    void displayResults(const QVector<double> &res, QwtPlot* widget_2);
-    void displayResults(const QVector<double> &res, const QVector<double> &res0, QwtPlot *widget_2);
+    void saveResults(const QVector<double>& pol, const QVector<double>& res, QwtPlot *widget);
+    void closeEvent(QCloseEvent *);
+private:
+    QGraphicsScene *scene = nullptr;
+    QwtPlotZoomer *zoom = nullptr;
+    QwtPlotCurve *curve = nullptr;
+    QwtPlotZoomer *zoom0 = nullptr;
+    QwtPlotCurve *curve0 = nullptr;
+    QVideoWidget * w = nullptr;
+    QMediaPlayer * player = nullptr;
+    Ui::MainWindow *ui = nullptr;
+    Processor *p = nullptr;
+    ModelingCore *core = nullptr;
+    void disableUi(bool b = true);
+    bool i_am_mad = false;
+    QString saved_config_name;
+signals:
+    void stop();
+    void death();
+public slots:
+    void Update(Display dis);
+    void imageAreaUpdated(Display dis);
+    void Error(QString a, QString b);
+    void plot(QVector<double> res);
+    void plot(QVector<double> res0, QVector<double> res);
 private slots:
-    void on_actionOpen_triggered();
-    void on_actionReset_triggered();
-    void on_actionRun_triggered();
+    void on_actionOpen_Image_s_triggered();
     void on_actionAlign_triggered();
-    void on_action3D_triggered();
-    void on_actionSave_triggered();
-    void on_actionLoad_triggered();
-    void on_actionCalibrate_triggered();
+    void on_actionRun_triggered();
+    void on_actionReset_triggered();
     void on_actionAutorun_triggered();
-    void on_actionOpen_Video_triggered();
-    void on_horizontalSlider_valueChanged(int value);
-    void on_actionExit_triggered();
-    void on_actionSave_as_Default_triggered();
-    void on_actionSave_2_triggered();
-    void on_actionLoad_2_triggered();
-    void on_actionAbout_triggered();
-    void on_actionBounds_triggered(bool checked);
-    void getImage(Image im);
-    void updateView(QString filename);
     void on_actionPrev_triggered();
     void on_actionNext_triggered();
-    void on_horizontalSlider_2_valueChanged(int value);
-    void on_pushButton_toggled(bool checked);
-    void on_actionSave_3_triggered();
-    void sliderAnalManipulation(int n);
-private:
-    QGraphicsScene * scene = nullptr;
-    QwtPlotZoomer *zoom;
-    QwtPlotCurve curve;
-    QwtPlotZoomer *zoom0;
-    QwtPlotCurve curve0;
-    Ui::MainWindow *ui;
-    QVideoWidget * w;
-    QMediaPlayer * player;
-    };
+    void on_actionExit_triggered();
+    void on_actionLoad_triggered();
+    void on_actionSave_triggered();
+    void on_actionLoad_2_triggered();
+    void on_actionSave_2_triggered();
+    void on_actionSave_as_Default_triggered();
+    void on_action3D_triggered(bool checked);
+    void on_actionCalibrate_triggered();
+    void on_actionOpen_Video_triggered();
+    void on_pushButton_2_clicked();
+    void on_pushButton_3_clicked();
+    void on_pushButton_clicked(bool checked);
+    void on_horizontalSlider_valueChanged(int value);
+    void on_actionStop_triggered();
+    void on_actionAbout_triggered();
+    void on_actionHelp_triggered();
+    void on_actionModeling_triggered();
+    void on_actionTest_triggered();
+    void on_actionSplash_triggered();
+    void on_actionDBremove_triggered();
+};
 
 #endif // MAINWINDOW_HPP

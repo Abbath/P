@@ -3,7 +3,7 @@
  <comment/>
  <exportmacro/>
  <class>ImageArea</class>
- <widget class="QWidget" name="ImageArea">
+ <widget name="ImageArea" class="QWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
