@@ -1,5 +1,7 @@
 # Optical Sensor Toolkit
 
+[![Join the chat at https://gitter.im/Abbath/P](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Abbath/P?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is my old master's degree project. It's not even an alpha :-). It includes modeling and measurement tool for optical pressure sensor
 
 Features
