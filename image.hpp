@@ -4,6 +4,7 @@
 #include <QtCore>
 #include <QtGui>
 #include "config.hpp"
+#include <numeric>
 
 /*!
  * \brief The Image class

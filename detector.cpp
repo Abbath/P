@@ -67,16 +67,5 @@ Point Detector::MatchingMethod(Mat img, Mat templ, int match_method)
         matchLoc = maxLoc;
     }
     
-    /// Show me what you got
-//    rectangle(img_display, matchLoc,
-//              Point(matchLoc.x + templ.cols, matchLoc.y + templ.rows),
-//              Scalar::all(255), 2, 8, 0);
-    // rectangle( result, matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y +
-    // templ.rows ), Scalar::all(255), 2, 8, 0 );
-    
-    //imshow("Im", img_display);
-    //cv::waitKey();
-    // imshow( result_window, result );
-    
     return matchLoc;
 }

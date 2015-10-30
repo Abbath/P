@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QtCore>
+#include <numeric>
+#include <algorithm>
 
 class Calculator : public QObject
 {

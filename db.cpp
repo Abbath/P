@@ -25,7 +25,7 @@ QPair<QVector<int>, QVector<int>> DB::getCDIDs()
 
 DB::~DB()
 {
-
+//FIXME: Crash
 }
 
 QSqlError DB::init()
@@ -282,6 +282,7 @@ QSqlError DB::removeSensor(QString name)
 
 ModelingData DB::getSensor(QString name, int& cid, int& did)
 {
+    //TODO: Check for faggotry
     ModelingData data;
     QSqlQuery q("select * from sensors where name = \"" + name + "\"");
     if(!q.exec()){
@@ -311,6 +312,7 @@ ModelingData DB::getSensor(QString name, int& cid, int& did)
 
 Config DB::getConfig(int id)
 {
+    //TODO: Check for faggotry
     Config conf;
     QSqlQuery q("select * from configs where id = "+ QString::number(id));
     q.next();
@@ -368,6 +370,7 @@ DB &DB::getInstance()
     std::call_once(onceFlag, []{ instance.reset(new DB); instance.get()->init();});
     return *instance.get();
 }
+
 int DB::getConfId() const
 {
     return confId;
